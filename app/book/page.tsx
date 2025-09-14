@@ -10,7 +10,13 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Header } from "@/components/header"
-import { 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import {
   Calendar, Clock, User, Shield, Heart, CheckCircle, Phone, Video, MapPin,
   Star, GraduationCap, Languages, Coffee, Brain, AlertTriangle
 } from "lucide-react"
@@ -45,7 +51,7 @@ const counselors: Counselor[] = [
     bio: "Specializes in cognitive behavioral therapy and mindfulness-based interventions."
   },
   {
-    id: "2", 
+    id: "2",
     name: "Dr. Arjun Patel",
     specialization: ["Relationship Counseling", "Family Therapy", "Communication Skills"],
     languages: ["English", "Hindi", "Gujarati"],
@@ -59,7 +65,7 @@ const counselors: Counselor[] = [
     name: "Dr. Meera Singh",
     specialization: ["Trauma Recovery", "PTSD", "Grief Counseling"],
     languages: ["English", "Hindi", "Punjabi"],
-    experience: "10 years", 
+    experience: "10 years",
     avatar: "/professional-counselor-woman-therapist.jpg",
     rating: 4.9,
     bio: "Trauma-informed specialist helping individuals heal from difficult experiences."
@@ -80,14 +86,19 @@ export default function BookingPage() {
   const [selectedDate, setSelectedDate] = useState<string>("")
   const [selectedTime, setSelectedTime] = useState<string>("")
   const [selectedCounselor, setSelectedCounselor] = useState<string>("")
-  const [sessionType, setSessionType] = useState<string>("")
+  
+  // --- THIS IS THE FIX ---
+  // Default sessionType to 'video' to ensure the "Review Booking" button is enabled by default.
+  const [sessionType, setSessionType] = useState<string>("video")
+  
   const [isAnonymous, setIsAnonymous] = useState(false)
   const [concerns, setConcerns] = useState<string>("")
   const [isUrgent, setIsUrgent] = useState(false)
   const [step, setStep] = useState(1)
+  const [isCounselorModalOpen, setIsCounselorModalOpen] = useState(false)
 
   const handleBooking = () => {
-    console.log({
+    console.log("Booking confirmed with details:", {
       date: selectedDate,
       time: selectedTime,
       counselor: selectedCounselor,
@@ -95,9 +106,26 @@ export default function BookingPage() {
       isAnonymous,
       concerns,
       isUrgent,
-    })
-    setStep(4) // Move to confirmation step
+    });
+    setStep(5);
   }
+
+  const resetBooking = () => {
+    setSelectedDate("");
+    setSelectedTime("");
+    setSelectedCounselor("");
+    setSessionType("video"); // Reset to default
+    setIsAnonymous(false);
+    setConcerns("");
+    setIsUrgent(false);
+    setStep(1);
+  };
+
+  const handleCounselorSelect = (counselorId: string) => {
+    setSelectedCounselor(counselorId);
+    setIsCounselorModalOpen(false);
+    setStep(3);
+  };
 
   const generateDates = () => {
     const dates = []
@@ -107,12 +135,12 @@ export default function BookingPage() {
       date.setDate(today.getDate() + i)
       dates.push({
         value: date.toISOString().split('T')[0],
-        label: date.toLocaleDateString('en-US', { 
-          weekday: 'short', 
-          month: 'short', 
-          day: 'numeric' 
+        label: date.toLocaleDateString('en-US', {
+          weekday: 'short',
+          month: 'short',
+          day: 'numeric'
         }),
-        disabled: date.getDay() === 0, // Disable Sundays
+        disabled: date.getDay() === 0,
       })
     }
     return dates
@@ -121,7 +149,7 @@ export default function BookingPage() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      
+
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">Book a Counseling Session</h1>
@@ -133,35 +161,39 @@ export default function BookingPage() {
         <Card className="max-w-2xl mx-auto">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
-              Step {step} of 4: {
+              {step === 5 ? (
+                <CheckCircle className="h-5 w-5 text-green-600" />
+              ) : (
+                <Calendar className="h-5 w-5" />
+              )}
+              {step === 5 ? 'Booking Confirmed!' : `Step ${step} of 4: ${
                 step === 1 ? 'Choose Date & Time' :
                 step === 2 ? 'Select Counselor' :
                 step === 3 ? 'Session Details' :
                 'Confirmation'
-              }
+              }`}
             </CardTitle>
             <CardDescription>
               {step === 1 && 'Select your preferred date and time slot'}
               {step === 2 && 'Choose a counselor that matches your needs'}
               {step === 3 && 'Provide session details and preferences'}
               {step === 4 && 'Review and confirm your booking'}
+              {step === 5 && 'Your session has been successfully scheduled.'}
             </CardDescription>
           </CardHeader>
 
           <CardContent className="space-y-6">
-            {/* Step 1: Date & Time Selection */}
             {step === 1 && (
               <div className="space-y-6">
                 <div>
                   <Label className="text-base font-medium mb-3 block">Select Date</Label>
                   <RadioGroup value={selectedDate} onValueChange={setSelectedDate}>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                       {generateDates().map((date) => (
                         <div key={date.value} className="flex items-center space-x-2">
                           <RadioGroupItem value={date.value} id={date.value} disabled={date.disabled} />
-                          <Label 
-                            htmlFor={date.value} 
+                          <Label
+                            htmlFor={date.value}
                             className={`text-sm ${date.disabled ? 'text-muted-foreground line-through' : ''}`}
                           >
                             {date.label}
@@ -176,12 +208,12 @@ export default function BookingPage() {
                   <div>
                     <Label className="text-base font-medium mb-3 block">Select Time</Label>
                     <RadioGroup value={selectedTime} onValueChange={setSelectedTime}>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                         {timeSlots.map((slot) => (
                           <div key={slot.id} className="flex items-center space-x-2">
                             <RadioGroupItem value={slot.time} id={slot.id} disabled={!slot.available} />
-                            <Label 
-                              htmlFor={slot.id} 
+                            <Label
+                              htmlFor={slot.id}
                               className={`text-sm ${!slot.available ? 'text-muted-foreground line-through' : ''}`}
                             >
                               {slot.time} {!slot.available && '(Booked)'}
@@ -194,8 +226,11 @@ export default function BookingPage() {
                 )}
 
                 <div className="flex justify-end">
-                  <Button 
-                    onClick={() => setStep(2)}
+                  <Button
+                    onClick={() => {
+                      setStep(2);
+                      setIsCounselorModalOpen(true);
+                    }}
                     disabled={!selectedDate || !selectedTime}
                   >
                     Next: Choose Counselor
@@ -203,74 +238,13 @@ export default function BookingPage() {
                 </div>
               </div>
             )}
-
-            {/* Step 2: Counselor Selection */}
+            
             {step === 2 && (
-              <div className="space-y-6">
-                <div>
-                  <Label className="text-base font-medium mb-4 block">Select Counselor</Label>
-                  <RadioGroup value={selectedCounselor} onValueChange={setSelectedCounselor}>
-                    <div className="space-y-4">
-                      {counselors.map((counselor) => (
-                        <div key={counselor.id} className="border rounded-lg p-4">
-                          <div className="flex items-center space-x-2 mb-3">
-                            <RadioGroupItem value={counselor.id} id={counselor.id} />
-                            <Label htmlFor={counselor.id} className="sr-only">
-                              Select {counselor.name}
-                            </Label>
-                          </div>
-                          
-                          <div className="space-y-2">
-                            <div className="flex items-center gap-3">
-                              <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center">
-                                <User className="h-6 w-6" />
-                              </div>
-                              <div>
-                                <h3 className="font-medium">{counselor.name}</h3>
-                                <div className="flex items-center gap-1">
-                                  <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                                  <span className="text-sm text-muted-foreground">{counselor.rating}</span>
-                                  <span className="text-sm text-muted-foreground">• {counselor.experience}</span>
-                                </div>
-                              </div>
-                            </div>
-                            
-                            <p className="text-sm text-muted-foreground">{counselor.bio}</p>
-                            
-                            <div className="flex flex-wrap gap-1">
-                              {counselor.specialization.map((spec) => (
-                                <Badge key={spec} variant="secondary" className="text-xs">
-                                  {spec}
-                                </Badge>
-                              ))}
-                            </div>
-                            
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                              <Languages className="h-4 w-4" />
-                              {counselor.languages.join(', ')}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </RadioGroup>
-                </div>
-
-                <div className="flex justify-between">
-                  <Button variant="outline" onClick={() => setStep(1)}>
-                    Back
-                  </Button>
-                  <Button 
-                    onClick={() => setStep(3)}
-                    disabled={!selectedCounselor}
-                  >
-                    Next: Session Details
-                  </Button>
-                </div>
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">Opening counselor selection...</p>
               </div>
             )}
 
-            {/* Step 3: Session Details */}
             {step === 3 && (
               <div className="space-y-6">
                 <div>
@@ -303,13 +277,13 @@ export default function BookingPage() {
                 </div>
 
                 <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="anonymous" 
-                    checked={isAnonymous} 
-                    onCheckedChange={(checked) => setIsAnonymous(checked === true)} 
+                  <Checkbox
+                    id="anonymous"
+                    checked={isAnonymous}
+                    onCheckedChange={(checked) => setIsAnonymous(checked === true)}
                   />
                   <Label htmlFor="anonymous" className="text-sm">
-                    Book anonymously (counselor won't see your name until the session)
+                    Book anonymously (counselor won't see your name)
                   </Label>
                 </div>
 
@@ -317,31 +291,28 @@ export default function BookingPage() {
                   <Label htmlFor="concerns" className="text-base font-medium mb-2 block">
                     What would you like to discuss? (Optional)
                   </Label>
-                  <Textarea 
+                  <Textarea
                     id="concerns"
-                    placeholder="Share what's on your mind or any specific concerns you'd like to address..."
+                    placeholder="Share what's on your mind to help your counselor prepare..."
                     value={concerns}
                     onChange={(e) => setConcerns(e.target.value)}
                     className="min-h-[100px]"
                   />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    This helps your counselor prepare for the session
-                  </p>
                 </div>
 
                 <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="urgent" 
-                    checked={isUrgent} 
-                    onCheckedChange={(checked) => setIsUrgent(checked === true)} 
+                  <Checkbox
+                    id="urgent"
+                    checked={isUrgent}
+                    onCheckedChange={(checked) => setIsUrgent(checked === true)}
                   />
                   <Label htmlFor="urgent" className="text-sm">
-                    This is urgent - I need support as soon as possible
+                    This is urgent
                   </Label>
                 </div>
 
                 {isUrgent && (
-                  <Alert>
+                  <Alert variant="destructive">
                     <AlertTriangle className="h-4 w-4" />
                     <AlertDescription>
                       For immediate crisis support, please call our 24/7 helpline at{" "}
@@ -353,10 +324,10 @@ export default function BookingPage() {
                 )}
 
                 <div className="flex justify-between">
-                  <Button variant="outline" onClick={() => setStep(2)}>
+                  <Button variant="outline" onClick={() => setStep(1)}>
                     Back
                   </Button>
-                  <Button 
+                  <Button
                     onClick={() => setStep(4)}
                     disabled={!sessionType}
                   >
@@ -366,7 +337,6 @@ export default function BookingPage() {
               </div>
             )}
 
-            {/* Step 4: Confirmation */}
             {step === 4 && (
               <div className="space-y-6">
                 <div className="bg-muted/50 rounded-lg p-4 space-y-3">
@@ -406,10 +376,9 @@ export default function BookingPage() {
                   <AlertDescription>
                     <strong>What's Next:</strong>
                     <ul className="list-disc list-inside mt-2 space-y-1 text-sm">
-                      <li>You'll receive a confirmation email with session details</li>
-                      <li>A reminder will be sent 24 hours before your appointment</li>
-                      <li>For video calls, you'll receive a secure meeting link</li>
-                      <li>You can reschedule or cancel up to 4 hours before the session</li>
+                      <li>You'll receive a confirmation email with all session details.</li>
+                      <li>A reminder will be sent 24 hours before your appointment.</li>
+                      <li>You can reschedule or cancel up to 4 hours before the session.</li>
                     </ul>
                   </AlertDescription>
                 </Alert>
@@ -424,9 +393,74 @@ export default function BookingPage() {
                 </div>
               </div>
             )}
+
+            {step === 5 && (
+              <div className="text-center py-8 space-y-4 flex flex-col items-center">
+                  <CheckCircle className="h-16 w-16 text-green-500" />
+                  <h2 className="text-2xl font-semibold">Booking Successful!</h2>
+                  <p className="text-muted-foreground max-w-sm">
+                      Your session with {counselors.find(c => c.id === selectedCounselor)?.name} is confirmed. 
+                      You will receive an email confirmation shortly.
+                  </p>
+                  <div className="pt-4">
+                      <Button onClick={resetBooking}>
+                          Book Another Session
+                      </Button>
+                  </div>
+              </div>
+            )}
+            
           </CardContent>
         </Card>
       </div>
+
+      <Dialog open={isCounselorModalOpen} onOpenChange={setIsCounselorModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Step 2 of 4: Select a Counselor</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
+            {counselors.map((counselor) => (
+              <button
+                key={counselor.id}
+                className="w-full text-left border rounded-lg p-4 hover:bg-muted transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
+                onClick={() => handleCounselorSelect(counselor.id)}
+              >
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center">
+                      <User className="h-6 w-6" />
+                    </div>
+                    <div>
+                      <h3 className="font-medium">{counselor.name}</h3>
+                      <div className="flex items-center gap-1">
+                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                        <span className="text-sm text-muted-foreground">{counselor.rating}</span>
+                        <span className="text-sm text-muted-foreground">• {counselor.experience}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <p className="text-sm text-muted-foreground">{counselor.bio}</p>
+
+                  <div className="flex flex-wrap gap-1">
+                    {counselor.specialization.map((spec) => (
+                      <Badge key={spec} variant="secondary" className="text-xs">
+                        {spec}
+                      </Badge>
+                    ))}
+                  </div>
+
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Languages className="h-4 w-4" />
+                    {counselor.languages.join(', ')}
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
