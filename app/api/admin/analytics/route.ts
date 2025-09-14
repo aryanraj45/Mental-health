@@ -1,6 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { verifyToken } from "@/lib/auth"
 
+// Force dynamic behavior for this API route
+export const dynamic = 'force-dynamic'
+
 // Mock student data - in real app, this would come from database
 const mockStudentData = {
   totalStudents: 1247,

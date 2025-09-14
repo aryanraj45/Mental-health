@@ -173,27 +173,20 @@ const nearbyNGOs: NGO[] = [
     services: ["Counseling Services", "Rehabilitation", "Skill Development", "Emergency Support"],
     availability: "Mon-Sat 9AM-5PM",
     distance: 7.8
-  }
-]
-
-const emergencySteps = [
-  {
-    title: "Immediate Danger",
-    description: "If you or someone else is in immediate physical danger",
-    action: "Call 100 (Police) or 108 (Emergency Services)",
-    color: "bg-red-50 border-red-200",
   },
   {
-    title: "Mental Health Crisis",
-    description: "Having thoughts of self-harm or suicide",
-    action: "Call 9152987821 (iCall) or 9999666555 (Vandrevala Foundation)",
-    color: "bg-orange-50 border-orange-200",
-  },
-  {
-    title: "Need Someone to Talk",
-    description: "Feeling overwhelmed, anxious, or depressed",
-    action: "Use our AI Chat support or call counseling helplines",
-    color: "bg-blue-50 border-blue-200",
+    id: "4",
+    name: "Mind Healers",
+    description: "Professional mental health counseling center",
+    phone: "08041510101",
+    whatsapp: "9886050101",
+    email: "info@mindhealers.in",
+    address: "1st Floor, 123 Double Road, Shanthi Nagar",
+    city: "Bangalore", 
+    state: "Karnataka",
+    services: ["Clinical Psychology", "Psychiatry", "Couple Counseling", "Child Psychology"],
+    availability: "Mon-Sun 9AM-8PM",
+    distance: 3.1
   }
 ]
 
@@ -368,261 +361,201 @@ export default function EmergencyPage() {
               ))}
             </div>
           </TabsContent>
+      description: "If you're having thoughts of self-harm or suicide",
+      action: "Call a crisis helpline immediately - you're not alone",
+      color: "bg-orange-50 border-orange-200",
+    },
+    {
+      title: "Mental Health Crisis",
+      description: "If you're experiencing severe anxiety, panic, or emotional distress",
+      action: "Reach out to a counseling helpline or trusted person",
+      color: "bg-yellow-50 border-yellow-200",
+    },
+    {
+      title: "Need Someone to Talk",
+      description: "If you need emotional support or someone to listen",
+      action: "Contact any of the helplines below - they're here for you",
+      color: "bg-green-50 border-green-200",
+    },
+  ]
 
-          {/* Nearby NGOs Tab */}
-          <TabsContent value="ngos" className="space-y-6">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-semibold">Mental Health NGOs Near You</h3>
-              <Button
-                onClick={() => setIsLocating(true)}
-                variant="outline"
-                size="sm"
-                disabled={isLocating}
-              >
-                <Navigation className="h-4 w-4 mr-2" />
-                {isLocating ? 'Locating...' : 'Find Nearby'}
-              </Button>
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-cyan-50 to-orange-50">
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <Heart className="h-8 w-8 text-red-500" />
+            <h1 className="text-4xl font-bold text-gray-900">Emergency Support</h1>
+          </div>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            You're not alone. Help is available 24/7. Reach out when you need support.
+          </p>
+        </div>
+
+        {/* Crisis Alert */}
+        <Card className="mb-8 border-red-200 bg-red-50">
+          <CardContent className="p-6">
+            <div className="flex items-start gap-4">
+              <AlertTriangle className="h-6 w-6 text-red-600 mt-1 flex-shrink-0" />
+              <div>
+                <h3 className="text-lg font-semibold text-red-900 mb-2">In Immediate Crisis?</h3>
+                <p className="text-red-800 mb-4">
+                  If you're having thoughts of self-harm or suicide, please reach out immediately. Your life matters and
+                  help is available right now.
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <Button className="bg-red-600 hover:bg-red-700" onClick={() => window.open("tel:9152987821")}>
+                    <Phone className="h-4 w-4 mr-2" />
+                    Call Crisis Helpline
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="border-red-300 text-red-700 hover:bg-red-100 bg-transparent"
+                    asChild
+                  >
+                    <Link href="/chat">
+                      <MessageCircle className="h-4 w-4 mr-2" />
+                      Chat with AI Support
+                    </Link>
+                  </Button>
+                </div>
+              </div>
             </div>
+          </CardContent>
+        </Card>
 
+        {/* Emergency Steps */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">When to Seek Help</h2>
+          <div className="grid md:grid-cols-2 gap-4">
+            {emergencySteps.map((step, index) => (
+              <Card key={index} className={`${step.color} border-2`}>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg">{step.title}</CardTitle>
+                  <CardDescription className="text-gray-700">{step.description}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="font-medium text-gray-900">{step.action}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* Helplines */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">24/7 Mental Health Helplines</h2>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {emergencyContacts.map((contact, index) => (
+              <Card key={index} className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <CardTitle className="text-lg leading-tight">{contact.name}</CardTitle>
+                    <Badge variant={contact.type === "crisis" ? "destructive" : "secondary"} className="ml-2">
+                      {contact.type}
+                    </Badge>
+                  </div>
+                  <CardDescription>{contact.description}</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <Phone className="h-4 w-4 text-cyan-600" />
+                    <span className="font-mono text-lg font-semibold">{contact.number}</span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-green-600" />
+                    <span className="text-sm text-gray-600">{contact.availability}</span>
+                  </div>
+
+                  <div className="flex flex-wrap gap-1">
+                    {contact.languages.map((lang, langIndex) => (
+                      <Badge key={langIndex} variant="outline" className="text-xs">
+                        {lang}
+                      </Badge>
+                    ))}
+                  </div>
+
+                  <Button className="w-full" onClick={() => window.open(`tel:${contact.number}`)}>
+                    <Phone className="h-4 w-4 mr-2" />
+                    Call Now
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* Additional Resources */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="text-xl">Additional Emergency Resources</CardTitle>
+            <CardDescription>Other important contacts and resources for immediate help</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <h4 className="font-semibold flex items-center gap-2">
+                  <Phone className="h-4 w-4" />
+                  Emergency Services
+                </h4>
+                <p className="text-sm text-gray-600">Police: 100</p>
+                <p className="text-sm text-gray-600">Medical Emergency: 108</p>
+                <p className="text-sm text-gray-600">Women's Helpline: 1091</p>
+              </div>
+
+              <div className="space-y-2">
+                <h4 className="font-semibold flex items-center gap-2">
+                  <MapPin className="h-4 w-4" />
+                  Campus Resources
+                </h4>
+                <p className="text-sm text-gray-600">Campus Security: Contact your institution</p>
+                <p className="text-sm text-gray-600">Student Counseling Center</p>
+                <p className="text-sm text-gray-600">Health Services</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Safety Planning */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-xl">Create Your Safety Plan</CardTitle>
+            <CardDescription>Having a plan can help you stay safe during difficult times</CardDescription>
+          </CardHeader>
+          <CardContent>
             <div className="grid md:grid-cols-2 gap-6">
-              {nearbyNGOs.map((ngo) => (
-                <Card key={ngo.id}>
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <CardTitle className="text-lg">{ngo.name}</CardTitle>
-                        <div className="flex items-center gap-1 mt-1">
-                          <MapPin className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm text-muted-foreground">{ngo.city}, {ngo.state}</span>
-                          {ngo.distance && (
-                            <Badge variant="outline" className="ml-2 text-xs">
-                              {ngo.distance} km away
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    <CardDescription>{ngo.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="text-sm text-muted-foreground">
-                      <p><strong>Address:</strong> {ngo.address}</p>
-                      <p><strong>Availability:</strong> {ngo.availability}</p>
-                    </div>
-
-                    <div className="flex flex-wrap gap-1">
-                      {ngo.services.map((service) => (
-                        <Badge key={service} variant="outline" className="text-xs">
-                          {service}
-                        </Badge>
-                      ))}
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2">
-                      <Button
-                        onClick={() => handleCall(ngo.phone)}
-                        variant="default"
-                        size="sm"
-                      >
-                        <Phone className="h-4 w-4 mr-2" />
-                        Call
-                      </Button>
-                      {ngo.whatsapp && (
-                        <Button
-                          onClick={() => handleWhatsApp(ngo.whatsapp!)}
-                          variant="outline"
-                          size="sm"
-                        >
-                          <MessageCircle className="h-4 w-4 mr-2" />
-                          WhatsApp
-                        </Button>
-                      )}
-                      {ngo.email && (
-                        <Button
-                          onClick={() => window.open(`mailto:${ngo.email}`)}
-                          variant="outline"
-                          size="sm"
-                        >
-                          <Mail className="h-4 w-4 mr-2" />
-                          Email
-                        </Button>
-                      )}
-                      {ngo.website && (
-                        <Button variant="ghost" size="sm" asChild>
-                          <Link href={ngo.website} target="_blank">
-                            <ExternalLink className="h-4 w-4 mr-2" />
-                            Website
-                          </Link>
-                        </Button>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-
-          {/* Emergency Steps Tab */}
-          <TabsContent value="steps" className="space-y-6">
-            <h3 className="text-xl font-semibold mb-6">What to Do in a Mental Health Emergency</h3>
-            
-            <div className="space-y-4">
-              {emergencySteps.map((step, index) => (
-                <Card key={index} className={step.color}>
-                  <CardContent className="p-6">
-                    <div className="flex items-start gap-4">
-                      <div className="bg-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-lg">
-                        {index + 1}
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-lg mb-2">{step.title}</h4>
-                        <p className="text-muted-foreground mb-3">{step.description}</p>
-                        <p className="font-medium">{step.action}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            <Card className="bg-blue-50 border-blue-200">
-              <CardContent className="p-6">
-                <h4 className="font-semibold text-lg mb-3">Remember:</h4>
-                <ul className="list-disc list-inside space-y-2 text-sm">
-                  <li>Mental health emergencies are real medical emergencies</li>
-                  <li>It's okay to call for help - you're not being dramatic</li>
-                  <li>Stay with the person if someone else is in crisis</li>
-                  <li>Remove any means of self-harm if possible</li>
-                  <li>Listen without judgment and encourage professional help</li>
+              <div>
+                <h4 className="font-semibold mb-2">Warning Signs to Watch For:</h4>
+                <ul className="text-sm text-gray-600 space-y-1">
+                  <li>• Persistent feelings of hopelessness</li>
+                  <li>• Thoughts of self-harm or suicide</li>
+                  <li>• Severe anxiety or panic attacks</li>
+                  <li>• Inability to cope with daily activities</li>
+                  <li>• Substance abuse as coping mechanism</li>
                 </ul>
-              </CardContent>
-            </Card>
-          </TabsContent>
+              </div>
 
-          {/* Quick Resources Tab */}
-          <TabsContent value="resources" className="space-y-6">
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <MessageCircle className="h-5 w-5 text-blue-600" />
-                    AI Chat Support
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Get immediate support from our AI mental health companion
-                  </p>
-                  <Button asChild className="w-full">
-                    <Link href="/chat">Start Chat</Link>
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Users className="h-5 w-5 text-green-600" />
-                    Community Support
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Connect with others who understand what you're going through
-                  </p>
-                  <Button asChild variant="outline" className="w-full">
-                    <Link href="/community">Join Community</Link>
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Heart className="h-5 w-5 text-red-600" />
-                    Self-Care Resources
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Breathing exercises, meditation, and coping strategies
-                  </p>
-                  <Button asChild variant="outline" className="w-full">
-                    <Link href="/resources">View Resources</Link>
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Video className="h-5 w-5 text-purple-600" />
-                    Professional Help
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Book a session with licensed mental health professionals
-                  </p>
-                  <Button asChild variant="outline" className="w-full">
-                    <Link href="/book">Book Session</Link>
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Share2 className="h-5 w-5 text-orange-600" />
-                    Share This Page
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Help others by sharing emergency resources
-                  </p>
-                  <Button
-                    onClick={() => {
-                      if (navigator.share) {
-                        navigator.share({
-                          title: 'Emergency Mental Health Support',
-                          text: 'Mental health emergency resources and support',
-                          url: window.location.href
-                        })
-                      } else {
-                        navigator.clipboard.writeText(window.location.href)
-                      }
-                    }}
-                    variant="outline" 
-                    className="w-full"
-                  >
-                    Share Resources
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-gradient-to-br from-blue-50 to-purple-50">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Zap className="h-5 w-5 text-yellow-600" />
-                    Crisis Text Line
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Text "HOME" to 741741 for crisis support via text message
-                  </p>
-                  <Button
-                    onClick={() => window.open('sms:741741?body=HOME')}
-                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600"
-                  >
-                    Text for Help
-                  </Button>
-                </CardContent>
-              </Card>
+              <div>
+                <h4 className="font-semibold mb-2">Coping Strategies:</h4>
+                <ul className="text-sm text-gray-600 space-y-1">
+                  <li>• Call a trusted friend or family member</li>
+                  <li>• Use breathing exercises or meditation</li>
+                  <li>• Go to a safe, public place</li>
+                  <li>• Remove means of self-harm</li>
+                  <li>• Contact a crisis helpline immediately</li>
+                </ul>
+              </div>
             </div>
-          </TabsContent>
-        </Tabs>
+
+            <div className="mt-6 pt-4 border-t">
+              <p className="text-sm text-gray-600 text-center">
+                Remember: Seeking help is a sign of strength, not weakness. You deserve support and care.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )
