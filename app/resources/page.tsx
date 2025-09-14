@@ -1,431 +1,34 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Slider } from "@/components/ui/slider"
 import { Header } from "@/components/header"
+import { useRef, useEffect } from "react"
+import { Slider } from "@/components/ui/slider"
+import { Palette, RotateCcw } from "lucide-react"
 import {
-  BookOpen, Video, Headphones, Heart, Search, Clock, User, Play, Star, Filter,
-  Brain, Zap, Moon, Target, Palette, Download, Volume2, VolumeX, Pause, RotateCcw,
-  Circle, Square, Minus, Type, Eraser
+  BookOpen,
+  Video,
+  Headphones,
+  Heart,
+  Search,
+  Clock,
+  User,
+  Play,
+  Star,
+  Filter,
+  Brain,
+  Zap,
+  Moon,
+  Target,
 } from "lucide-react"
 import Link from "next/link"
 
-// Drawing Canvas Component
-function DrawingPad() {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const [isDrawing, setIsDrawing] = useState(false)
-  const [currentTool, setCurrentTool] = useState<'pen' | 'eraser'>('pen')
-  const [currentColor, setCurrentColor] = useState('#000000')
-  const [brushSize, setBrushSize] = useState([5])
-
-  useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-
-    const context = canvas.getContext('2d')
-    if (!context) return
-
-    // Set canvas size
-    canvas.width = 600
-    canvas.height = 400
-    
-    // Set default styles
-    context.lineCap = 'round'
-    context.lineJoin = 'round'
-  }, [])
-
-  const startDrawing = (e: React.MouseEvent) => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-
-    const context = canvas.getContext('2d')
-    if (!context) return
-
-    setIsDrawing(true)
-    const rect = canvas.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const y = e.clientY - rect.top
-
-    context.beginPath()
-    context.moveTo(x, y)
-  }
-
-  const draw = (e: React.MouseEvent) => {
-    if (!isDrawing) return
-
-    const canvas = canvasRef.current
-    if (!canvas) return
-
-    const context = canvas.getContext('2d')
-    if (!context) return
-
-    const rect = canvas.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const y = e.clientY - rect.top
-
-    if (currentTool === 'eraser') {
-      context.globalCompositeOperation = 'destination-out'
-    } else {
-      context.globalCompositeOperation = 'source-over'
-      context.strokeStyle = currentColor
-    }
-    
-    context.lineWidth = brushSize[0]
-    context.lineTo(x, y)
-    context.stroke()
-  }
-
-  const stopDrawing = () => {
-    setIsDrawing(false)
-  }
-
-  const clearCanvas = () => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-
-    const context = canvas.getContext('2d')
-    if (!context) return
-
-    context.clearRect(0, 0, canvas.width, canvas.height)
-  }
-
-  const saveDrawing = () => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-
-    const link = document.createElement('a')
-    link.download = 'my-drawing.png'
-    link.href = canvas.toDataURL()
-    link.click()
-  }
-
-  return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Palette className="h-5 w-5" />
-          Creative Drawing Pad
-        </CardTitle>
-        <CardDescription>
-          Express yourself through art. Drawing can be therapeutic and help process emotions.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Drawing Tools */}
-        <div className="flex items-center gap-4 p-2 bg-muted rounded-lg">
-          <div className="flex items-center gap-2">
-            <Button
-              variant={currentTool === 'pen' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setCurrentTool('pen')}
-            >
-              <Type className="h-4 w-4" />
-            </Button>
-            <Button
-              variant={currentTool === 'eraser' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setCurrentTool('eraser')}
-            >
-              <Eraser className="h-4 w-4" />
-            </Button>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <span className="text-sm">Color:</span>
-            <input
-              type="color"
-              value={currentColor}
-              onChange={(e) => setCurrentColor(e.target.value)}
-              className="w-8 h-8 rounded border"
-            />
-          </div>
-
-          <div className="flex items-center gap-2 flex-1">
-            <span className="text-sm">Size:</span>
-            <Slider
-              value={brushSize}
-              onValueChange={setBrushSize}
-              max={20}
-              min={1}
-              step={1}
-              className="w-20"
-            />
-            <span className="text-sm">{brushSize[0]}px</span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={clearCanvas}>
-              <RotateCcw className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" size="sm" onClick={saveDrawing}>
-              <Download className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-
-        {/* Canvas */}
-        <div className="border rounded-lg overflow-hidden bg-white">
-          <canvas
-            ref={canvasRef}
-            onMouseDown={startDrawing}
-            onMouseMove={draw}
-            onMouseUp={stopDrawing}
-            onMouseLeave={stopDrawing}
-            className="cursor-crosshair w-full h-64"
-            style={{ maxWidth: '100%', height: '300px' }}
-          />
-        </div>
-
-        <p className="text-sm text-muted-foreground">
-          💡 Tip: Try drawing your feelings, doodling patterns, or creating something that brings you joy.
-        </p>
-      </CardContent>
-    </Card>
-  )
-}
-
-// Calming Sounds Component
-function CalmingSounds() {
-  const [currentlyPlaying, setCurrentlyPlaying] = useState<string | null>(null)
-  const [volume, setVolume] = useState([50])
-  const audioRef = useRef<HTMLAudioElement | null>(null)
-
-  const sounds = [
-    { id: '1', name: 'Rain Sounds', description: 'Gentle rainfall', icon: '🌧️', duration: '10:00' },
-    { id: '2', name: 'Ocean Waves', description: 'Peaceful ocean waves', icon: '🌊', duration: '15:00' },
-    { id: '3', name: 'Forest Birds', description: 'Nature sounds with birds', icon: '🌲', duration: '12:00' },
-    { id: '4', name: 'White Noise', description: 'Soothing white noise', icon: '⚪', duration: '∞' },
-    { id: '5', name: 'Meditation Bell', description: 'Tibetan singing bowls', icon: '🔔', duration: '8:00' },
-    { id: '6', name: 'Wind Chimes', description: 'Gentle wind chimes', icon: '🎐', duration: '20:00' },
-    { id: '7', name: 'Crackling Fire', description: 'Cozy fireplace sounds', icon: '🔥', duration: '25:00' },
-    { id: '8', name: 'Night Crickets', description: 'Peaceful night sounds', icon: '🦗', duration: '30:00' },
-  ]
-
-  const playSound = (soundId: string) => {
-    // In a real implementation, you would load actual audio files
-    if (currentlyPlaying === soundId) {
-      setCurrentlyPlaying(null)
-      if (audioRef.current) {
-        audioRef.current.pause()
-      }
-    } else {
-      setCurrentlyPlaying(soundId)
-      // Here you would load and play the actual audio file
-      console.log(`Playing sound: ${soundId}`)
-    }
-  }
-
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = volume[0] / 100
-    }
-  }, [volume])
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Headphones className="h-5 w-5" />
-          Calming Background Sounds
-        </CardTitle>
-        <CardDescription>
-          Listen to relaxing sounds to reduce stress and improve focus
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Volume Control */}
-        <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
-          <Volume2 className="h-4 w-4" />
-          <Slider
-            value={volume}
-            onValueChange={setVolume}
-            max={100}
-            min={0}
-            step={1}
-            className="flex-1"
-          />
-          <span className="text-sm w-10">{volume[0]}%</span>
-        </div>
-
-        {/* Sound Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {sounds.map((sound) => (
-            <Card 
-              key={sound.id} 
-              className={`cursor-pointer transition-all hover:shadow-md ${
-                currentlyPlaying === sound.id ? 'ring-2 ring-primary bg-primary/5' : ''
-              }`}
-              onClick={() => playSound(sound.id)}
-            >
-              <CardContent className="p-4 text-center">
-                <div className="text-2xl mb-2">{sound.icon}</div>
-                <h4 className="font-medium text-sm mb-1">{sound.name}</h4>
-                <p className="text-xs text-muted-foreground mb-2">{sound.description}</p>
-                <div className="flex items-center justify-center gap-1">
-                  {currentlyPlaying === sound.id ? (
-                    <Pause className="h-3 w-3" />
-                  ) : (
-                    <Play className="h-3 w-3" />
-                  )}
-                  <span className="text-xs">{sound.duration}</span>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        <audio ref={audioRef} loop />
-        
-        <p className="text-sm text-muted-foreground">
-          🎧 Best experienced with headphones. Use these sounds during study, meditation, or relaxation.
-        </p>
-      </CardContent>
-    </Card>
-  )
-}
-
-// Exercise GIFs Component
-function ExerciseGuides() {
-  const exercises = [
-    {
-      id: '1',
-      name: 'Deep Breathing',
-      description: '4-7-8 breathing technique for anxiety relief',
-      duration: '5 min',
-      difficulty: 'Beginner',
-      category: 'Breathing',
-      steps: [
-        'Sit comfortably with your back straight',
-        'Exhale completely through your mouth',
-        'Inhale through nose for 4 counts',
-        'Hold breath for 7 counts',
-        'Exhale through mouth for 8 counts',
-        'Repeat 3-4 times'
-      ]
-    },
-    {
-      id: '2',
-      name: 'Progressive Muscle Relaxation',
-      description: 'Tense and release muscle groups to reduce stress',
-      duration: '10 min',
-      difficulty: 'Beginner',
-      category: 'Relaxation',
-      steps: [
-        'Lie down in a comfortable position',
-        'Start with your toes - tense for 5 seconds',
-        'Release and relax for 10 seconds',
-        'Move up to calves, thighs, abdomen',
-        'Continue to arms, shoulders, face',
-        'Notice the contrast between tension and relaxation'
-      ]
-    },
-    {
-      id: '3',
-      name: 'Mindful Stretching',
-      description: 'Gentle stretches to release tension',
-      duration: '8 min',
-      difficulty: 'Beginner',
-      category: 'Movement',
-      steps: [
-        'Start with neck rolls - slow and gentle',
-        'Shoulder shrugs - lift and release',
-        'Arm stretches across body',
-        'Gentle spinal twist while seated',
-        'Forward fold to stretch back',
-        'Hold each stretch for 30 seconds'
-      ]
-    },
-    {
-      id: '4',
-      name: 'Grounding Exercise',
-      description: '5-4-3-2-1 technique for anxiety and panic',
-      duration: '3 min',
-      difficulty: 'Beginner',
-      category: 'Mindfulness',
-      steps: [
-        'Name 5 things you can see',
-        'Name 4 things you can touch',
-        'Name 3 things you can hear',
-        'Name 2 things you can smell',
-        'Name 1 thing you can taste',
-        'Take slow, deep breaths throughout'
-      ]
-    }
-  ]
-
-  return (
-    <div className="grid md:grid-cols-2 gap-4">
-      {exercises.map((exercise) => (
-        <Card key={exercise.id}>
-          <CardHeader>
-            <div className="flex items-start justify-between">
-              <div>
-                <CardTitle className="text-lg">{exercise.name}</CardTitle>
-                <CardDescription>{exercise.description}</CardDescription>
-              </div>
-              <Badge variant="outline">{exercise.category}</Badge>
-            </div>
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-              <span className="flex items-center gap-1">
-                <Clock className="h-4 w-4" />
-                {exercise.duration}
-              </span>
-              <span className="flex items-center gap-1">
-                <Target className="h-4 w-4" />
-                {exercise.difficulty}
-              </span>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {/* Placeholder for GIF/Animation */}
-              <div className="aspect-video bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-200">
-                <div className="text-center">
-                  <Play className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-                  <p className="text-sm text-gray-500">Exercise Animation</p>
-                  <p className="text-xs text-gray-400">GIF would be displayed here</p>
-                </div>
-              </div>
-
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button variant="outline" className="w-full">
-                    View Step-by-Step Guide
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-md">
-                  <DialogHeader>
-                    <DialogTitle>{exercise.name}</DialogTitle>
-                    <DialogDescription>{exercise.description}</DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-3">
-                    {exercise.steps.map((step, index) => (
-                      <div key={index} className="flex gap-3">
-                        <div className="flex-shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-medium">
-                          {index + 1}
-                        </div>
-                        <p className="text-sm">{step}</p>
-                      </div>
-                    ))}
-                  </div>
-                </DialogContent>
-              </Dialog>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  )
-}
-
-// Enhanced Resources Component
 interface Resource {
   id: string
   title: string
@@ -453,187 +56,518 @@ const resources: Resource[] = [
     difficulty: "beginner",
     rating: 4.8,
     thumbnail: "/anxiety-guide-thumbnail.jpg",
-    author: "Dr. Sarah Johnson",
-    tags: ["anxiety", "students", "coping", "mental health"]
+    author: "Dr. Priya Sharma",
+    tags: ["anxiety", "coping", "students", "mental health"],
   },
   {
     id: "2",
-    title: "Guided Meditation for Better Sleep",
-    description: "A soothing meditation session designed to help you unwind and prepare for restful sleep.",
+    title: "Guided Meditation for Exam Stress",
+    description: "A 15-minute guided meditation to help you relax and focus before exams.",
     type: "audio",
-    category: "Sleep",
-    duration: "20 min",
-    language: "English",
+    category: "Stress Management",
+    duration: "15 min",
+    language: "Hindi",
     difficulty: "beginner",
     rating: 4.9,
     thumbnail: "/meditation-audio-thumbnail.jpg",
-    author: "Mindful Moments",
-    tags: ["meditation", "sleep", "relaxation", "guided"]
+    author: "Meditation Coach Anita",
+    tags: ["meditation", "stress", "exams", "relaxation"],
   },
   {
     id: "3",
-    title: "Breathing Exercises for Stress Relief",
-    description: "Learn various breathing techniques that can help reduce stress and anxiety in real-time.",
+    title: "Building Healthy Sleep Habits",
+    description: "Video guide on creating a sleep routine that supports your mental health and academic performance.",
     type: "video",
-    category: "Stress Management",
+    category: "Sleep & Wellness",
     duration: "12 min",
     language: "English",
     difficulty: "beginner",
     rating: 4.7,
+    thumbnail: "/sleep-habits-video-thumbnail.jpg",
+    author: "Dr. Sleep Specialist",
+    tags: ["sleep", "wellness", "habits", "health"],
+  },
+  {
+    id: "4",
+    title: "Mood Tracker & Journal",
+    description:
+      "Interactive tool to track your daily mood, identify patterns, and reflect on your mental health journey.",
+    type: "tool",
+    category: "Self-Assessment",
+    duration: "5-10 min daily",
+    language: "English",
+    difficulty: "beginner",
+    rating: 4.6,
+    thumbnail: "/mood-tracker-tool-thumbnail.jpg",
+    author: "MindCare Team",
+    tags: ["mood", "tracking", "journal", "self-care"],
+  },
+  {
+    id: "5",
+    title: "Dealing with Social Anxiety in College",
+    description:
+      "Practical strategies for managing social anxiety in campus settings and building meaningful connections.",
+    type: "article",
+    category: "Social Anxiety",
+    duration: "10 min read",
+    language: "Tamil",
+    difficulty: "intermediate",
+    rating: 4.5,
+    thumbnail: "/social-anxiety-article-thumbnail.jpg",
+    author: "Dr. Social Psychology",
+    tags: ["social anxiety", "college", "relationships", "confidence"],
+  },
+  {
+    id: "6",
+    title: "Breathing Exercises for Panic Attacks",
+    description: "Learn effective breathing techniques to manage panic attacks and acute anxiety episodes.",
+    type: "video",
+    category: "Crisis Management",
+    duration: "8 min",
+    language: "English",
+    difficulty: "beginner",
+    rating: 4.9,
     thumbnail: "/breathing-exercises-video-thumbnail.jpg",
-    author: "Wellness Workshop",
-    tags: ["breathing", "stress relief", "techniques", "wellness"]
-  }
+    author: "Anxiety Specialist",
+    tags: ["panic", "breathing", "crisis", "techniques"],
+  },
 ]
+
+const categories = [
+  "All",
+  "Anxiety",
+  "Depression",
+  "Stress Management",
+  "Sleep & Wellness",
+  "Social Anxiety",
+  "Crisis Management",
+  "Self-Assessment",
+]
+const languages = ["All", "English", "Hindi", "Tamil", "Bengali", "Telugu"]
+const resourceTypes = ["All", "article", "video", "audio", "tool"]
+
+function DrawingPad() {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const [isDrawing, setIsDrawing] = useState(false)
+  const [currentColor, setCurrentColor] = useState("#000000")
+  const [brushSize, setBrushSize] = useState([5])
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    const context = canvas?.getContext("2d")
+    if (!canvas || !context) return
+
+    const parent = canvas.parentElement
+    if (parent) {
+      canvas.width = parent.offsetWidth
+      canvas.height = 400
+    }
+
+    context.lineCap = "round"
+    context.lineJoin = "round"
+  }, [])
+
+  const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const context = canvasRef.current?.getContext("2d")
+    if (!context) return
+    setIsDrawing(true)
+    context.beginPath()
+    context.moveTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY)
+  }
+
+  const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!isDrawing) return
+    const context = canvasRef.current?.getContext("2d")
+    if (!context) return
+    context.strokeStyle = currentColor
+    context.lineWidth = brushSize[0]
+    context.lineTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY)
+    context.stroke()
+  }
+
+  const stopDrawing = () => setIsDrawing(false)
+
+  const clearCanvas = () => {
+    const canvas = canvasRef.current
+    const context = canvas?.getContext("2d")
+    if (!canvas || !context) return
+    context.clearRect(0, 0, canvas.width, canvas.height)
+  }
+
+  return (
+    <Card className="w-full mt-6">
+      <CardHeader>
+        <div className="flex items-center gap-2">
+          <Palette className="h-6 w-6 text-primary" />
+          <CardTitle>Creative Drawing Pad</CardTitle>
+        </div>
+        <CardDescription>A space to express your feelings visually. Don't worry about making it perfect.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="flex flex-wrap items-center gap-4 p-2 mb-4 bg-muted rounded-lg">
+          <div className="flex items-center gap-2">
+            <label htmlFor="color-picker" className="text-sm font-medium">Color:</label>
+            <input
+              id="color-picker"
+              type="color"
+              value={currentColor}
+              onChange={(e) => setCurrentColor(e.target.value)}
+              className="w-8 h-8 rounded border-none cursor-pointer bg-transparent"
+            />
+          </div>
+          <div className="flex items-center gap-2 flex-1 min-w-[150px]">
+            <label className="text-sm font-medium">Size:</label>
+            <Slider value={brushSize} onValueChange={setBrushSize} max={50} min={1} step={1} />
+            <span className="text-sm font-semibold w-8 text-center">{brushSize[0]}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="icon" onClick={clearCanvas} title="Clear Canvas">
+              <RotateCcw className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+        <div className="border rounded-lg overflow-hidden bg-white">
+          <canvas
+            ref={canvasRef}
+            onMouseDown={startDrawing}
+            onMouseMove={draw}
+            onMouseUp={stopDrawing}
+            onMouseLeave={stopDrawing}
+            className="cursor-crosshair w-full h-[600px]"
+          />
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
 
 export default function ResourcesPage() {
   const [searchTerm, setSearchTerm] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState<string>("all")
-  const [selectedType, setSelectedType] = useState<string>("all")
+  const [selectedCategory, setSelectedCategory] = useState("All")
+  const [selectedLanguage, setSelectedLanguage] = useState("All")
+  const [selectedType, setSelectedType] = useState("All")
+  const [filteredResources, setFilteredResources] = useState(resources)
 
-  const filteredResources = resources.filter((resource) => {
-    const matchesSearch = resource.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         resource.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         resource.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
-    const matchesCategory = selectedCategory === "all" || resource.category === selectedCategory
-    const matchesType = selectedType === "all" || resource.type === selectedType
+  const filterResources = () => {
+    let filtered = resources
 
-    return matchesSearch && matchesCategory && matchesType
-  })
+    if (searchTerm) {
+      filtered = filtered.filter(
+        (resource) =>
+          resource.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          resource.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          resource.tags.some((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase())),
+      )
+    }
+
+    if (selectedCategory !== "All") {
+      filtered = filtered.filter((resource) => resource.category === selectedCategory)
+    }
+
+    if (selectedLanguage !== "All") {
+      filtered = filtered.filter((resource) => resource.language === selectedLanguage)
+    }
+
+    if (selectedType !== "All") {
+      filtered = filtered.filter((resource) => resource.type === selectedType)
+    }
+
+    setFilteredResources(filtered)
+  }
+
+  const getResourceIcon = (type: string) => {
+    switch (type) {
+      case "article":
+        return <BookOpen className="h-5 w-5" />
+      case "video":
+        return <Video className="h-5 w-5" />
+      case "audio":
+        return <Headphones className="h-5 w-5" />
+      case "tool":
+        return <Zap className="h-5 w-5" />
+      default:
+        return <BookOpen className="h-5 w-5" />
+    }
+  }
+
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty) {
+      case "beginner":
+        return "bg-green-100 text-green-800"
+      case "intermediate":
+        return "bg-yellow-100 text-yellow-800"
+      case "advanced":
+        return "bg-red-100 text-red-800"
+      default:
+        return "bg-gray-100 text-gray-800"
+    }
+  }
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Mental Health Resources</h1>
-          <p className="text-muted-foreground">
-            Access a comprehensive collection of tools, guides, and activities to support your mental wellness journey.
+
+      <div className="container mx-auto px-4 py-6 max-w-7xl">
+        {/* Hero Section */}
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold mb-4">Mental Health Resource Hub</h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Discover evidence-based resources, tools, and content to support your mental health journey. Available in
+            multiple languages and designed specifically for students.
           </p>
         </div>
 
-        <Tabs defaultValue="resources" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="resources">Articles & Videos</TabsTrigger>
-            <TabsTrigger value="sounds">Calming Sounds</TabsTrigger>
-            <TabsTrigger value="exercises">Wellness Exercises</TabsTrigger>
-            <TabsTrigger value="drawing">Creative Pad</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="resources" className="space-y-6">
-            {/* Search and Filters */}
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                <Input
-                  placeholder="Search resources..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  <SelectItem value="Anxiety">Anxiety</SelectItem>
-                  <SelectItem value="Depression">Depression</SelectItem>
-                  <SelectItem value="Stress Management">Stress Management</SelectItem>
-                  <SelectItem value="Sleep">Sleep</SelectItem>
-                  <SelectItem value="Mindfulness">Mindfulness</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={selectedType} onValueChange={setSelectedType}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="article">Articles</SelectItem>
-                  <SelectItem value="video">Videos</SelectItem>
-                  <SelectItem value="audio">Audio</SelectItem>
-                  <SelectItem value="tool">Tools</SelectItem>
-                </SelectContent>
-              </Select>
+        {/* Search and Filters */}
+        <div className="mb-8 space-y-4">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search resources, topics, or keywords..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
             </div>
+            <Button onClick={filterResources} className="md:w-auto">
+              <Filter className="h-4 w-4 mr-2" />
+              Apply Filters
+            </Button>
+          </div>
 
-            {/* Resources Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select Category" />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map((category) => (
+                  <SelectItem key={category} value={category}>
+                    {category}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select Language" />
+              </SelectTrigger>
+              <SelectContent>
+                {languages.map((language) => (
+                  <SelectItem key={language} value={language}>
+                    {language}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={selectedType} onValueChange={setSelectedType}>
+              <SelectTrigger>
+                <SelectValue placeholder="Resource Type" />
+              </SelectTrigger>
+              <SelectContent>
+                {resourceTypes.map((type) => (
+                  <SelectItem key={type} value={type}>
+                    {type === "All" ? "All Types" : type.charAt(0).toUpperCase() + type.slice(1)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <Tabs defaultValue="browse" className="space-y-6">
+<TabsList className="grid w-full grid-cols-4">
+    <TabsTrigger value="browse">Browse Resources</TabsTrigger>
+    <TabsTrigger value="tools">Wellness Tools</TabsTrigger>
+    <TabsTrigger value="music">Calming Music</TabsTrigger> 
+    <TabsTrigger value="favorites">My Favorites</TabsTrigger>
+</TabsList>
+            
+          <TabsContent value="browse">
+
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredResources.map((resource) => (
-                <Card key={resource.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                  <div className="aspect-video bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
-                    <div className="text-center">
-                      {resource.type === 'video' && <Video className="h-8 w-8 mx-auto mb-2 text-gray-400" />}
-                      {resource.type === 'audio' && <Headphones className="h-8 w-8 mx-auto mb-2 text-gray-400" />}
-                      {resource.type === 'article' && <BookOpen className="h-8 w-8 mx-auto mb-2 text-gray-400" />}
-                      {resource.type === 'tool' && <Brain className="h-8 w-8 mx-auto mb-2 text-gray-400" />}
-                      <p className="text-sm text-gray-500">{resource.type.charAt(0).toUpperCase() + resource.type.slice(1)}</p>
+                <Card key={resource.id} className="hover:shadow-lg transition-shadow">
+                  <div className="relative">
+                    <img
+                      src={resource.thumbnail || "/placeholder.svg?height=200&width=400"}
+                      alt={resource.title}
+                      className="w-full h-48 object-cover rounded-t-lg"
+                    />
+                    <div className="absolute top-2 left-2">
+                      <Badge className={`${getDifficultyColor(resource.difficulty)}`}>{resource.difficulty}</Badge>
+                    </div>
+                    <div className="absolute top-2 right-2">
+                      <Badge variant="secondary" className="flex items-center gap-1">
+                        {getResourceIcon(resource.type)}
+                        {resource.type}
+                      </Badge>
                     </div>
                   </div>
-                  <CardHeader>
+                  <CardHeader className="pb-2">
                     <div className="flex items-start justify-between">
-                      <Badge variant="secondary">{resource.category}</Badge>
-                      <div className="flex items-center gap-1">
-                        <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                        <span className="text-xs">{resource.rating}</span>
+                      <CardTitle className="text-lg leading-tight">{resource.title}</CardTitle>
+                      <div className="flex items-center gap-1 text-sm">
+                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                        {resource.rating}
                       </div>
                     </div>
-                    <CardTitle className="text-lg">{resource.title}</CardTitle>
-                    <CardDescription>{resource.description}</CardDescription>
+                    <CardDescription className="text-sm">{resource.description}</CardDescription>
                   </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
-                      <span className="flex items-center gap-1">
-                        <Clock className="h-4 w-4" />
-                        {resource.duration}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <User className="h-4 w-4" />
-                        {resource.author}
-                      </span>
+                  <CardContent className="pt-0">
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <Clock className="h-4 w-4" />
+                          {resource.duration}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <User className="h-4 w-4" />
+                          {resource.author}
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap gap-1">
+                        {resource.tags.slice(0, 3).map((tag) => (
+                          <Badge key={tag} variant="outline" className="text-xs">
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                      <div className="flex gap-2">
+                        <Button size="sm" className="flex-1">
+                          {resource.type === "tool" ? "Use Tool" : resource.type === "video" ? "Watch" : "Read"}
+                        </Button>
+                        <Button size="sm" variant="outline">
+                          <Heart className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex flex-wrap gap-1 mb-4">
-                      {resource.tags.slice(0, 3).map((tag) => (
-                        <Badge key={tag} variant="outline" className="text-xs">
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-                    <Button className="w-full" asChild>
-                      <Link href={`/resources/${resource.id}`}>
-                        Access Resource
-                      </Link>
-                    </Button>
                   </CardContent>
                 </Card>
               ))}
             </div>
           </TabsContent>
+          <TabsContent value="music">
+    <div className=" ">
+        <Card>
+            <CardHeader>
+                <CardTitle>Peaceful Piano</CardTitle>
+                <CardDescription>Relaxing piano music to help you focus, study, or unwind.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <iframe
+                    title="Spotify Embed: Peaceful Piano"
+                    style={{ borderRadius: '12px' }}
+                    src="https://open.spotify.com/embed/playlist/37i9dQZF1DX4sWSpwq3LiO?utm_source=generator"
+                    width="100%"
+                    height="800"
+                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                    loading="lazy"
+                ></iframe>
+            </CardContent>
+        </Card>
 
-          <TabsContent value="sounds">
-            <CalmingSounds />
-          </TabsContent>
+    </div>
+</TabsContent>
 
-          <TabsContent value="exercises">
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Zap className="h-5 w-5" />
-                  Wellness Exercises
-                </CardTitle>
-                <CardDescription>
-                  Practice these exercises regularly to build resilience and manage stress
-                </CardDescription>
-              </CardHeader>
-            </Card>
-            <ExerciseGuides />
-          </TabsContent>
-
-          <TabsContent value="drawing">
+          <TabsContent value="tools">
             <DrawingPad />
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                    <Brain className="h-6 w-6 text-primary" />
+                  </div>
+                  <CardTitle>Mood Tracker</CardTitle>
+                  <CardDescription>Track your daily emotions and identify patterns over time</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button className="w-full">Start Tracking</Button>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <div className="w-12 h-12 bg-secondary/10 rounded-lg flex items-center justify-center mb-4">
+                    <Target className="h-6 w-6 text-secondary" />
+                  </div>
+                  <CardTitle>Anxiety Assessment</CardTitle>
+                  <CardDescription>Quick self-assessment to understand your anxiety levels</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button className="w-full">Take Assessment</Button>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center mb-4">
+                    <Moon className="h-6 w-6 text-accent" />
+                  </div>
+                  <CardTitle>Sleep Tracker</CardTitle>
+                  <CardDescription>Monitor your sleep patterns and get personalized recommendations</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button className="w-full">Track Sleep</Button>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                    <Zap className="h-6 w-6 text-primary" />
+                  </div>
+                  <CardTitle>Stress Buster</CardTitle>
+                  <CardDescription>Quick 5-minute exercises to reduce stress and anxiety</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button className="w-full">Start Exercise</Button>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <div className="w-12 h-12 bg-secondary/10 rounded-lg flex items-center justify-center mb-4">
+                    <Heart className="h-6 w-6 text-secondary" />
+                  </div>
+                  <CardTitle>Gratitude Journal</CardTitle>
+                  <CardDescription>Daily gratitude practice to improve your mental wellbeing</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button className="w-full">Write Entry</Button>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center mb-4">
+                    <Play className="h-6 w-6 text-accent" />
+                  </div>
+                  <CardTitle>Guided Meditation</CardTitle>
+                  <CardDescription>Collection of meditation sessions for different needs</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button className="w-full">Start Session</Button>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="favorites">
+            <Card>
+              <CardContent className="p-6 text-center">
+                <Heart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="font-semibold mb-2">No Favorites Yet</h3>
+                <p className="text-muted-foreground mb-4">
+                  Start exploring resources and save your favorites for quick access
+                </p>
+                <Button asChild>
+                  <Link href="#browse">Browse Resources</Link>
+                </Button>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>

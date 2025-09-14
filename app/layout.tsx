@@ -7,10 +7,12 @@ import { ThemeProvider } from "next-themes"
 import { Suspense } from "react"
 import "./globals.css"
 import { EmergencyWidget } from "@/components/emergency-widget"
+import { LanguageProvider } from "@/contexts/language-context"
+import { AuthProvider } from "@/contexts/auth-context"
 
 export const metadata: Metadata = {
-  title: "v0 App",
-  description: "Created with v0",
+  title: "Sukoon - Mental Wellness Platform",
+  description: "Your mental health and wellness companion",
   generator: "v0.app",
 }
 
@@ -22,12 +24,16 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable} antialiased`}>
       <body>
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
-          <Suspense fallback={null}>
-            {children}
-            <EmergencyWidget />
-          </Suspense>
-        </ThemeProvider>
+        <AuthProvider>
+          <LanguageProvider>
+            <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
+              <Suspense fallback={null}>
+                {children}
+                <EmergencyWidget />
+              </Suspense>
+            </ThemeProvider>
+          </LanguageProvider>
+        </AuthProvider>
         <Analytics />
       </body>
     </html>

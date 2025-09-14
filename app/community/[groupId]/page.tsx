@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Textarea } from "@/components/ui/textarea"
+import { Header } from "@/components/header"
 import { Users, Heart, Reply, Send, ArrowLeft, Shield } from "lucide-react"
 import Link from "next/link"
 
@@ -124,8 +125,10 @@ export default function GroupPage({ params }: { params: { groupId: string } }) {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-50">
+      <Header />
+      
+      {/* Group-specific header */}
+      <div className="border-b bg-card/50 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="sm" asChild>
@@ -144,7 +147,7 @@ export default function GroupPage({ params }: { params: { groupId: string } }) {
             Safe Space
           </Badge>
         </div>
-      </header>
+      </div>
 
       <div className="container mx-auto px-4 py-6 max-w-4xl">
         {/* Group Info */}

@@ -109,7 +109,25 @@ const moderationQueue = [
 export default function AdminDashboard() {
   const [timeRange, setTimeRange] = useState("7d")
   const [selectedMetric, setSelectedMetric] = useState("all")
-  const [analyticsData, setAnalyticsData] = useState(null)
+  type InterventionOutcome = {
+    type: string
+    successful: number
+    total: number
+    successRate: number
+  }
+
+  type AnalyticsData = {
+    totalStudents?: number
+    activeStudents?: number
+    studentsAtRisk?: number
+    studentsImproved?: number
+    riskDistribution?: Array<{ level: string; count: number; percentage: number }>
+    weeklyTrends?: Array<{ week: string; avgAnxiety: number; avgDepression: number; avgStress: number; avgWellbeing: number }>
+    mentalHealthScores?: Array<{ studentId: string; anxiety: number; depression: number; stress: number; wellbeing: number; lastAssessment: string }>
+    interventionOutcomes?: InterventionOutcome[]
+  }
+
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {

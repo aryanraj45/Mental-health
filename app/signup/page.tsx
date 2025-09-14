@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Header } from "@/components/header"
 import { Heart, User, Shield } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
@@ -73,8 +74,10 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
+    <div>
+      <Header />
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex items-center justify-center gap-2 mb-4">
             <Heart className="h-8 w-8 text-primary" />
@@ -240,6 +243,7 @@ export default function SignUpPage() {
           </form>
         </CardContent>
       </Card>
+      </div>
     </div>
   )
 }
