@@ -26,7 +26,7 @@ export default function RootLayout({
       <body>
         <AuthProvider>
           <LanguageProvider>
-            <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
+            <ThemeProvider attribute="class" defaultTheme="dark" disableTransitionOnChange>
               <Suspense fallback={null}>
                 {children}
                 <EmergencyWidget />

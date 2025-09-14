@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Header } from "@/components/header"
 import { Calendar, Clock, User, Video, Phone, MapPin, Heart, MessageCircle, AlertTriangle, FileText, Users, Bot } from "lucide-react"
 import Link from "next/link"
 
@@ -134,21 +135,7 @@ const QuickAction = ({ href, icon: Icon, children }: { href: string, icon: React
 export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-black antialiased">
-      {/* --- Header --- */}
-      <header className="sticky top-0 z-50 p-4">
-        <div className="container mx-auto max-w-screen-xl bg-card/60 backdrop-blur-lg border rounded-full shadow-sm">
-          <div className="px-4 py-2 flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2 group">
-              <Heart className="h-8 w-8 text-primary group-hover:scale-110 transition-transform" />
-              <h1 className="text-2xl font-bold text-foreground">MindCare</h1>
-            </Link>
-            <div className="flex items-center gap-4">
-              <span className="text-sm font-medium text-muted-foreground hidden sm:inline">Welcome, User!</span>
-              <Badge variant="secondary" className="rounded-full">Dashboard</Badge>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       <main className="container mx-auto px-4 py-8 max-w-7xl">
         <div className="mb-10">
