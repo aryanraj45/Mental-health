@@ -143,7 +143,6 @@ function ElegantShape({
 // --- Main Page Component ---
 export default function HomePage() {
   const { t } = useLanguage();
-  const { theme, setTheme } = useTheme();
 
   // Animation variants for Framer Motion (static, compatible)
   const fadeUpVariants = {
