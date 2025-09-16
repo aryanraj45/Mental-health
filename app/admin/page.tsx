@@ -48,8 +48,7 @@ import {
 } from "framer-motion";
 import { cn } from "@/lib/utils";
 import React from "react";
-// import Link from "next/link"; // This is the correct import for your Next.js project.
-const Link = "a" as any; // Using `a` tag for preview compatibility.
+import Link from "next/link";
 import {
   Area,
   AreaChart,

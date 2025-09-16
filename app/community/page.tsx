@@ -61,8 +61,7 @@ import {
   Share2,
   BookOpen,
 } from "lucide-react";
-// import Link from "next/link"; // This is the correct import for your Next.js project.
-const Link = "a" as any; // Using `a` tag for preview compatibility.
+import Link from "next/link";
 import { format, formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 

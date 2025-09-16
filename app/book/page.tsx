@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, ReactNode } from "react";
-// import Link from "next/link"; // This is the correct import for your Next.js project. It is commented out for this preview.
-const Link = "a" as any; // Using `a` tag for preview compatibility.
+import Link from "next/link";
 import {
   motion,
   useMotionValue,

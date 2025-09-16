@@ -152,27 +152,27 @@ export default function HomePage() {
   };
 
   return (
-    <div className="w-full bg-[#030303] text-white relative overflow-hidden">
+    <div className="w-full bg-background text-foreground relative overflow-hidden">
       <Stars />
 
       {/* Hero Section */}
       <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden">
         {/* Navigation Header */}
-        <div className="absolute top-0 left-0 w-full p-4 sm:p-6 z-30">
+        <div className="absolute top-0 left-0 w-full p-6 sm:p-8 z-30">
           <div className="container mx-auto flex justify-between items-center">
-            <Link href="/" className="flex items-center gap-2">
-              <Heart className="h-8 w-8 text-white" />
-              <h1 className="text-2xl font-bold text-white">Sukoon</h1>
+            <Link href="/" className="flex items-center gap-3 group">
+              <Heart className="h-10 w-10 text-primary transition-all duration-300 group-hover:scale-110 neon-glow" />
+              <h1 className="text-3xl font-bold text-gradient">Sukoon</h1>
             </Link>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-4">
               <Button
                 variant="outline"
                 asChild
-                className="bg-transparent text-white border-white/20 hover:bg-white/10 hover:text-white"
+                className="glass-effect border-primary/30 text-foreground hover:bg-primary/10 hover:border-primary/50 transition-all duration-300 px-6 py-3"
               >
                 <Link href="/login">Login</Link>
               </Button>
-              <Button asChild className="bg-white text-black hover:bg-white/90">
+              <Button asChild className="btn-neon px-6 py-3">
                 <Link href="/signup">Sign Up</Link>
               </Button>
             </div>
@@ -180,14 +180,14 @@ export default function HomePage() {
         </div>
 
         {/* Background Gradients & Shapes */}
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/[0.05] via-transparent to-rose-500/[0.05] blur-3xl" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.05] via-transparent to-accent/[0.05] blur-3xl" />
         <div className="absolute inset-0 overflow-hidden">
           <ElegantShape
             delay={0.3}
             width={600}
             height={140}
             rotate={12}
-            gradient="from-indigo-500/[0.15]"
+            gradient="from-primary/[0.15]"
             className="left-[-10%] top-[15%]"
           />
           <ElegantShape
@@ -195,22 +195,22 @@ export default function HomePage() {
             width={500}
             height={120}
             rotate={-15}
-            gradient="from-rose-500/[0.15]"
+            gradient="from-accent/[0.15]"
             className="right-[-5%] top-[70%]"
           />
         </div>
 
-        <div className="relative z-10 container mx-auto px-4 md:px-6">
-          <div className="max-w-3xl mx-auto text-center">
+        <div className="relative z-10 container mx-auto px-6 md:px-8">
+          <div className="max-w-4xl mx-auto text-center modern-spacing-lg">
             <motion.div
               custom={0}
               variants={fadeUpVariants}
               initial="hidden"
               animate="visible"
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.03] border border-white/[0.08] mb-8 md:mb-12"
+              className="inline-flex items-center gap-3 px-4 py-2 rounded-full glass-effect border border-primary/20 mb-12 md:mb-16 neon-glow-accent"
             >
-              <Heart className="h-5 w-5 text-white/80" />
-              <span className="text-sm text-white/60 tracking-wide">
+              <Heart className="h-6 w-6 text-primary animate-pulse-glow" />
+              <span className="text-sm text-muted-foreground tracking-wide font-medium">
                 Sukoon for Students
               </span>
             </motion.div>
@@ -243,7 +243,7 @@ export default function HomePage() {
               initial="hidden"
               animate="visible"
             >
-              <p className="text-base sm:text-lg md:text-xl text-white/40 mb-10 leading-relaxed font-light tracking-wide max-w-xl mx-auto px-4">
+              <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground mb-12 leading-relaxed font-light tracking-wide max-w-2xl mx-auto">
                 Confidential support, AI companionship, and professional
                 guidance, all designed for the modern student. You're not alone.
               </p>
@@ -258,7 +258,7 @@ export default function HomePage() {
               <Button
                 asChild
                 size="lg"
-                className="bg-white text-black hover:bg-white/90 rounded-full px-8 py-3 text-lg font-semibold"
+                className="btn-neon px-12 py-4 text-xl font-semibold rounded-2xl animate-float"
               >
                 <Link href="/chat">Get Started</Link>
               </Button>
@@ -266,65 +266,68 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="absolute inset-0 bg-gradient-to-t from-[#030303] via-transparent to-[#030303]/80 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/80 pointer-events-none" />
       </div>
 
       {/* Macbook Scroll Section */}
-      <div className="relative z-10 w-full">
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <ElegantShape
-            delay={0.8}
-            width={300}
-            height={80}
-            rotate={-8}
-            gradient="from-violet-500/[0.15]"
-            className="left-[5%] bottom-[10%]"
-          />
-          <ElegantShape
-            delay={1.0}
-            width={200}
-            height={60}
-            rotate={20}
-            gradient="from-amber-500/[0.15]"
-            className="right-[15%] top-[10%]"
-          />
-          <ElegantShape
-            delay={1.2}
-            width={450}
-            height={100}
-            rotate={-25}
-            gradient="from-cyan-500/[0.15]"
-            className="left-[20%] top-[5%]"
-          />
-          <ElegantShape
-            delay={1.3}
-            width={400}
-            height={80}
-            rotate={18}
-            gradient="from-green-500/[0.15]"
-            className="right-[20%] bottom-[5%]"
-          />
-        </div>
-        <MacbookScroll
-          title={
-            <div className="text-center">
-              <h2
-                className={cn(
-                  "text-3xl md:text-5xl font-bold text-white",
-                  pacifico.className
-                )}
-              >
-                See Sukoon in Action
-              </h2>
-              <p className="text-base md:text-lg text-white/60 mt-4">
-                An interactive walkthrough of our platform's key features.
-              </p>
+      <div className="relative z-10 w-full py-20">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col items-center justify-center min-h-[70vh]">
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+              <ElegantShape
+                delay={0.8}
+                width={300}
+                height={80}
+                rotate={-8}
+                gradient="from-violet-500/[0.15]"
+                className="left-[5%] bottom-[10%]"
+              />
+              <ElegantShape
+                delay={1.0}
+                width={200}
+                height={60}
+                rotate={20}
+                gradient="from-amber-500/[0.15]"
+                className="right-[15%] top-[10%]"
+              />
+              <ElegantShape
+                delay={1.2}
+                width={450}
+                height={100}
+                rotate={-25}
+                gradient="from-cyan-500/[0.15]"
+                className="left-[20%] top-[5%]"
+              />
+              <ElegantShape
+                delay={1.3}
+                width={400}
+                height={80}
+                rotate={18}
+                gradient="from-green-500/[0.15]"
+                className="right-[20%] bottom-[5%]"
+              />
             </div>
-          }
-          src={`/dashboard-video.mp4`} // <-- IMPORTANT: REPLACE WITH YOUR VIDEO IN THE /public FOLDER
-        />
+            <MacbookScroll
+              title={
+                <div className="text-center">
+                  <h2
+                    className={cn(
+                      "text-3xl md:text-5xl font-bold text-white",
+                      pacifico.className
+                    )}
+                  >
+                    See Sukoon in Action
+                  </h2>
+                  <p className="text-base md:text-lg text-white/60 mt-4">
+                    An interactive walkthrough of our platform's key features.
+                  </p>
+                </div>
+              }
+              src={`/dashboard-video.mp4`} // <-- IMPORTANT: REPLACE WITH YOUR VIDEO IN THE /public FOLDER
+            />
+          </div>
+        </div>
       </div>
-
       {/* About Section */}
       <div className="relative w-full py-20 md:py-32">
         {/* Neon Glow Effect */}
@@ -403,11 +406,13 @@ export const MacbookScroll = ({
   return (
     <div
       ref={ref}
-      className="flex min-h-[200vh] shrink-0 scale-[0.5] transform flex-col items-center justify-start py-0 [perspective:800px] sm:scale-75 md:scale-100 md:py-80"
+      className="flex h-auto shrink-0 scale-75 transform flex-col items-center justify-center py-5 [perspective:800px] md:scale-90 lg:scale-100"
     >
       <motion.div
-        style={{ translateY: textTransform, opacity: textOpacity }}
-        className="mb-20 text-center"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="mb-10 text-center"
       >
         {title}
       </motion.div>

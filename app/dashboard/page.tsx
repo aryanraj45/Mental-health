@@ -1,28 +1,40 @@
 "use client";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Calendar, Clock, User, Video, Phone, MapPin, Heart, MessageCircle, ArrowRight, Home, Zap, Sparkles, Eye } from "lucide-react"
-import { MoodAssessmentModal } from "@/components/MoodAssessmentModal" // <-- 1. IMPORT THE MODAL
-
-// Using `a` tag for preview compatibility.
-const Link = "a" as any; 
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion"
-import { cn } from "@/lib/utils"
-import React, { useState, useRef, useEffect, ReactNode } from "react"
-
-// --- TYPE DEFINITIONS for this page ---
-interface Appointment {
-  id: string;
-  date: string;
-  time: string;
-  counselor: string;
-  type: 'video' | 'phone' | 'in-person';
-  status: 'confirmed' | 'completed' | 'cancelled';
-  bookingId: string;
-}
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Calendar,
+  Clock,
+  User,
+  Video,
+  Phone,
+  MapPin,
+  Heart,
+  MessageCircle,
+  ArrowRight,
+  Home,
+  Zap,
+  Sparkles,
+  Eye,
+} from "lucide-react";
+import Link from "next/link";
+import {
+  motion,
+  useMotionValue,
+  useSpring,
+  useTransform,
+  AnimatePresence,
+} from "framer-motion";
+import { cn } from "@/lib/utils";
+import React, { useState, useRef, useEffect, ReactNode } from "react";
 
 // --- Reusable UI Components & Hooks ---
 
