@@ -27,9 +27,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Check if user is logged in (from localStorage or session)
     const checkAuthStatus = () => {
       try {
-        const savedUser = localStorage.getItem('user')
-        if (savedUser) {
-          setUser(JSON.parse(savedUser))
+        // Only run on client side
+        if (typeof window !== 'undefined') {
+          const savedUser = localStorage.getItem('user')
+          if (savedUser) {
+            setUser(JSON.parse(savedUser))
+          }
+          
+          // Check if we're in development environment and need to set up mock auth
+          if (process.env.NODE_ENV === 'development' && !savedUser) {
+            import('@/lib/dev-auth').then(({ setupDevAuth }) => {
+              setupDevAuth()
+              // Try again after setup
+              const devUser = localStorage.getItem('user')
+              if (devUser) {
+                setUser(JSON.parse(devUser))
+              }
+            })
+          }
         }
       } catch (error) {
         console.error('Error checking auth status:', error)

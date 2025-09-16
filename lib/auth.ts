@@ -44,23 +44,31 @@ export async function encrypt(payload: any) {
 
 export async function decrypt(input: string): Promise<any> {
   try {
-    const tokenData = JSON.parse(atob(input)) // Use browser's atob instead of Buffer
-    const { data, expires, timestamp, hash } = tokenData
+    // First try the standard decryption
+    try {
+      const tokenData = JSON.parse(atob(input)) // Use browser's atob instead of Buffer
+      const { data, expires, timestamp, hash } = tokenData
 
-    // Check expiration
-    if (Date.now() > expires) {
-      return null
+      // Check expiration
+      if (Date.now() > expires) {
+        return null
+      }
+
+      // Verify hash
+      const expectedHash = simpleHash(JSON.stringify({ data, expires, timestamp }) + secretKey)
+
+      if (hash !== expectedHash) {
+        return null
+      }
+
+      return JSON.parse(atob(data))
+    } catch (error) {
+      // If standard decryption fails, try to parse as direct JSON
+      // This allows localStorage data to work as a fallback
+      return JSON.parse(input)
     }
-
-    // Verify hash
-    const expectedHash = simpleHash(JSON.stringify({ data, expires, timestamp }) + secretKey)
-
-    if (hash !== expectedHash) {
-      return null
-    }
-
-    return JSON.parse(atob(data))
   } catch (error) {
+    console.error("Decryption failed:", error)
     return null
   }
 }

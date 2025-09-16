@@ -113,6 +113,11 @@ export default function LoginPage() {
       setPassword("password123");
     }
     setError("");
+    
+    // Clear any previous session to start fresh
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('user');
+    }
   }, [role]);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -127,6 +132,7 @@ export default function LoginPage() {
         password === "password123" &&
         role === "student"
       ) {
+        // First login to set user data in localStorage
         login({
           id: "student1",
           name: "Student User",
@@ -134,22 +140,34 @@ export default function LoginPage() {
           role: "student",
         });
         
-        // --- MODIFICATION: Set the flag to show the modal on the dashboard ---
-        sessionStorage.setItem('showMoodModal', 'true');
+        // Set the flag to show the modal on the dashboard
+        if (typeof window !== 'undefined') {
+          window.sessionStorage.setItem('showMoodModal', 'true');
+        }
         
-        router.push("/dashboard"); 
+        // Add a small delay before navigation to ensure state updates
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Use window.location for more reliable navigation
+        window.location.href = "/dashboard";
       } else if (
         email === "admin@university.edu" &&
         password === "password123" &&
         role === "admin"
       ) {
+        // First login to set user data in localStorage
         login({
           id: "admin1",
           name: "Admin User",
           email: email,
           role: "admin",
         });
-        router.push("/administrator"); 
+        
+        // Add a small delay before navigation to ensure state updates
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Use window.location for more reliable navigation
+        window.location.href = "/administrator";
       } else {
         throw new Error("Invalid credentials");
       }
@@ -160,17 +178,10 @@ export default function LoginPage() {
     }
   };
 
+  // Simple animation variants that work with TypeScript
   const fadeUpVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: (i: number = 0) => ({
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.8,
-        delay: 0.1 * i,
-        ease: [0.25, 0.4, 0.25, 1],
-      },
-    }),
+    visible: { opacity: 1, y: 0 }
   };
 
   return (
@@ -197,7 +208,6 @@ export default function LoginPage() {
         >
           <div className="text-center">
             <motion.div
-              custom={0}
               variants={fadeUpVariants}
               className="flex items-center justify-center gap-3 mb-4"
             >
