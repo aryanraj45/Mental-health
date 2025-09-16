@@ -8,6 +8,7 @@ import { motion } from "framer-motion";
 import { Pacifico } from "next/font/google";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/auth-context";
 
 // --- Font Definition from HomePage ---
 const pacifico = Pacifico({
@@ -84,6 +85,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
+  const { login } = useAuth();
 
   // --- NEW: Autofill useEffect ---
   useEffect(() => {
@@ -110,10 +112,24 @@ export default function LoginPage() {
       if (
         (email === "student@university.edu" && password === "password123" && role === "student")
       ) {
+        // Login user with auth context
+        login({
+          id: "student1",
+          name: "Student User",
+          email: email,
+          role: "student"
+        });
         router.push("/dashboard"); // Or your student dashboard route
       } else if (
         (email === "admin@university.edu" && password === "password123" && role === "admin")
       ) {
+        // Login admin with auth context
+        login({
+          id: "admin1",
+          name: "Admin User",
+          email: email,
+          role: "admin"
+        });
         router.push("/admin"); // Or your admin dashboard route
       } else {
         throw new Error("Invalid credentials");

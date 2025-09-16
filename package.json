@@ -50,7 +50,7 @@
     "date-fns": "4.1.0",
     "embla-carousel-react": "8.5.1",
     "fabric": "^6.7.1",
-    "framer-motion": "^12.23.12",
+    "framer-motion": "^12.23.13",
     "geist": "latest",
     "html-to-image": "^1.11.13",
     "html2canvas": "^1.4.1",

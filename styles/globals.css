@@ -10,6 +10,35 @@
   ========================================================================== 
 */
 
+
+/* In your globals.css */
+body {
+  background-color: hsl(var(--background));
+  /* Optional: Add a subtle background pattern or gradient */
+  background-image: radial-gradient(circle at 1px 1px, hsl(var(--muted)) 1px, transparent 0);
+  background-size: 2rem 2rem;
+}
+
+@keyframes pulse-bg {
+  0% {
+    background-position: 0% 50%;
+    opacity: 0.1;
+  }
+  50% {
+    background-position: 100% 50%;
+    opacity: 0.25;
+  }
+  100% {
+    background-position: 0% 50%;
+    opacity: 0.1;
+  }
+}
+
+.animate-pulse-bg {
+  background-size: 200% 200%;
+  animation: pulse-bg 8s ease-in-out infinite;
+}
+
 /* --- Light Mode (Default) --- */
 :root {
   /* Main Colors */
@@ -220,4 +249,5 @@
     scrollbar-color: var(--border) transparent;
     scrollbar-width: thin;
   }
+
 }

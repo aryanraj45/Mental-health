@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useMemo, useEffect, useRef, ReactNode } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/auth-context";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -222,30 +224,42 @@ const InteractiveGlassCard = ({
   );
 };
 
-const Header = () => (
-  <header className="sticky top-0 z-50 border-b border-white/10 bg-black/30 backdrop-blur-xl">
-    <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-      <Link href="/" className="flex items-center gap-2">
-        <Heart className="h-8 w-8 text-white" />
-        <h1 className="text-2xl font-bold text-white">Sukoon Admin</h1>
-      </Link>
-      <div className="flex items-center gap-4">
-        <Button
-          asChild
-          variant="outline"
-          className="bg-transparent text-white/70 border-white/20 hover:bg-white/10 hover:text-white rounded-full"
-        >
-          <Link href="/">
-            <Home className="mr-2 h-4 w-4" /> Home
-          </Link>
-        </Button>
-        <Badge className="bg-white/10 text-white/70 border border-white/20">
-          Admin Panel
-        </Badge>
+const Header = () => {
+  const { user, logout } = useAuth();
+  
+  return (
+    <header className="sticky top-0 z-50 border-b border-white/10 bg-black/30 backdrop-blur-xl">
+      <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-2">
+          <Heart className="h-8 w-8 text-white" />
+          <h1 className="text-2xl font-bold text-white">Sukoon Admin</h1>
+        </Link>
+        <div className="flex items-center gap-4">
+          <span className="text-white/70 text-sm">Welcome, {user?.name || 'Admin'}</span>
+          <Button
+            asChild
+            variant="outline"
+            className="bg-transparent text-white/70 border-white/20 hover:bg-white/10 hover:text-white rounded-full"
+          >
+            <Link href="/">
+              <Home className="mr-2 h-4 w-4" /> Home
+            </Link>
+          </Button>
+          <Button
+            variant="outline"
+            onClick={logout}
+            className="bg-transparent text-white/70 border-white/20 hover:bg-red-500/20 hover:text-red-300 hover:border-red-500/30 rounded-full"
+          >
+            Logout
+          </Button>
+          <Badge className="bg-white/10 text-white/70 border border-white/20">
+            Admin Panel
+          </Badge>
+        </div>
       </div>
-    </div>
-  </header>
-);
+    </header>
+  );
+};
 
 // --- Interfaces, Types, and Mock Data ---
 type RiskLevel = "low" | "medium" | "high" | "critical";
@@ -417,10 +431,33 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 // --- Main Admin Dashboard Component ---
 export default function AdminDashboard() {
+  const router = useRouter();
+  const { user, isLoggedIn, isLoading, logout } = useAuth();
   const [students, setStudents] = useState<Student[]>(mockStudents);
   const [crisisAlerts, setCrisisAlerts] =
     useState<CrisisAlert[]>(mockCrisisAlerts);
   const [activeTab, setActiveTab] = useState("overview");
+
+  // Authentication check
+  useEffect(() => {
+    if (!isLoading && (!isLoggedIn || user?.role !== 'admin')) {
+      router.push('/login');
+    }
+  }, [isLoggedIn, user, isLoading, router]);
+
+  // Show loading state while checking authentication
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#030303] flex items-center justify-center">
+        <div className="text-white text-lg">Loading...</div>
+      </div>
+    );
+  }
+
+  // Don't render admin content if not authenticated as admin
+  if (!isLoggedIn || user?.role !== 'admin') {
+    return null;
+  }
 
   const riskBadgeColors: Record<RiskLevel, string> = {
     low: "bg-green-500/10 text-green-300 border-green-500/20",
