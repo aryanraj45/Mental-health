@@ -5,6 +5,7 @@ import { motion, useScroll, useTransform, MotionValue } from "framer-motion";
 import { Pacifico } from "next/font/google";
 import { Heart } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image"; // Import the Image component
 import { cn } from "@/lib/utils";
 import React, { useEffect, useRef, useState } from "react";
 // import { Header } from "@/components/header";
@@ -163,8 +164,15 @@ export default function HomePage() {
         <div className="absolute top-0 left-0 w-full p-6 sm:p-8 z-30">
           <div className="container mx-auto flex justify-between items-center">
             <Link href="/" className="flex items-center gap-3 group">
-              <Heart className="h-10 w-10 text-primary transition-all duration-300 group-hover:scale-110 neon-glow" />
-              <h1 className="text-3xl font-bold text-gradient">Sukoon</h1>
+              {/* Replaced Heart icon with Image component */}
+              <Image
+                src="/logoo.png"
+                alt="Sukoon Logo"
+                width={150} // Adjust width as needed
+                height={200} // Adjust height as needed
+                className="transition-all duration-300 group-hover:scale-110 neon-glow"
+              />
+            
             </Link>
             <div className="flex items-center gap-4">
               <Button
