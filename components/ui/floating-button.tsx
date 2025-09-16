@@ -13,25 +13,25 @@ interface FloatingButtonProps {
   onClick?: () => void;
 }
 
-export function FloatingButton({ 
-  children, 
+export function FloatingButton({
+  children,
   className,
   variant = "neon",
   size = "md",
-  onClick
+  onClick,
 }: FloatingButtonProps) {
   const baseClasses = "relative overflow-hidden transition-all duration-300";
-  
+
   const variants = {
     neon: "btn-neon animate-float",
     glow: "neon-glow bg-primary text-primary-foreground hover:scale-105",
-    glass: "glass-effect border-primary/30 hover:bg-primary/10"
+    glass: "glass-effect border-primary/30 hover:bg-primary/10",
   };
 
   const sizes = {
     sm: "px-4 py-2 text-sm",
     md: "px-6 py-3 text-base",
-    lg: "px-8 py-4 text-lg"
+    lg: "px-8 py-4 text-lg",
   };
 
   return (
@@ -42,12 +42,7 @@ export function FloatingButton({
     >
       <Button
         onClick={onClick}
-        className={cn(
-          baseClasses,
-          variants[variant],
-          sizes[size],
-          className
-        )}
+        className={cn(baseClasses, variants[variant], sizes[size], className)}
       >
         {children}
       </Button>

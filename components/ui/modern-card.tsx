@@ -12,12 +12,12 @@ interface ModernCardProps {
   gradient?: boolean;
 }
 
-export function ModernCard({ 
-  children, 
-  className, 
-  hover = true, 
+export function ModernCard({
+  children,
+  className,
+  hover = true,
   glow = false,
-  gradient = false 
+  gradient = false,
 }: ModernCardProps) {
   return (
     <motion.div
@@ -35,32 +35,17 @@ export function ModernCard({
   );
 }
 
-export function GlassCard({ 
-  children, 
-  className,
-  ...props 
-}: ModernCardProps) {
+export function GlassCard({ children, className, ...props }: ModernCardProps) {
   return (
-    <ModernCard
-      className={cn("glass-effect", className)}
-      {...props}
-    >
+    <ModernCard className={cn("glass-effect", className)} {...props}>
       {children}
     </ModernCard>
   );
 }
 
-export function NeonCard({ 
-  children, 
-  className,
-  ...props 
-}: ModernCardProps) {
+export function NeonCard({ children, className, ...props }: ModernCardProps) {
   return (
-    <ModernCard
-      className={cn("neon-glow", className)}
-      glow={true}
-      {...props}
-    >
+    <ModernCard className={cn("neon-glow", className)} glow={true} {...props}>
       {children}
     </ModernCard>
   );

@@ -7,6 +7,7 @@ import { Heart } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import React, { useEffect, useRef, useState } from "react";
+// import { Header } from "@/components/header";
 import {
   IconBrightnessDown,
   IconBrightnessUp,
@@ -154,6 +155,7 @@ export default function HomePage() {
   return (
     <div className="w-full bg-background text-foreground relative overflow-hidden">
       <Stars />
+      {/* <Header /> */}
 
       {/* Hero Section */}
       <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden">
@@ -260,7 +262,7 @@ export default function HomePage() {
                 size="lg"
                 className="btn-neon px-12 py-4 text-xl font-semibold rounded-2xl animate-float"
               >
-                <Link href="/chat">Get Started</Link>
+                {/* <Link href="/chat">Get Started</Link> */}
               </Button>
             </motion.div>
           </div>

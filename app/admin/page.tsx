@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useRef, ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
+import { Header } from "@/components/header";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -224,43 +225,6 @@ const InteractiveGlassCard = ({
   );
 };
 
-const Header = () => {
-  const { user, logout } = useAuth();
-  
-  return (
-    <header className="sticky top-0 z-50 border-b border-white/10 bg-black/30 backdrop-blur-xl">
-      <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
-          <Heart className="h-8 w-8 text-white" />
-          <h1 className="text-2xl font-bold text-white">Sukoon Admin</h1>
-        </Link>
-        <div className="flex items-center gap-4">
-          <span className="text-white/70 text-sm">Welcome, {user?.name || 'Admin'}</span>
-          <Button
-            asChild
-            variant="outline"
-            className="bg-transparent text-white/70 border-white/20 hover:bg-white/10 hover:text-white rounded-full"
-          >
-            <Link href="/">
-              <Home className="mr-2 h-4 w-4" /> Home
-            </Link>
-          </Button>
-          <Button
-            variant="outline"
-            onClick={logout}
-            className="bg-transparent text-white/70 border-white/20 hover:bg-red-500/20 hover:text-red-300 hover:border-red-500/30 rounded-full"
-          >
-            Logout
-          </Button>
-          <Badge className="bg-white/10 text-white/70 border border-white/20">
-            Admin Panel
-          </Badge>
-        </div>
-      </div>
-    </header>
-  );
-};
-
 // --- Interfaces, Types, and Mock Data ---
 type RiskLevel = "low" | "medium" | "high" | "critical";
 interface Student {
@@ -440,8 +404,8 @@ export default function AdminDashboard() {
 
   // Authentication check
   useEffect(() => {
-    if (!isLoading && (!isLoggedIn || user?.role !== 'admin')) {
-      router.push('/login');
+    if (!isLoading && (!isLoggedIn || user?.role !== "admin")) {
+      router.push("/login");
     }
   }, [isLoggedIn, user, isLoading, router]);
 
@@ -455,7 +419,7 @@ export default function AdminDashboard() {
   }
 
   // Don't render admin content if not authenticated as admin
-  if (!isLoggedIn || user?.role !== 'admin') {
+  if (!isLoggedIn || user?.role !== "admin") {
     return null;
   }
 

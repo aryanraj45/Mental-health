@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Header } from "@/components/header";
 import {
   Calendar,
   Clock,
@@ -319,11 +320,11 @@ export default function DashboardPage() {
                         <Tabs defaultValue="appointments" onValueChange={setActiveTab}>
                             <TabsList className="grid w-full grid-cols-2 bg-white/[0.03] border border-white/[0.08] p-1 h-auto rounded-lg mb-8">
                                 <TabsTrigger value="appointments" className="relative data-[state=active]:text-gray-900 data-[state=active]:font-bold text-white/70 h-10 transition-colors duration-300">
-                                    {activeTab === "appointments" && <motion.div layoutId="active-tab-dashboard" className="absolute inset-0 bg-white rounded-md shadow-lg" />}
+                                    {activeTab === "appointments" && <motion.div layoutId="active-tab-dashboard" className="absolute inset-0 bg-gray-500 rounded-md shadow-lg" />}
                                     <span className="relative z-10">My Appointments</span>
                                 </TabsTrigger>
                                 <TabsTrigger value="history" className="relative data-[state=active]:text-gray-900 data-[state=active]:font-bold text-white/70 h-10 transition-colors duration-300">
-                                    {activeTab === "history" && <motion.div layoutId="active-tab-dashboard" className="absolute inset-0 bg-white rounded-md shadow-lg" />}
+                                    {activeTab === "history" && <motion.div layoutId="active-tab-dashboard" className="absolute inset-0 bg-gray-500 rounded-md shadow-lg" />}
                                     <span className="relative z-10">Session History</span>
                                 </TabsTrigger>
                             </TabsList>

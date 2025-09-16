@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect, ReactNode } from "react";
+import { Header } from "@/components/header";
 import {
   motion,
   AnimatePresence,
@@ -192,35 +193,6 @@ const InteractiveGlassCard = ({
   );
 };
 
-const Header = () => (
-  <header className="sticky top-0 z-50 border-b border-white/10 bg-black/30 backdrop-blur-xl">
-    <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-      <Link href="/" className="flex items-center gap-2">
-        <Heart className="h-8 w-8 text-white" />
-        <h1 className="text-2xl font-bold text-white">Sukoon</h1>
-      </Link>
-      <div className="flex items-center gap-4">
-        <Button
-          asChild
-          variant="outline"
-          className="bg-transparent text-white/70 border-white/20 hover:bg-white/10 hover:text-white rounded-full"
-        >
-          <Link href="/resources">
-            <BookOpen className="mr-2 h-4 w-4" /> Resources
-          </Link>
-        </Button>
-        <Button
-          asChild
-          variant="outline"
-          className="bg-transparent text-white/70 border-white/20 hover:bg-white/10 hover:text-white rounded-full"
-        >
-          <Link href="/dashboard">Dashboard</Link>
-        </Button>
-      </div>
-    </div>
-  </header>
-);
-
 // --- Original Page Data & Logic ---
 interface Comment {
   id: string;
@@ -404,6 +376,12 @@ export default function CommunityPage() {
   const [isAnonymousPost, setIsAnonymousPost] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [commentText, setCommentText] = useState<{ [postId: string]: string }>(
+    {}
+  );
+  const [showComments, setShowComments] = useState<{
+    [postId: string]: boolean;
+  }>({});
 
   const handleCreatePost = () => {
     if (!newPostTitle.trim() || !newPostContent.trim()) return;
@@ -457,6 +435,39 @@ export default function CommunityPage() {
           : post
       )
     );
+  };
+
+  const handleAddComment = (postId: string) => {
+    const text = commentText[postId]?.trim();
+    if (!text) return;
+
+    const newComment = {
+      id: Date.now().toString(),
+      content: text,
+      author: {
+        name: "Current User",
+        avatar: "https://placehold.co/32x32/38bdf8/ffffff?text=CU",
+        isAnonymous: false,
+      },
+      timestamp: new Date(),
+      likes: 0,
+      isLiked: false,
+      replies: [],
+    };
+
+    setPosts(
+      posts.map((post) =>
+        post.id === postId
+          ? { ...post, comments: [...post.comments, newComment] }
+          : post
+      )
+    );
+
+    setCommentText({ ...commentText, [postId]: "" });
+  };
+
+  const toggleComments = (postId: string) => {
+    setShowComments({ ...showComments, [postId]: !showComments[postId] });
   };
 
   const filteredPosts = posts.filter((post) => {
@@ -626,6 +637,10 @@ export default function CommunityPage() {
                     post={post}
                     onLike={handleLikePost}
                     onBookmark={handleBookmarkPost}
+                    onToggleComments={toggleComments}
+                    onAddComment={handleAddComment}
+                    commentText={commentText[post.id] || ""}
+                    showComments={showComments[post.id] || false}
                   />
                 </motion.div>
               ))}
@@ -674,10 +689,18 @@ const PostCard = ({
   post,
   onLike,
   onBookmark,
+  onToggleComments,
+  onAddComment,
+  commentText,
+  showComments,
 }: {
   post: Post;
   onLike: (id: string) => void;
   onBookmark: (id: string) => void;
+  onToggleComments: (id: string) => void;
+  onAddComment: (id: string) => void;
+  commentText: string;
+  showComments: boolean;
 }) => (
   <InteractiveGlassCard className="!p-0 overflow-hidden">
     <div className="p-6">
@@ -721,52 +744,140 @@ const PostCard = ({
       <CardTitle className="text-xl my-4 text-white">{post.title}</CardTitle>
       <p className="text-white/70 mb-4">{post.content}</p>
     </div>
-    <div className="flex items-center justify-between border-t border-white/10 px-6 py-2 bg-black/20">
-      <div className="flex items-center gap-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => onLike(post.id)}
-          className={cn(
-            "text-white/60 hover:text-white",
-            post.isLiked && "text-red-400 hover:text-red-400"
-          )}
-        >
-          <Heart
-            className={cn("h-4 w-4 mr-2", post.isLiked && "fill-current")}
-          />{" "}
-          {post.likes}
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="text-white/60 hover:text-white"
-        >
-          <MessageCircle className="h-4 w-4 mr-2" /> {post.comments.length}
-        </Button>
+    <div className="border-t border-white/10 bg-black/20">
+      <div className="flex items-center justify-between px-6 py-2">
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onLike(post.id)}
+            className={cn(
+              "text-white/60 hover:text-white",
+              post.isLiked && "text-red-400 hover:text-red-400"
+            )}
+          >
+            <Heart
+              className={cn("h-4 w-4 mr-2", post.isLiked && "fill-current")}
+            />{" "}
+            {post.likes}
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onToggleComments(post.id)}
+            className="text-white/60 hover:text-white"
+          >
+            <MessageCircle className="h-4 w-4 mr-2" /> {post.comments.length}
+          </Button>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onBookmark(post.id)}
+            className={cn(
+              "text-white/60 hover:text-white",
+              post.isBookmarked && "text-cyan-400 hover:text-cyan-400"
+            )}
+          >
+            <Bookmark
+              className={cn("h-4 w-4", post.isBookmarked && "fill-current")}
+            />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-white/60 hover:text-white"
+          >
+            <Flag className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
-      <div className="flex items-center gap-2">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => onBookmark(post.id)}
-          className={cn(
-            "text-white/60 hover:text-white",
-            post.isBookmarked && "text-cyan-400 hover:text-cyan-400"
-          )}
-        >
-          <Bookmark
-            className={cn("h-4 w-4", post.isBookmarked && "fill-current")}
-          />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-white/60 hover:text-white"
-        >
-          <Flag className="h-4 w-4" />
-        </Button>
-      </div>
+
+      {/* Comments Section */}
+      {showComments && (
+        <div className="border-t border-white/10 p-6 space-y-4">
+          {/* Add Comment */}
+          <div className="flex gap-3">
+            <Avatar className="h-8 w-8 border border-white/20">
+              <AvatarFallback className="bg-white/10 text-xs">
+                CU
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 space-y-2">
+              <Textarea
+                placeholder="Write a comment..."
+                value={commentText}
+                onChange={(e) => {
+                  // This needs to be handled by parent component
+                }}
+                className="bg-white/5 border-white/10 text-white placeholder:text-white/50 min-h-[80px] resize-none"
+              />
+              <Button
+                size="sm"
+                onClick={() => onAddComment(post.id)}
+                className="bg-cyan-500 hover:bg-cyan-600 text-white"
+                disabled={!commentText.trim()}
+              >
+                <Reply className="h-4 w-4 mr-2" />
+                Comment
+              </Button>
+            </div>
+          </div>
+
+          {/* Comments List */}
+          <div className="space-y-4">
+            {post.comments.map((comment) => (
+              <div key={comment.id} className="flex gap-3">
+                <Avatar className="h-8 w-8 border border-white/20">
+                  <AvatarImage src={comment.author.avatar} />
+                  <AvatarFallback className="bg-white/10 text-xs">
+                    {comment.author.isAnonymous
+                      ? "?"
+                      : comment.author.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 space-y-1">
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="font-medium text-white/90">
+                      {comment.author.isAnonymous
+                        ? "Anonymous"
+                        : comment.author.name}
+                    </span>
+                    <span className="text-white/40 text-xs">
+                      {formatDistanceToNow(comment.timestamp, {
+                        addSuffix: true,
+                      })}
+                    </span>
+                  </div>
+                  <p className="text-white/70 text-sm">{comment.content}</p>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-white/40 hover:text-white h-6 text-xs px-2"
+                    >
+                      <Heart className="h-3 w-3 mr-1" />
+                      {comment.likes}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-white/40 hover:text-white h-6 text-xs px-2"
+                    >
+                      <Reply className="h-3 w-3 mr-1" />
+                      Reply
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   </InteractiveGlassCard>
 );
