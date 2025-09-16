@@ -2,19 +2,11 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react'
 
-// Define supported languages
+// Define supported languages - only English, Hindi, and Kashmiri
 export const languages = [
   { code: 'en', name: 'English', flag: '🇺🇸' },
   { code: 'hi', name: 'हिंदी', flag: '🇮🇳' },
   { code: 'ks', name: 'کٲشُر', flag: '🇮🇳' }, // Kashmiri
-  { code: 'bn', name: 'বাংলা', flag: '🇧🇩' },
-  { code: 'ta', name: 'தமிழ்', flag: '🇮🇳' },
-  { code: 'te', name: 'తెలుగు', flag: '🇮🇳' },
-  { code: 'mr', name: 'मराठी', flag: '🇮🇳' },
-  { code: 'gu', name: 'ગુજરાતી', flag: '🇮🇳' },
-  { code: 'kn', name: 'ಕನ್ನಡ', flag: '🇮🇳' },
-  { code: 'ml', name: 'മലയാളം', flag: '🇮🇳' },
-  { code: 'pa', name: 'ਪੰਜਾਬੀ', flag: '🇮🇳' },
 ]
 
 // Translation dictionary

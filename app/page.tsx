@@ -32,7 +32,6 @@ import {
 } from "@tabler/icons-react";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { useLanguage } from "@/contexts/language-context";
-import { useTheme } from "next-themes";
 
 const pacifico = Pacifico({
   subsets: ["latin"],
@@ -172,14 +171,6 @@ export default function HomePage() {
             </Link>
             <div className="flex items-center gap-4">
               <LanguageSwitcher />
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className="border-primary/30 text-foreground hover:bg-primary/10 hover:border-primary/50 transition-all duration-300 px-3 py-2"
-              >
-                {theme === "dark" ? "🌙" : "☀️"}
-              </Button>
               <Button
                 variant="outline"
                 asChild
