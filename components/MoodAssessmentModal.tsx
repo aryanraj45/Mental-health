@@ -6,6 +6,69 @@ import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { X, Bot, Users, Video, Music, BookOpen, Smile, Sparkles, TrendingUp, AlertCircle, ShieldAlert, ThumbsUp } from 'lucide-react'; 
 import { cn } from '@/lib/utils';
 
+// ============================================================================
+// --- PARENT COMPONENT WITH THE NEW LOGIC ---
+// This is an example of how you would use the modal on a dashboard page.
+// ============================================================================
+
+export default function DashboardPage() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  // Replace "Jane" with the actual user's name from your authentication state
+  const userName = "Jane"; 
+
+  // This effect runs only once when the page loads
+  useEffect(() => {
+    // Check if the flag to show the modal exists in session storage
+    const shouldShowModal = sessionStorage.getItem('showMoodModal') === 'true';
+
+    if (shouldShowModal) {
+      setIsModalOpen(true);
+    }
+  }, []); // The empty dependency array [] ensures this runs only once on mount
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    // IMPORTANT: Remove the flag from session storage when the modal is closed
+    // This prevents it from showing again on the next refresh.
+    sessionStorage.removeItem('showMoodModal');
+  };
+  
+  // A helper function to simulate logging in and setting the flag.
+  // In your real app, you would call sessionStorage.setItem after a successful login API call.
+  const simulateLogin = () => {
+    sessionStorage.setItem('showMoodModal', 'true');
+    alert("Login simulated! The 'showMoodModal' flag is set. Refresh the page to see the modal.");
+    window.location.reload();
+  };
+
+  return (
+    <div className="p-8 bg-gray-900 min-h-screen text-white">
+      <h1 className="text-3xl font-bold">Welcome to your Dashboard, {userName}</h1>
+      <p className="mt-2 text-gray-400">This is your main application content.</p>
+
+      <button 
+        onClick={simulateLogin}
+        className="mt-8 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg"
+      >
+        Simulate Login
+      </button>
+
+      {/* The MoodAssessmentModal is rendered here with the controlled state */}
+      <MoodAssessmentModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        userName={userName}
+      />
+    </div>
+  );
+}
+
+
+// ============================================================================
+// --- YOUR ORIGINAL MoodAssessmentModal (UNCHANGED) ---
+// No changes were made to the component below.
+// ============================================================================
+
 // --- TYPE DEFINITIONS (ENHANCED) ---
 interface MoodAssessmentModalProps {
   isOpen: boolean;

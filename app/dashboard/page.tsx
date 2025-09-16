@@ -36,10 +36,11 @@ import {
 } from "framer-motion";
 import { cn } from "@/lib/utils";
 import React, { useState, useRef, useEffect, ReactNode } from "react";
-import { MoodAssessmentModal } from "@/components/MoodAssessmentModal";
+// Assuming MoodAssessmentModal is in this path
+import { MoodAssessmentModal } from "@/components/MoodAssessmentModal"; 
+import Image from 'next/image';
 
-// --- Reusable UI Components & Hooks ---
-
+// --- Reusable UI Components & Hooks (Unchanged) ---
 function ElegantShape({
   className,
   delay = 0,
@@ -166,103 +167,53 @@ const InteractiveGlassCard = ({
   );
 };
 
-// --- Appointment Type ---
-type Appointment = {
-  id: string;
-  date: string;
-  time: string;
-  counselor: string;
-  type: "video" | "phone";
-  status: "confirmed" | "completed";
-  bookingId: string;
-};
-
-// --- Page Data ---
-const upcomingAppointments: Appointment[] = [
-  { id: "1", date: "2025-09-20", time: "2:00 PM", counselor: "Dr. Priya Sharma", type: "video", status: "confirmed", bookingId: "MC-123456" },
-  { id: "2", date: "2025-09-27", time: "10:00 AM", counselor: "Dr. Rajesh Kumar", type: "phone", status: "confirmed", bookingId: "MC-789012" },
-]
-const pastAppointments: Appointment[] = [
-  { id: "3", date: "2025-09-08", time: "3:00 PM", counselor: "Dr. Anita Menon", type: "video", status: "completed", bookingId: "MC-345678" },
-]
-
-// --- Feature Components ---
-
-const MindfulMomentCard = () => {
-  const moments = [
-    {
-      title: "Quick Breather",
-      description:
-        "Take 5 deep belly breaths. Inhale for 4, hold for 4, exhale for 6.",
-      icon: Zap,
-    },
-    {
-      title: "Mindful Observation",
-      description:
-        "Notice 3 things you can see, 2 things you can hear, and 1 thing you can feel.",
-      icon: Eye,
-    },
-    {
-      title: "Positive Affirmation",
-      description:
-        "Say to yourself: 'I am capable and I am enough, just as I am.'",
-      icon: Sparkles,
-    },
-  ];
-  const [moment, setMoment] = useState(moments[0]);
-
-  useEffect(() => {
-    setMoment(moments[Math.floor(Math.random() * moments.length)]);
-  }, []);
-
-  return (
-    <InteractiveGlassCard className="lg:col-span-3">
-      <div className="flex items-center gap-4">
-        <div className="p-3 rounded-lg bg-gradient-to-br from-violet-500 to-purple-500">
-          <Sparkles className="h-6 w-6 text-white" />
-        </div>
-        <div>
-          <h3 className="font-bold text-lg text-white">Your Mindful Moment</h3>
-          <p className="text-sm text-white/60">{moment.title}</p>
-        </div>
-      </div>
-      <p className="text-white/80 mt-4 text-lg">{moment.description}</p>
-    </InteractiveGlassCard>
-  );
-};
+type Appointment = { id: string; date: string; time: string; counselor: string; type: "video" | "phone"; status: "confirmed" | "completed"; bookingId: string; };
+const upcomingAppointments: Appointment[] = [ { id: "1", date: "2025-09-20", time: "2:00 PM", counselor: "Dr. Priya Sharma", type: "video", status: "confirmed", bookingId: "MC-123456" }, { id: "2", date: "2025-09-27", time: "10:00 AM", counselor: "Dr. Rajesh Kumar", type: "phone", status: "confirmed", bookingId: "MC-789012" }, ]
+const pastAppointments: Appointment[] = [ { id: "3", date: "2025-09-08", time: "3:00 PM", counselor: "Dr. Anita Menon", type: "video", status: "completed", bookingId: "MC-345678" }, ]
+const MindfulMomentCard = () => { const moments = [ { title: "Quick Breather", description: "Take 5 deep belly breaths. Inhale for 4, hold for 4, exhale for 6.", icon: Zap, }, { title: "Mindful Observation", description: "Notice 3 things you can see, 2 things you can hear, and 1 thing you can feel.", icon: Eye, }, { title: "Positive Affirmation", description: "Say to yourself: 'I am capable and I am enough, just as I am.'", icon: Sparkles, }, ]; const [moment, setMoment] = useState(moments[0]); useEffect(() => { setMoment(moments[Math.floor(Math.random() * moments.length)]); }, []); return ( <InteractiveGlassCard className="lg:col-span-3"> <div className="flex items-center gap-4"> <div className="p-3 rounded-lg bg-gradient-to-br from-violet-500 to-purple-500"> <Sparkles className="h-6 w-6 text-white" /> </div> <div> <h3 className="font-bold text-lg text-white">Your Mindful Moment</h3> <p className="text-sm text-white/60">{moment.title}</p> </div> </div> <p className="text-white/80 mt-4 text-lg">{moment.description}</p> </InteractiveGlassCard> ); };
 
 // --- Main Dashboard Component ---
 export default function DashboardPage() {
     const [activeTab, setActiveTab] = useState("appointments");
     const [isModalOpen, setIsModalOpen] = useState(false);
 
+    // --- MODIFICATION 1: USEEFFECT NOW CHECKS SESSION STORAGE INSTEAD OF USING A TIMER ---
     useEffect(() => {
-        const timer = setTimeout(() => {
+        // Check if the flag to show the modal exists
+        const shouldShowModal = sessionStorage.getItem('showMoodModal') === 'true';
+
+        if (shouldShowModal) {
             setIsModalOpen(true);
-        }, 1000);
+        }
+    }, []); // Empty array ensures this runs only once when the component mounts
 
-        return () => clearTimeout(timer);
-    }, []); 
+    // --- MODIFICATION 2: A NEW HANDLER TO CLOSE THE MODAL AND CLEAR THE FLAG ---
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        // This is crucial: remove the flag so it doesn't show again on refresh
+        sessionStorage.removeItem('showMoodModal');
+    };
 
-  const fadeUpVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: (i: number) => ({
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.8,
-        delay: 0.2 + i * 0.15,
-        ease: [0.25, 1, 0.5, 1],
-      },
-    }),
-  };
+    const fadeUpVariants = {
+        hidden: { opacity: 0, y: 30 },
+        visible: (i: number) => ({
+            opacity: 1,
+            y: 0,
+            transition: {
+                duration: 0.8,
+                delay: 0.2 + i * 0.15,
+                ease: [0.25, 1, 0.5, 1],
+            },
+        }),
+    };
 
     return (
         <div className="relative min-h-screen w-full overflow-hidden bg-[#030303] text-white">
+            {/* --- MODIFICATION 3: THE ONCLOSE PROP IS UPDATED --- */}
             <MoodAssessmentModal 
                 isOpen={isModalOpen} 
-                onClose={() => setIsModalOpen(false)}
-                userName="there" 
+                onClose={handleCloseModal}
+                userName="there" // You can replace this with the actual user's name
             />
             
             <div className="absolute inset-0">
@@ -273,44 +224,45 @@ export default function DashboardPage() {
             <div className="absolute inset-0 bg-gradient-to-t from-[#030303] via-transparent to-[#030303]/80 pointer-events-none" />
 
             <header className="sticky top-0 z-50 border-b border-white/10 bg-black/30 backdrop-blur-xl">
-                 <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-                    <Link href="/" className="flex items-center gap-2">
-                        <Heart className="h-8 w-8 text-white" />
-                        <h1 className="text-2xl font-bold text-white">MindCare</h1>
+                <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+                    <Link href="/" className="flex items-center gap-3">
+                        <Image
+                            src="/logoo.png"
+                            alt="MindCare Logo"
+                            width={150}
+                            height={200}
+                        />
                     </Link>
                     <div className="flex items-center gap-4">
                          <Button asChild variant="outline" className="bg-transparent text-white/70 border-white/20 hover:bg-white/10 hover:text-white rounded-full">
                             <Link href="/"><Home className="mr-2 h-4 w-4" /> Home</Link>
                         </Button>
-                        
-                        {/* --- NEW PROFILE BUTTON ADDED HERE --- */}
                         <Button asChild variant="outline" className="bg-transparent text-white/70 border-white/20 hover:bg-white/10 hover:text-white rounded-full">
                             <Link href="/profile"><User className="mr-2 h-4 w-4" /> Profile</Link>
                         </Button>
-
                         <Badge className="bg-white/10 text-white/70 border border-white/20">Dashboard</Badge>
                     </div>
                 </div>
             </header>
 
-      <main className="relative z-10 container mx-auto px-4 py-8 max-w-6xl">
-        <motion.div
-          custom={0}
-          variants={fadeUpVariants}
-          initial="hidden"
-          animate="visible"
-          className="mb-12"
-        >
-          <h2 className="text-5xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60">
-            Welcome Back
-          </h2>
-          <p className="text-white/50 text-lg">
-            Your sanctuary for mental clarity and growth.
-          </p>
-        </motion.div>
+            <main className="relative z-10 container mx-auto px-4 py-8 max-w-6xl">
+                <motion.div
+                  custom={0}
+                  variants={fadeUpVariants}
+                  initial="hidden"
+                  animate="visible"
+                  className="mb-12"
+                >
+                  <h2 className="text-5xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60">
+                    Welcome Back
+                  </h2>
+                  <p className="text-white/50 text-lg">
+                    Your sanctuary for mental clarity and growth.
+                  </p>
+                </motion.div>
 
                 <div className="grid lg:grid-cols-3 gap-8">
-                     <div className="lg:col-span-3">
+                    <div className="lg:col-span-3">
                          <motion.div custom={1} variants={fadeUpVariants} initial="hidden" animate="visible">
                            <MindfulMomentCard />
                          </motion.div>
@@ -329,131 +281,47 @@ export default function DashboardPage() {
                                 </TabsTrigger>
                             </TabsList>
 
-              <TabsContent value="appointments" className="space-y-4">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-semibold">Upcoming Sessions</h3>
-                  <Button
-                    asChild
-                    size="sm"
-                    className="bg-white text-black hover:bg-white/90 rounded-full font-semibold"
-                  >
-                    <Link href="/book">Book New Session</Link>
-                  </Button>
-                </div>
-                {upcomingAppointments.length > 0 ? (
-                  upcomingAppointments.map((app) => (
-                    <AppointmentCard key={app.id} appointment={app} />
-                  ))
-                ) : (
-                  <p className="text-white/50 text-center py-8">
-                    No upcoming appointments.
-                  </p>
-                )}
-              </TabsContent>
-              <TabsContent value="history" className="space-y-4">
-                <h3 className="text-xl font-semibold mb-4">Past Sessions</h3>
-                {pastAppointments.length > 0 ? (
-                  pastAppointments.map((app) => (
-                    <AppointmentCard key={app.id} appointment={app} />
-                  ))
-                ) : (
-                  <p className="text-white/50 text-center py-8">
-                    No past appointments.
-                  </p>
-                )}
-              </TabsContent>
-            </Tabs>
-          </motion.div>
+                            <TabsContent value="appointments" className="space-y-4">
+                                <div className="flex items-center justify-between mb-4">
+                                  <h3 className="text-xl font-semibold">Upcoming Sessions</h3>
+                                  <Button asChild size="sm" className="bg-white text-black hover:bg-white/90 rounded-full font-semibold">
+                                    <Link href="/book">Book New Session</Link>
+                                  </Button>
+                                </div>
+                                {upcomingAppointments.length > 0 ? ( upcomingAppointments.map((app) => ( <AppointmentCard key={app.id} appointment={app} /> )) ) : ( <p className="text-white/50 text-center py-8"> No upcoming appointments. </p> )}
+                            </TabsContent>
+                            <TabsContent value="history" className="space-y-4">
+                                <h3 className="text-xl font-semibold mb-4">Past Sessions</h3>
+                                {pastAppointments.length > 0 ? ( pastAppointments.map((app) => ( <AppointmentCard key={app.id} appointment={app} /> )) ) : ( <p className="text-white/50 text-center py-8"> No past appointments. </p> )}
+                            </TabsContent>
+                        </Tabs>
+                    </motion.div>
 
-          <motion.div
-            custom={3}
-            variants={fadeUpVariants}
-            initial="hidden"
-            animate="visible"
-            className="space-y-8"
-          >
-            <InteractiveGlassCard>
-              <CardTitle className="text-lg text-white mb-4">
-                Quick Actions
-              </CardTitle>
-              <div className="space-y-3">
-                <ActionButton href="/chat">Start AI Chat</ActionButton>
-                <ActionButton href="/book">Book a Session</ActionButton>
-                <ActionButton href="/resources">Browse Resources</ActionButton>
-              </div>
-            </InteractiveGlassCard>
-            <InteractiveGlassCard>
-              <CardTitle className="text-lg text-white mb-2">
-                Emergency Support
-              </CardTitle>
-              <CardDescription className="text-white/50 mb-4">
-                24/7 crisis support
-              </CardDescription>
-              <div className="space-y-2 text-sm text-white/80">
-                <div>
-                  <strong>NIMHANS:</strong> 080-26995000
+                    <motion.div custom={3} variants={fadeUpVariants} initial="hidden" animate="visible" className="space-y-8">
+                        <InteractiveGlassCard>
+                            <CardTitle className="text-lg text-white mb-4">Quick Actions</CardTitle>
+                            <div className="space-y-3">
+                                <ActionButton href="/chat">Start AI Chat</ActionButton>
+                                <ActionButton href="/book">Book a Session</ActionButton>
+                                <ActionButton href="/resources">Browse Resources</ActionButton>
+                            </div>
+                        </InteractiveGlassCard>
+                        <InteractiveGlassCard>
+                            <CardTitle className="text-lg text-white mb-2">Emergency Support</CardTitle>
+                            <CardDescription className="text-white/50 mb-4">24/7 crisis support</CardDescription>
+                            <div className="space-y-2 text-sm text-white/80">
+                                <div><strong>NIMHANS:</strong> 080-26995000</div>
+                                <div><strong>Vandrevala:</strong> 9999666555</div>
+                            </div>
+                        </InteractiveGlassCard>
+                    </motion.div>
                 </div>
-                <div>
-                  <strong>Vandrevala:</strong> 9999666555
-                </div>
-              </div>
-            </InteractiveGlassCard>
-          </motion.div>
+            </main>
         </div>
-      </main>
-    </div>
-  );
+    );
 }
 
-// Reusable components
-const AppointmentCard = ({ appointment }: { appointment: Appointment }) => (
-    <InteractiveGlassCard>
-        <div className="flex items-start justify-between">
-            <div className="space-y-3">
-                <InfoItem icon={<Calendar />}>{new Date(appointment.date).toLocaleDateString("en-IN", { weekday: "long", month: "long", day: "numeric" })}</InfoItem>
-                {appointment.time && <InfoItem icon={<Clock />}>{appointment.time}</InfoItem>}
-                <InfoItem icon={<User />}>{appointment.counselor}</InfoItem>
-                <InfoItem icon={appointment.type === 'video' ? <Video/> : <Phone/>}>{appointment.type === 'video' ? 'Video Session' : 'Phone Session'}</InfoItem>
-            </div>
-            <div className="flex flex-col items-end gap-2">
-                {appointment.status === 'confirmed' ? <Badge className="bg-green-500/10 text-green-300 border border-green-500/20">Confirmed</Badge> : <Badge className="bg-white/10 text-white/70 border border-white/20">Completed</Badge>}
-            </div>
-        </div>
-    </InteractiveGlassCard>
-);
-
-const ActionButton = ({
-  href,
-  children,
-}: {
-  href: string;
-  children: React.ReactNode;
-}) => (
-  <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-    <Link
-      href={href}
-      className="flex items-center justify-between w-full p-3 bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 transition-colors duration-300"
-    >
-      <span className="font-semibold">{children}</span>
-      <ArrowRight className="h-4 w-4" />
-    </Link>
-  </motion.div>
-);
-
-const InfoItem = ({
-  icon,
-  children,
-}: {
-  icon: React.ReactNode;
-  children: React.ReactNode;
-}) => (
-  <div className="flex items-center gap-3 text-white/80">
-    <div className="bg-white/5 p-1.5 rounded-full">
-      {React.cloneElement(icon as React.ReactElement, {
-        className: "h-4 w-4 text-white/70",
-      })}
-    </div>
-    {/* --- BUG FIX APPLIED: WRAPPED CHILDREN IN SPAN --- */}
-    <span>{children}</span>
-  </div> // --- BUG FIX APPLIED: MISSING DIV TAG ADDED ---
-);
+// Reusable components (Unchanged)
+const AppointmentCard = ({ appointment }: { appointment: Appointment }) => ( <InteractiveGlassCard> <div className="flex items-start justify-between"> <div className="space-y-3"> <InfoItem icon={<Calendar />}>{new Date(appointment.date).toLocaleDateString("en-IN", { weekday: "long", month: "long", day: "numeric" })}</InfoItem> {appointment.time && <InfoItem icon={<Clock />}>{appointment.time}</InfoItem>} <InfoItem icon={<User />}>{appointment.counselor}</InfoItem> <InfoItem icon={appointment.type === 'video' ? <Video/> : <Phone/>}>{appointment.type === 'video' ? 'Video Session' : 'Phone Session'}</InfoItem> </div> <div className="flex flex-col items-end gap-2"> {appointment.status === 'confirmed' ? <Badge className="bg-green-500/10 text-green-300 border border-green-500/20">Confirmed</Badge> : <Badge className="bg-white/10 text-white/70 border border-white/20">Completed</Badge>} </div> </div> </InteractiveGlassCard> );
+const ActionButton = ({ href, children, }: { href: string; children: React.ReactNode; }) => ( <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}> <Link href={href} className="flex items-center justify-between w-full p-3 bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 transition-colors duration-300"> <span className="font-semibold">{children}</span> <ArrowRight className="h-4 w-4" /> </Link> </motion.div> );
+const InfoItem = ({ icon, children, }: { icon: React.ReactNode; children: React.ReactNode; }) => ( <div className="flex items-center gap-3 text-white/80"> <div className="bg-white/5 p-1.5 rounded-full"> {React.cloneElement(icon as React.ReactElement, { className: "h-4 w-4 text-white/70", })} </div> <span>{children}</span> </div> );
