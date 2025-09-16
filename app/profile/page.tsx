@@ -1,7 +1,7 @@
 // app/profile/page.tsx
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image"; // Import the Next.js Image component
 import { motion, useScroll, useTransform } from "framer-motion";
@@ -11,9 +11,13 @@ import { Badge } from "@/components/ui/badge";
 import { Pacifico } from "next/font/google";
 import { cn } from "@/lib/utils";
 // Import all the icons you'll need
-import { User, Edit, Brain, BookOpen, Wind, CheckCircle, Flame, Trophy, Award, Heart, Camera, Upload, X } from "lucide-react";
+import { User, Edit, Brain, BookOpen, Wind, CheckCircle, Flame, Trophy, Award, Heart, Camera, Upload, X, Check, Loader2 } from "lucide-react";
 import { Header } from "@/components/header";
 import Head from "next/head";
+import { useAuth } from "@/contexts/auth-context";
+import { Input } from "@/components/ui/input";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { useToast } from "@/hooks/use-toast";
 
 const pacifico = Pacifico({
   subsets: ["latin"],
@@ -21,8 +25,8 @@ const pacifico = Pacifico({
   variable: "--font-pacifico",
 });
 
-// --- Mock Data for the profile page ---
-const userProfile = {
+// --- Default profile data template ---
+const defaultUserProfile = {
     name: "Alex",
     profileImage: "/placeholder-user.jpg", // Default profile image
     intention: "To be present in each moment.",
@@ -151,7 +155,104 @@ function ElegantShape({
 
 // --- This is the main component for your new page ---
 export default function ProfilePage() {
-    const [profileImage, setProfileImage] = useState(userProfile.profileImage);
+    const { user } = useAuth();
+    const { toast } = useToast();
+    
+    // Load profile from localStorage or use default
+    const [profileData, setProfileData] = useState(() => {
+        // Try to get profile from localStorage
+        if (typeof window !== 'undefined') {
+            const savedProfile = localStorage.getItem('userProfile');
+            if (savedProfile) {
+                return JSON.parse(savedProfile);
+            }
+        }
+        // If not found or error, use default
+        return defaultUserProfile;
+    });
+    
+    const [profileImage, setProfileImage] = useState(profileData.profileImage);
+    const [isEditingIntention, setIsEditingIntention] = useState(false);
+    const [intentionText, setIntentionText] = useState(profileData.intention);
+    const [isEditingName, setIsEditingName] = useState(false);
+    const [nameText, setNameText] = useState(profileData.name);
+    const [isSaving, setIsSaving] = useState(false);
+    const [showSuccess, setShowSuccess] = useState(false);
+    
+    // Save profile data whenever it changes
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('userProfile', JSON.stringify(profileData));
+        }
+    }, [profileData]);
+    
+    const updateProfileData = async (field: string, value: any) => {
+        setIsSaving(true);
+        
+        try {
+            // Create an updated profile object
+            const updatedProfile = {
+                ...profileData,
+                [field]: value
+            };
+            
+            // Send update to API
+            const response = await fetch('/api/user/update', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ [field]: value }),
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                // Update local state
+                setProfileData(updatedProfile);
+                setShowSuccess(true);
+                
+                // Show success toast
+                toast({
+                    title: "Profile updated",
+                    description: `Your ${field} has been updated successfully.`,
+                });
+                
+                // Hide success message after 3 seconds
+                setTimeout(() => setShowSuccess(false), 3000);
+            } else {
+                throw new Error(result.message || 'Failed to update profile');
+            }
+        } catch (error) {
+            console.error('Error updating profile:', error);
+            toast({
+                title: "Update failed",
+                description: "There was a problem updating your profile. Please try again.",
+                variant: "destructive",
+            });
+        } finally {
+            setIsSaving(false);
+        }
+    };
+    
+    const handleIntentionSave = () => {
+        setIsEditingIntention(false);
+        if (intentionText !== profileData.intention) {
+            updateProfileData('intention', intentionText);
+        }
+    };
+    
+    const handleNameSave = () => {
+        setIsEditingName(false);
+        if (nameText !== profileData.name) {
+            updateProfileData('name', nameText);
+        }
+    };
+    
+    const handleProfileImageUpdate = (image: string) => {
+        setProfileImage(image);
+        updateProfileData('profileImage', image);
+    };
     
     const fadeUpVariants = {
         hidden: { opacity: 0, y: 30 },
@@ -164,7 +265,7 @@ export default function ProfilePage() {
             ease: "easeOut" as const,
           },
         }),
-      };
+    };
 
     return (
         <div className="relative min-h-screen w-full overflow-hidden bg-[#030303] text-white">
@@ -192,28 +293,50 @@ export default function ProfilePage() {
               />
             </div>
 
-
+            {/* Success indicator */}
+            {showSuccess && (
+                <div className="fixed top-4 right-4 z-50">
+                    <motion.div
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        className="bg-green-500/90 text-white p-3 rounded-lg shadow-lg flex items-center gap-2"
+                    >
+                        <Check className="h-5 w-5" />
+                        <span>Profile updated successfully!</span>
+                    </motion.div>
+                </div>
+            )}
             
             <main className="relative z-10 container mx-auto px-4 py-8 max-w-4xl space-y-8">
                 <motion.div initial="hidden" animate="visible" variants={fadeUpVariants} custom={0}>
                     <ProfileHeader 
-                        name={userProfile.name} 
-                        intention={userProfile.intention} 
+                        name={nameText}
+                        intention={intentionText}
                         profileImage={profileImage}
-                        onImageUpdate={setProfileImage}
+                        onImageUpdate={handleProfileImageUpdate}
+                        isEditingIntention={isEditingIntention}
+                        setIsEditingIntention={setIsEditingIntention}
+                        onIntentionChange={setIntentionText}
+                        onIntentionSave={handleIntentionSave}
+                        isEditingName={isEditingName}
+                        setIsEditingName={setIsEditingName}
+                        onNameChange={setNameText}
+                        onNameSave={handleNameSave}
+                        isSaving={isSaving}
                     />
                 </motion.div>
                 
                 <motion.div initial="hidden" animate="visible" variants={fadeUpVariants} custom={1}>
-                    <WeeklyReflection report={userProfile.weeklyReport} />
+                    <WeeklyReflection report={profileData.weeklyReport} />
                 </motion.div>
                 
                 <motion.div initial="hidden" animate="visible" variants={fadeUpVariants} custom={2}>
-                    <StreaksAndMilestones streaks={userProfile.streaks} />
+                    <StreaksAndMilestones streaks={profileData.streaks} />
                 </motion.div>
                 
                 <motion.div initial="hidden" animate="visible" variants={fadeUpVariants} custom={3}>
-                    <Suggestions recommendations={userProfile.recommendations} />
+                    <Suggestions recommendations={profileData.recommendations} />
                 </motion.div>
             </main>
 
@@ -228,16 +351,46 @@ const ProfileHeader = ({
     name, 
     intention, 
     profileImage, 
-    onImageUpdate 
+    onImageUpdate,
+    isEditingIntention,
+    setIsEditingIntention,
+    onIntentionChange,
+    onIntentionSave,
+    isEditingName,
+    setIsEditingName,
+    onNameChange,
+    onNameSave,
+    isSaving
 }: { 
     name: string; 
     intention: string; 
     profileImage: string;
     onImageUpdate: (image: string) => void;
+    isEditingIntention: boolean;
+    setIsEditingIntention: (editing: boolean) => void;
+    onIntentionChange: (intention: string) => void;
+    onIntentionSave: () => void;
+    isEditingName: boolean;
+    setIsEditingName: (editing: boolean) => void;
+    onNameChange: (name: string) => void;
+    onNameSave: () => void;
+    isSaving: boolean;
 }) => {
     const [isHovering, setIsHovering] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const intentionInputRef = useRef<HTMLInputElement>(null);
+    const nameInputRef = useRef<HTMLInputElement>(null);
+
+    // Add focus when editing is enabled
+    useEffect(() => {
+        if (isEditingIntention && intentionInputRef.current) {
+            intentionInputRef.current.focus();
+        }
+        if (isEditingName && nameInputRef.current) {
+            nameInputRef.current.focus();
+        }
+    }, [isEditingIntention, isEditingName]);
 
     const validateAndProcessFile = (file: File) => {
         // Validate file type
@@ -302,6 +455,26 @@ const ProfileHeader = ({
 
     const removeImage = () => {
         onImageUpdate("/placeholder-user.jpg");
+    };
+
+    const handleKeyDown = (
+        e: React.KeyboardEvent<HTMLInputElement>,
+        saveFunction: () => void
+    ) => {
+        if (e.key === 'Enter') {
+            saveFunction();
+        } else if (e.key === 'Escape') {
+            // For intention we cancel editing
+            if (isEditingIntention) {
+                setIsEditingIntention(false);
+                onIntentionChange(intention); // Reset to original
+            }
+            // For name we cancel editing
+            if (isEditingName) {
+                setIsEditingName(false);
+                onNameChange(name); // Reset to original
+            }
+        }
     };
 
     return (
@@ -388,13 +561,74 @@ const ProfileHeader = ({
             </div>
             
             <div>
-                <h2 className="text-4xl font-bold text-white">Good evening, {name}.</h2>
-                <p className="text-white/60 text-lg mt-1 italic flex items-center gap-2">
-                    "{intention}"
-                    <button className="text-white/40 hover:text-white transition-colors">
-                        <Edit className="h-4 w-4" />
-                    </button>
-                </p>
+                {isEditingName ? (
+                    <div className="flex items-center gap-2">
+                        <Input
+                            ref={nameInputRef}
+                            type="text"
+                            value={name}
+                            onChange={(e) => onNameChange(e.target.value)}
+                            onKeyDown={(e) => handleKeyDown(e, onNameSave)}
+                            className="text-2xl font-bold bg-white/10 border-white/20 text-white"
+                            placeholder="Your name"
+                            disabled={isSaving}
+                        />
+                        <Button 
+                            onClick={onNameSave}
+                            variant="outline"
+                            size="icon"
+                            className="border-white/20 text-white"
+                            disabled={isSaving}
+                        >
+                            {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                        </Button>
+                    </div>
+                ) : (
+                    <h2 className="text-4xl font-bold text-white flex items-center gap-2">
+                        Good evening, {name}.
+                        <button 
+                            onClick={() => setIsEditingName(true)} 
+                            className="text-white/40 hover:text-white transition-colors"
+                        >
+                            <Edit className="h-4 w-4" />
+                        </button>
+                    </h2>
+                )}
+                
+                {isEditingIntention ? (
+                    <div className="flex items-center gap-2 mt-1">
+                        <Input
+                            ref={intentionInputRef}
+                            type="text"
+                            value={intention}
+                            onChange={(e) => onIntentionChange(e.target.value)}
+                            onKeyDown={(e) => handleKeyDown(e, onIntentionSave)}
+                            className="italic bg-white/10 border-white/20 text-white"
+                            placeholder="Your intention"
+                            disabled={isSaving}
+                        />
+                        <Button 
+                            onClick={onIntentionSave}
+                            variant="outline"
+                            size="icon"
+                            className="border-white/20 text-white"
+                            disabled={isSaving}
+                        >
+                            {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                        </Button>
+                    </div>
+                ) : (
+                    <p className="text-white/60 text-lg mt-1 italic flex items-center gap-2">
+                        "{intention}"
+                        <button 
+                            onClick={() => setIsEditingIntention(true)} 
+                            className="text-white/40 hover:text-white transition-colors"
+                        >
+                            <Edit className="h-4 w-4" />
+                        </button>
+                    </p>
+                )}
+                
                 <p className="text-white/40 text-sm mt-2">
                     Click or drag an image to update your profile picture
                 </p>
@@ -403,7 +637,7 @@ const ProfileHeader = ({
     );
 };
 
-const WeeklyReflection = ({ report }: { report: typeof userProfile.weeklyReport }) => (
+const WeeklyReflection = ({ report }: { report: typeof defaultUserProfile.weeklyReport }) => (
     <Card className="glass-effect border-white/[0.08] backdrop-blur-lg">
         <CardHeader>
             <CardTitle className="text-2xl text-white">Your Weekly Reflection</CardTitle>
@@ -435,7 +669,7 @@ const WeeklyReflection = ({ report }: { report: typeof userProfile.weeklyReport 
             <div>
                  <h3 className="font-semibold text-lg text-white/90 mb-3">Themes From Your Journal</h3>
                  <div className="flex flex-wrap gap-2">
-                    {report.journalThemes.map(theme => (
+                    {report.journalThemes.map((theme: string) => (
                         <Badge key={theme} variant="secondary" className="bg-white/10 text-white/80 border-white/20 text-sm">#{theme}</Badge>
                     ))}
                  </div>
@@ -454,7 +688,7 @@ const ActivityStat = ({ icon, label, value }: { icon: React.ReactNode, label: st
     </div>
 );
 
-const StreaksAndMilestones = ({ streaks }: { streaks: typeof userProfile.streaks }) => (
+const StreaksAndMilestones = ({ streaks }: { streaks: typeof defaultUserProfile.streaks }) => (
     <Card className="glass-effect border-white/[0.08] backdrop-blur-lg">
          <CardHeader>
             <CardTitle className="text-2xl text-white">Streaks & Milestones</CardTitle>
@@ -478,7 +712,7 @@ const StreaksAndMilestones = ({ streaks }: { streaks: typeof userProfile.streaks
     </Card>
 );
 
-const Suggestions = ({ recommendations }: { recommendations: typeof userProfile.recommendations }) => (
+const Suggestions = ({ recommendations }: { recommendations: typeof defaultUserProfile.recommendations }) => (
     <div>
         <h2 className="text-2xl font-bold text-white mb-4">A Few Ideas for the Coming Week</h2>
         <div className="grid md:grid-cols-2 gap-4">
