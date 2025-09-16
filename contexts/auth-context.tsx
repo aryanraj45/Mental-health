@@ -15,6 +15,8 @@ interface AuthContextType {
   login: (userData: User) => void
   logout: () => void
   isLoading: boolean
+  isAdmin: boolean
+  isStudent: boolean
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -23,50 +25,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
+  // Load user from localStorage on mount
   useEffect(() => {
-    // Check if user is logged in (from localStorage or session)
-    const checkAuthStatus = () => {
+    const loadUser = () => {
       try {
-        // Only run on client side
         if (typeof window !== 'undefined') {
           const savedUser = localStorage.getItem('user')
           if (savedUser) {
             setUser(JSON.parse(savedUser))
           }
-          
-          // Check if we're in development environment and need to set up mock auth
-          if (process.env.NODE_ENV === 'development' && !savedUser) {
-            import('@/lib/dev-auth').then(({ setupDevAuth }) => {
-              setupDevAuth()
-              // Try again after setup
-              const devUser = localStorage.getItem('user')
-              if (devUser) {
-                setUser(JSON.parse(devUser))
-              }
-            })
-          }
         }
       } catch (error) {
-        console.error('Error checking auth status:', error)
+        console.error('Error loading user:', error)
       } finally {
         setIsLoading(false)
       }
     }
 
-    checkAuthStatus()
+    loadUser()
   }, [])
 
+  // Simple login function - just stores user in localStorage
   const login = (userData: User) => {
     setUser(userData)
     localStorage.setItem('user', JSON.stringify(userData))
   }
 
+  // Logout function - clears user from localStorage and redirects
   const logout = () => {
     setUser(null)
     localStorage.removeItem('user')
-    // Redirect to home page after logout
     window.location.href = '/'
   }
+
+  // Derived properties for role-based checks
+  const isAdmin = user?.role === 'admin'
+  const isStudent = user?.role === 'student'
 
   return (
     <AuthContext.Provider value={{
@@ -74,7 +68,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isLoggedIn: !!user,
       login,
       logout,
-      isLoading
+      isLoading,
+      isAdmin,
+      isStudent
     }}>
       {children}
     </AuthContext.Provider>

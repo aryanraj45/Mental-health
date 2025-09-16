@@ -27,14 +27,41 @@ function HeaderComponent() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const navLinks = [
-  { href: "/chat", icon: MessageCircle, label: "AI Support" },
-  { href: "/resources", icon: BookOpen, label: "Resources" },
-  { href: "/community", icon: Users, label: "Community" },
-  { href: "/book", icon: Calendar, label: "Book Session" },
-  { href: "/urgent", icon: AlertTriangle, label: "Emergency", urgent: true },
-  // { href: "/emergency", icon: Shield, label: "Emergency", special: true },
+  // Define interface for navigation links
+  interface NavLink {
+    href: string;
+    icon: React.FC<any>; // Icon component type
+    label: string;
+    urgent?: boolean;
+    special?: boolean;
+  }
+  
+  // Base navigation links - available to all users
+  const baseNavLinks: NavLink[] = [
+    { href: "/chat", icon: MessageCircle, label: "AI Support" },
+    { href: "/resources", icon: BookOpen, label: "Resources" },
+    { href: "/community", icon: Users, label: "Community" },
+    { href: "/urgent", icon: AlertTriangle, label: "Emergency", urgent: true },
   ];
+  
+  // Student-specific links
+  const studentLinks: NavLink[] = [
+    { href: "/book", icon: Calendar, label: "Book Session" },
+    ...baseNavLinks
+  ];
+  
+  // Admin-specific links
+  const adminLinks: NavLink[] = [
+    { href: "/administrator", icon: Shield, label: "Admin", special: true },
+    ...baseNavLinks
+  ];
+  
+  // Choose which links to show based on user role
+  const navLinks = user?.role === 'admin' 
+    ? adminLinks 
+    : user?.role === 'student' 
+      ? studentLinks
+      : baseNavLinks;
 
   return (
     <motion.header

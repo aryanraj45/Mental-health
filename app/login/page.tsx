@@ -123,57 +123,40 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError("");
+    
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      if (
-        email === "student@university.edu" &&
-        password === "password123" &&
-        role === "student"
-      ) {
-        // First login to set user data in localStorage
-        login({
-          id: "student1",
-          name: "Student User",
-          email: email,
-          role: "student",
-        });
-        
-        // Set the flag to show the modal on the dashboard
-        if (typeof window !== 'undefined') {
-          window.sessionStorage.setItem('showMoodModal', 'true');
-        }
-        
-        // Add a small delay before navigation to ensure state updates
-        await new Promise(resolve => setTimeout(resolve, 100));
-        
-        // Use window.location for more reliable navigation
-        window.location.href = "/dashboard";
-      } else if (
-        email === "admin@university.edu" &&
-        password === "password123" &&
-        role === "admin"
-      ) {
-        // First login to set user data in localStorage
-        login({
-          id: "admin1",
-          name: "Admin User",
-          email: email,
-          role: "admin",
-        });
-        
-        // Add a small delay before navigation to ensure state updates
-        await new Promise(resolve => setTimeout(resolve, 100));
-        
-        // Use window.location for more reliable navigation
-        window.location.href = "/administrator";
-      } else {
-        throw new Error("Invalid credentials");
+      // Simulate loading for better UX
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      // Create user data based on selected role
+      const userData = role === "student" 
+        ? {
+            id: "student1",
+            name: "Student User",
+            email: "student@university.edu",
+            role: "student" as const,
+          }
+        : {
+            id: "admin1",
+            name: "Admin User",
+            email: "admin@university.edu",
+            role: "admin" as const,
+          };
+      
+      // Use the auth context login function
+      login(userData);
+      
+      // Set the flag to show the mood modal on the dashboard if student
+      if (role === "student") {
+        sessionStorage.setItem('showMoodModal', 'true');
       }
-    } catch {
-      setError("Invalid credentials. Please use the demo credentials.");
-    } finally {
+      
+      // Redirect to the appropriate dashboard
+      router.push(role === "student" ? "/dashboard" : "/administrator");
+      
+    } catch (error) {
+      console.error("Login error:", error);
+      setError("Something went wrong. Please try again.");
       setIsLoading(false);
     }
   };
