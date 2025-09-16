@@ -142,7 +142,11 @@ function ElegantShape({
 
 // --- Main Page Component ---
 export default function HomePage() {
-  const { t } = useLanguage();
+  const { t, currentLanguage } = useLanguage();
+  
+  useEffect(() => {
+    console.log("Home page rendered with language:", currentLanguage);
+  }, [currentLanguage]);
 
   // Animation variants for Framer Motion (static, compatible)
   const fadeUpVariants = {
@@ -235,7 +239,15 @@ export default function HomePage() {
                     pacifico.className
                   )}
                 >
-                  {t('your-mental-wellness')}
+                  {t('your-mental')}
+                </span>
+                <span
+                  className={cn(
+                    "bg-clip-text text-transparent bg-gradient-to-r from-rose-300 via-white/90 to-indigo-300 ",
+                    pacifico.className
+                  )}
+                >
+                  {t('wellness-journey')}
                 </span>
               </h1>
             </motion.div>
@@ -246,7 +258,7 @@ export default function HomePage() {
               animate="visible"
             >
               <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground mb-12 leading-relaxed font-light tracking-wide max-w-2xl mx-auto">
-                {t('ai-support')}
+                {/* {t('ai-support')} */}
               </p>
             </motion.div>
 
@@ -316,10 +328,10 @@ export default function HomePage() {
                       pacifico.className
                     )}
                   >
-                    See Sukoon in Action
+                    {t('see-sukoon-action')}
                   </h2>
                   <p className="text-base md:text-lg text-white/60 mt-4">
-                    An interactive walkthrough of our platform's key features.
+                    {t('interactive-walkthrough')}
                   </p>
                 </div>
               }
@@ -343,7 +355,7 @@ export default function HomePage() {
           >
             <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 tracking-tight">
               <span className="bg-clip-text text-transparent bg-gradient-to-b from-white to-white/80">
-                Our Mission at{" "}
+                {t('our-mission-at')}{" "}
               </span>
               <span
                 className={cn(
@@ -351,15 +363,11 @@ export default function HomePage() {
                   pacifico.className
                 )}
               >
-                Sukoon
+                {t('sukoon')}
               </span>
             </h2>
             <p className="text-base sm:text-lg md:text-xl text-white/60 leading-relaxed font-light tracking-wide max-w-2xl mx-auto">
-              We believe every student deserves a confidential space to nurture
-              their mental wellbeing. Sukoon was built to break down barriers,
-              offering anonymous, AI-powered support and easy access to
-              professional help. Our mission is to ensure no student feels alone
-              on their journey.
+              {t('mission-statement')}
             </p>
           </motion.div>
         </div>

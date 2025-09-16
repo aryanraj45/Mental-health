@@ -14,7 +14,7 @@ export const translations = {
   en: {
     // Header
     'mental-wellness-platform': 'Mental Wellness Platform',
-    'ai-support': 'AI Support',
+    // 'ai-support': 'AI Support',
     'resources': 'Resources',
     'community': 'Community',
     'book-session': 'Book Session',
@@ -22,6 +22,15 @@ export const translations = {
     'dashboard': 'Dashboard',
     'login': 'Login',
     'logout': 'Logout',
+    
+    // Homepage
+    'your-mental': 'Your Mental',
+    'wellness-journey': 'Wellness Journey',
+    'see-sukoon-action': 'See Sukoon in Action',
+    'interactive-walkthrough': 'An interactive walkthrough of our platform\'s key features.',
+    'our-mission-at': 'Our Mission at',
+    'sukoon': 'Sukoon',
+    'mission-statement': 'We believe every student deserves a confidential space to nurture their mental wellbeing. Sukoon was built to break down barriers, offering anonymous, AI-powered support and easy access to professional help. Our mission is to ensure no student feels alone on their journey.',
     // 'signup': 'Sign Up',
     
     // Common
@@ -157,6 +166,15 @@ export const translations = {
     'logout': 'लॉगआउट',
     'signup': 'साइन अप',
     
+    // Homepage
+    'your-mental': 'आपका मानसिक',
+    'wellness-journey': 'कल्याण यात्रा',
+    'see-sukoon-action': 'सुकून को कार्य करते देखें',
+    'interactive-walkthrough': 'हमारे प्लेटफॉर्म की मुख्य विशेषताओं का इंटरैक्टिव वॉकथ्रू',
+    'our-mission-at': 'हमारा मिशन',
+    'sukoon': 'सुकून',
+    'mission-statement': 'हम मानते हैं कि हर विद्यार्थी अपने मानसिक स्वास्थ्य को बढ़ावा देने के लिए एक गोपनीय स्थान का हकदार है। सुकून को बाधाओं को तोड़ने के लिए बनाया गया था, जो गुमनाम, AI-संचालित समर्थन और पेशेवर मदद तक आसान पहुंच प्रदान करता है। हमारा मिशन यह सुनिश्चित करना है कि कोई भी विद्यार्थी अपनी यात्रा में अकेला महसूस न करे।',
+    
     // Common
     'loading': 'लोड हो रहा है...',
     'save': 'सहेजें',
@@ -290,6 +308,15 @@ export const translations = {
     'logout': 'لاگ آؤٹ',
     'signup': 'سائن اپ',
     
+    // Homepage
+    'your-mental': 'آپ کی ذہنی',
+    'wellness-journey': 'صحت کا سفر',
+    'see-sukoon-action': 'سکون کو عمل میں دیکھیں',
+    'interactive-walkthrough': 'ہمارے پلیٹ فارم کی اہم خصوصیات کا تعاملی جائزہ',
+    'our-mission-at': 'ہمارا مقصد',
+    'sukoon': 'سکون',
+    'mission-statement': 'ہم مانتے ہیں کہ ہر طالب علم اپنی ذہنی صحت کی پرورش کے لیے ایک خفیہ جگہ کا حقدار ہے۔ سکون کو رکاوٹوں کو توڑنے کے لیے بنایا گیا تھا، جو گمنام، AI طاقت سے چلنے والی مدد اور پیشہ ورانہ مدد تک آسان رسائی فراہم کرتا ہے۔ ہمارا مقصد یہ یقینی بنانا ہے کہ کوئی بھی طالب علم اپنے سفر میں اکیلا محسوس نہ کرے۔',
+    
     // Common
     'loading': 'لوڈ ہو رہا ہے...',
     'save': 'محفوظ کریں',
@@ -391,7 +418,7 @@ export const translations = {
   }
 }
 
-type Language = keyof typeof translations
+type Language = 'en' | 'hi' | 'ks'
 type TranslationKey = keyof typeof translations.en
 
 interface LanguageContextType {
@@ -405,37 +432,64 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [currentLanguage, setCurrentLanguage] = useState<Language>('en')
+  const [isInitialized, setIsInitialized] = useState(false)
 
+  // Load saved language preference on initial render only
   useEffect(() => {
-    // Load saved language from localStorage
+    console.log("LanguageProvider mounted - checking localStorage")
     if (typeof window !== 'undefined') {
-      const savedLanguage = localStorage.getItem('preferred-language') as Language
-      if (savedLanguage && translations[savedLanguage]) {
-        setCurrentLanguage(savedLanguage)
+      try {
+        const savedLanguage = localStorage.getItem('preferred-language')
+        console.log("Found saved language:", savedLanguage)
+        
+        // Check if it's one of our supported languages
+        if (savedLanguage && ['en', 'hi', 'ks'].includes(savedLanguage)) {
+          console.log("Setting language from localStorage:", savedLanguage)
+          setCurrentLanguage(savedLanguage as Language)
+        }
+      } catch (error) {
+        console.error("Error loading language preference:", error)
+      } finally {
+        setIsInitialized(true)
       }
     }
   }, [])
 
   const setLanguage = (language: Language) => {
+    console.log("Setting language to:", language)
+    // Update the state
     setCurrentLanguage(language)
-    if (typeof window !== 'undefined') {
+    
+    // Save to localStorage
+    try {
       localStorage.setItem('preferred-language', language)
+      console.log("Language saved to localStorage:", language)
+    } catch (error) {
+      console.error("Error saving language preference:", error)
     }
   }
 
   const t = (key: TranslationKey): string => {
-    const languageTranslations = translations[currentLanguage]
-    const fallbackTranslations = translations.en
-    
-    if (languageTranslations && key in languageTranslations) {
-      return languageTranslations[key]
+    try {
+      // First check if we have the key in the current language
+      if (currentLanguage in translations) {
+        const translatedValue = (translations[currentLanguage] as any)[key]
+        if (translatedValue) {
+          return translatedValue
+        }
+      }
+      
+      // Fall back to English if translation not found
+      if (key in translations.en) {
+        return translations.en[key]
+      }
+      
+      // Return the key itself as a last resort
+      return key as string
+    } catch (error) {
+      console.error("Translation error for key:", key, error)
+      return key as string
     }
-    
-    if (key in fallbackTranslations) {
-      return fallbackTranslations[key]
-    }
-    
-    return key
   }
 
   return (

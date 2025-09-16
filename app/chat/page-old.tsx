@@ -214,7 +214,7 @@ export default function ChatPage() {
           <div className="flex items-center gap-2">
             <Badge variant="secondary" className="flex items-center gap-1">
               <Bot className="h-4 w-4" />
-              AI Support
+              {/* AI Support */}
             </Badge>
           </div>
         </div>
