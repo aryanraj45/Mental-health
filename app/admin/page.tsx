@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, FC } from "react"
+import { useState, useMemo, useEffect, useRef, ReactNode } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -13,17 +13,106 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
-import { Header } from "@/components/header"
-import {
+import { motion, useMotionValue, useSpring, useTransform, AnimatePresence } from "framer-motion"
+import { cn } from "@/lib/utils"
+import React from "react"
+// import Link from "next/link"; // This is the correct import for your Next.js project.
+const Link = "a" as any; // Using `a` tag for preview compatibility.
+import { 
   Area, AreaChart, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Line, LineChart
 } from "recharts"
 import { 
   Shield, Users, AlertTriangle, TrendingUp, Flag, Brain, Heart, Search, Download,
-  Eye, MessageSquare, UserCheck, Phone, Mail, CheckCircle, Zap, FileText, Calendar, Bot, BookOpen
+  Eye, MessageSquare, UserCheck, Phone, Mail, CheckCircle, Zap, FileText, Calendar, Bot, BookOpen, ArrowRight, Home
 } from "lucide-react"
 
-// --- Interfaces & Types ---
+// --- Reusable UI Components & Hooks ---
+
+const useMouseParallax = (ref: React.RefObject<HTMLDivElement>, strength: number) => {
+    const x = useMotionValue(0);
+    const y = useMotionValue(0);
+    useEffect(() => {
+        const handleMouseMove = (event: MouseEvent) => {
+            if (!ref.current) return;
+            const { clientX, clientY } = event;
+            const { innerWidth, innerHeight } = window;
+            const moveX = (clientX - innerWidth / 2) / (innerWidth / 2);
+            const moveY = (clientY - innerHeight / 2) / (innerHeight / 2);
+            x.set(moveX * strength);
+            y.set(moveY * strength);
+        };
+        window.addEventListener("mousemove", handleMouseMove);
+        return () => window.removeEventListener("mousemove", handleMouseMove);
+    }, [ref, strength, x, y]);
+    const springX = useSpring(x, { stiffness: 300, damping: 30, restDelta: 0.001 });
+    const springY = useSpring(y, { stiffness: 300, damping: 30, restDelta: 0.001 });
+    return { x: springX, y: springY };
+};
+
+function ElegantShape({ className, delay = 0, gradient = "from-white/[0.08]", parallaxStrength = 50 }: { className?: string; delay?: number; gradient?: string; parallaxStrength?: number; }) {
+  const ref = useRef(null);
+  const { x, y } = useMouseParallax(ref, parallaxStrength);
+  const width = Math.random() * 400 + 200;
+  const height = Math.random() * 100 + 50;
+  const rotate = Math.random() * 360;
+
+  return (
+    <motion.div ref={ref} initial={{ opacity: 0, scale: 0.5, rotate: rotate - 15 }} animate={{ opacity: 1, scale: 1, rotate: rotate }} transition={{ duration: 1.5, delay, ease: [0.16, 1, 0.3, 1] }} className={cn("absolute", className)} style={{ x, y }}>
+      <motion.div animate={{ scale: [1, 1.05, 1] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }} style={{ width, height }} className="relative">
+        <div className={cn("absolute inset-0 rounded-full", "bg-gradient-to-r to-transparent", gradient, "backdrop-blur-md border-2 border-white/[0.1]", "shadow-[0_8px_32px_0_rgba(0,0,0,0.3)]")} />
+        <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1),transparent_60%)]" />
+      </motion.div>
+    </motion.div>
+  );
+}
+
+const InteractiveGlassCard = ({ children, className }: { children: React.ReactNode; className?: string }) => {
+    const ref = useRef<HTMLDivElement>(null);
+    const x = useMotionValue(0);
+    const y = useMotionValue(0);
+    const xSpring = useSpring(x, { stiffness: 150, damping: 20 });
+    const ySpring = useSpring(y, { stiffness: 150, damping: 20 });
+    const rotateX = useTransform(ySpring, [-0.5, 0.5], ["7deg", "-7deg"]);
+    const rotateY = useTransform(xSpring, [-0.5, 0.5], ["-7deg", "7deg"]);
+
+    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+        const rect = ref.current?.getBoundingClientRect();
+        if (!rect) return;
+        const width = rect.width;
+        const height = rect.height;
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+        x.set((mouseX / width) - 0.5);
+        y.set((mouseY / height) - 0.5);
+    };
+    const handleMouseLeave = () => { x.set(0); y.set(0); };
+
+    return (
+        <motion.div ref={ref} onMouseMove={handleMouseMove} onMouseLeave={handleMouseLeave} style={{ rotateX, rotateY, transformStyle: "preserve-3d" }} className={cn("bg-white/[0.03] border border-white/[0.08] backdrop-blur-lg p-6 rounded-xl relative", className)}>
+             <div style={{ transform: "translateZ(30px)" }}>{children}</div>
+        </motion.div>
+    );
+};
+
+const Header = () => (
+    <header className="sticky top-0 z-50 border-b border-white/10 bg-black/30 backdrop-blur-xl">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+            <Link href="/" className="flex items-center gap-2">
+                <Heart className="h-8 w-8 text-white" />
+                <h1 className="text-2xl font-bold text-white">MindCare Admin</h1>
+            </Link>
+            <div className="flex items-center gap-4">
+                 <Button asChild variant="outline" className="bg-transparent text-white/70 border-white/20 hover:bg-white/10 hover:text-white rounded-full">
+                    <Link href="/"><Home className="mr-2 h-4 w-4" /> Home</Link>
+                </Button>
+                <Badge className="bg-white/10 text-white/70 border border-white/20">Admin Panel</Badge>
+            </div>
+        </div>
+    </header>
+);
+
+// --- Interfaces, Types, and Mock Data ---
 type RiskLevel = "low" | "medium" | "high" | "critical";
 interface Student {
   id: string; name: string; email: string; rollNo: string; course: string; year: number; avatar: string;
@@ -39,35 +128,23 @@ interface CrisisAlert {
   severity: "high" | "critical"; status: "new" | "reviewing" | "resolved"; assignedTo?: string;
 }
 
-// --- Enhanced Mock Data ---
 const mockStudents: Student[] = [
-  { id: "1", name: "Aarav Sharma", email: "aarav.sharma@college.edu", rollNo: "CS2021001", course: "Computer Science", year: 3, avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=Aarav", lastActive: new Date(Date.now() - 2 * 36e5), mentalHealthScore: 75, riskLevel: "medium", sessionsCompleted: 12, moodTrend: "improving", emergencyAlerts: 0, lastAssessment: new Date(Date.now() - 24 * 36e5), radarData: [{ subject: 'Academic', value: 80 }, { subject: 'Social', value: 70 }, { subject: 'Emotional', value: 65 }, { subject: 'Coping', value: 75 }, { subject: 'Sleep', value: 85 }], scoreHistory: [{ month: 'Jan', score: 60 }, { month: 'Feb', score: 65 }, { month: 'Mar', score: 72 }, { month: 'Apr', score: 75 }], activityLog: [{ time: new Date(Date.now() - 2 * 36e5), activity: "Completed a session with Dr. Sharma", icon: UserCheck }, { time: new Date(Date.now() - 48 * 36e5), activity: "Viewed resource: 'Stress Management'", icon: BookOpen }], adminNotes: "Shows consistent improvement after weekly sessions. Responds well to CBT techniques." },
-  { id: "2", name: "Priya Patel", email: "priya.patel@college.edu", rollNo: "EE2020045", course: "Electrical Engineering", year: 4, avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=Priya", lastActive: new Date(Date.now() - 5 * 6e4), mentalHealthScore: 45, riskLevel: "high", sessionsCompleted: 8, moodTrend: "declining", emergencyAlerts: 1, lastAssessment: new Date(Date.now() - 3 * 36e5), radarData: [{ subject: 'Academic', value: 40 }, { subject: 'Social', value: 55 }, { subject: 'Emotional', value: 30 }, { subject: 'Coping', value: 50 }, { subject: 'Sleep', value: 60 }], scoreHistory: [{ month: 'Jan', score: 55 }, { month: 'Feb', score: 50 }, { month: 'Mar', score: 48 }, { month: 'Apr', score: 45 }], activityLog: [{ time: new Date(Date.now() - 5 * 6e4), activity: "Started AI Chat session", icon: Bot }, { time: new Date(Date.now() - 72 * 36e5), activity: "Crisis keyword detected in chat", icon: AlertTriangle }], adminNotes: "High academic pressure reported. Declining scores correlate with exam periods. Recommend proactive outreach before mid-terms." },
-  { id: "3", name: "Rohan Mehra", email: "rohan.mehra@college.edu", rollNo: "CE2022015", course: "Civil Engineering", year: 2, avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=Rohan", lastActive: new Date(Date.now() - 26 * 36e5), mentalHealthScore: 92, riskLevel: "low", sessionsCompleted: 20, moodTrend: "stable", emergencyAlerts: 0, lastAssessment: new Date(Date.now() - 10 * 24 * 36e5), radarData: [{ subject: 'Academic', value: 95 }, { subject: 'Social', value: 88 }, { subject: 'Emotional', value: 90 }, { subject: 'Coping', value: 92 }, { subject: 'Sleep', value: 85 }], scoreHistory: [{ month: 'Jan', score: 80 }, { month: 'Feb', score: 85 }, { month: 'Mar', score: 88 }, { month: 'Apr', score: 92 }], activityLog: [{ time: new Date(Date.now() - 26 * 36e5), activity: "Joined 'Exam Stress' community group", icon: Users }], adminNotes: "Highly engaged student. Utilizes community features effectively. No concerns at present." },
-  { id: "4", name: "Ananya Singh", email: "ananya.singh@college.edu", rollNo: "BT2021007", course: "Biotechnology", year: 3, avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=Ananya", lastActive: new Date(Date.now() - 15 * 6e4), mentalHealthScore: 25, riskLevel: "critical", sessionsCompleted: 3, moodTrend: "declining", emergencyAlerts: 3, lastAssessment: new Date(Date.now() - 1 * 36e5), radarData: [{ subject: 'Academic', value: 30 }, { subject: 'Social', value: 25 }, { subject: 'Emotional', value: 15 }, { subject: 'Coping', value: 20 }, { subject: 'Sleep', value: 40 }], scoreHistory: [{ month: 'Jan', score: 40 }, { month: 'Feb', score: 35 }, { month: 'Mar', score: 30 }, { month: 'Apr', score: 25 }], activityLog: [{ time: new Date(Date.now() - 15 * 6e4), activity: "Flagged community post", icon: Flag }, { time: new Date(Date.now() - 25 * 36e5), activity: "Emergency alert triggered", icon: AlertTriangle }], adminNotes: "CRITICAL: Multiple alerts triggered. Assigned to Dr. Sharma for immediate intervention on 14/09/2025. Followed up via WhatsApp." },
-  { id: "5", name: "Vikram Reddy", email: "vikram.reddy@college.edu", rollNo: "ME2021050", course: "Mechanical Engineering", year: 3, avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=Vikram", lastActive: new Date(Date.now() - 3 * 24 * 36e5), mentalHealthScore: 68, riskLevel: "medium", sessionsCompleted: 5, moodTrend: "stable", emergencyAlerts: 0, lastAssessment: new Date(Date.now() - 5 * 24 * 36e5), radarData: [{ subject: 'Academic', value: 60 }, { subject: 'Social', value: 75 }, { subject: 'Emotional', value: 65 }, { subject: 'Coping', value: 70 }, { subject: 'Sleep', value: 72 }], scoreHistory: [{ month: 'Jan', score: 65 }, { month: 'Feb', score: 68 }, { month: 'Mar', score: 67 }, { month: 'Apr', score: 68 }], activityLog: [{ time: new Date(Date.now() - 3 * 24 * 36e5), activity: "Accessed 'Dealing with Social Anxiety' article", icon: BookOpen }], adminNotes: "Student is making slow but steady progress. Social anxiety seems to be the primary concern." },
+  { id: "1", name: "Aarav Sharma", email: "aarav.sharma@college.edu", rollNo: "CS2021001", course: "Computer Science", year: 3, avatar: "https://placehold.co/128x128/e2e8f0/64748b?text=AS", lastActive: new Date(Date.now() - 2 * 36e5), mentalHealthScore: 75, riskLevel: "medium", sessionsCompleted: 12, moodTrend: "improving", emergencyAlerts: 0, lastAssessment: new Date(Date.now() - 24 * 36e5), radarData: [{ subject: 'Academic', value: 80 }, { subject: 'Social', value: 70 }, { subject: 'Emotional', value: 65 }, { subject: 'Coping', value: 75 }, { subject: 'Sleep', value: 85 }], scoreHistory: [{ month: 'Jan', score: 60 }, { month: 'Feb', score: 65 }, { month: 'Mar', score: 72 }, { month: 'Apr', score: 75 }], activityLog: [{ time: new Date(Date.now() - 2 * 36e5), activity: "Completed a session with Dr. Sharma", icon: UserCheck }, { time: new Date(Date.now() - 48 * 36e5), activity: "Viewed resource: 'Stress Management'", icon: BookOpen }], adminNotes: "Shows consistent improvement after weekly sessions. Responds well to CBT techniques." },
+  { id: "2", name: "Priya Patel", email: "priya.patel@college.edu", rollNo: "EE2020045", course: "Electrical Engineering", year: 4, avatar: "https://placehold.co/128x128/e2e8f0/64748b?text=PP", lastActive: new Date(Date.now() - 5 * 6e4), mentalHealthScore: 45, riskLevel: "high", sessionsCompleted: 8, moodTrend: "declining", emergencyAlerts: 1, lastAssessment: new Date(Date.now() - 3 * 36e5), radarData: [{ subject: 'Academic', value: 40 }, { subject: 'Social', value: 55 }, { subject: 'Emotional', value: 30 }, { subject: 'Coping', value: 50 }, { subject: 'Sleep', value: 60 }], scoreHistory: [{ month: 'Jan', score: 55 }, { month: 'Feb', score: 50 }, { month: 'Mar', score: 48 }, { month: 'Apr', score: 45 }], activityLog: [{ time: new Date(Date.now() - 5 * 6e4), activity: "Started AI Chat session", icon: Bot }, { time: new Date(Date.now() - 72 * 36e5), activity: "Crisis keyword detected in chat", icon: AlertTriangle }], adminNotes: "High academic pressure reported. Declining scores correlate with exam periods. Recommend proactive outreach before mid-terms." },
 ];
 const mockCrisisAlerts: CrisisAlert[] = [
   { id: "1", studentId: "4", studentName: "Ananya Singh", message: "Student mentioned thoughts of self-harm during AI chat session.", timestamp: new Date(Date.now() - 30 * 6e4), severity: "critical", status: "new" },
   { id: "2", studentId: "2", studentName: "Priya Patel", message: "Multiple crisis keywords detected in chat messages.", timestamp: new Date(Date.now() - 2 * 36e5), severity: "high", status: "reviewing", assignedTo: "Dr. Sharma" },
-  { id: "3", studentId: "1", studentName: "Aarav Sharma", message: "User expressed feelings of hopelessness in journal entry.", timestamp: new Date(Date.now() - 5 * 36e5), severity: "high", status: "resolved", assignedTo: "Dr. Kumar" }
 ];
-const moderationQueue = [
-    { id: "1", type: "Community Post", content: "I don't think I can handle this anymore...", author: "Anonymous", timestamp: new Date(Date.now() - 15 * 6e4), flagReason: "Concerning content", priority: "high" },
-    { id: "2", type: "Chat Message", content: "This platform is useless and no one cares.", author: "Anonymous", timestamp: new Date(Date.now() - 2 * 36e5), flagReason: "Negative Sentiment", priority: "medium" }
-];
-const mentalHealthTrends = [{ month: "Jan", anxiety: 65, depression: 45 }, { month: "Feb", anxiety: 72, depression: 48 }, { month: "Mar", anxiety: 68, depression: 52 }, { month: "Apr", anxiety: 75, depression: 49 }, { month: "May", anxiety: 71, depression: 46 }, { month: "Jun", anxiety: 69, depression: 44 }];
 const riskDistributionData = [{ name: 'Low Risk', value: 750, fill: '#22c55e' }, { name: 'Medium Risk', value: 342, fill: '#f59e0b' }, { name: 'High Risk', value: 125, fill: '#ef4444' }, { name: 'Critical Risk', value: 30, fill: '#b91c1c' }];
-const interventionSuccessData = [{ name: 'AI Chat', successRate: 82 }, { name: 'Counseling', successRate: 94 }, { name: 'Peer Support', successRate: 78 }, { name: 'Resources', successRate: 65 }];
 
-// --- Custom Tooltip Component for Charts ---
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="rounded-lg border bg-background/90 p-2 text-sm shadow-lg backdrop-blur-sm">
-        <p className="font-bold">{label}</p>
+      <div className="rounded-lg border border-white/20 bg-black/50 p-2 text-sm shadow-lg backdrop-blur-lg">
+        <p className="font-bold text-white">{label}</p>
         {payload.map((entry: any, index: number) => (
-          <p key={`item-${index}`} style={{ color: entry.color || entry.stroke }}>
+          <p key={`item-${index}`} style={{ color: entry.color || entry.stroke || entry.fill }}>
             {`${entry.name}: ${entry.value}`}
           </p>
         ))}
@@ -81,102 +158,140 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 export default function AdminDashboard() {
   const [students, setStudents] = useState<Student[]>(mockStudents);
   const [crisisAlerts, setCrisisAlerts] = useState<CrisisAlert[]>(mockCrisisAlerts);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [riskFilter, setRiskFilter] = useState<string>("all");
-  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
-  const [adminNote, setAdminNote] = useState("");
+  const [activeTab, setActiveTab] = useState("overview");
 
-  const filteredStudents = useMemo(() => students.filter(student => (student.name.toLowerCase().includes(searchQuery.toLowerCase()) || student.rollNo.toLowerCase().includes(searchQuery.toLowerCase())) && (riskFilter === "all" || student.riskLevel === riskFilter)), [students, searchQuery, riskFilter]);
-  
-  const handleAlertStatusChange = (alertId: string, newStatus: "new" | "reviewing" | "resolved") => setCrisisAlerts(p => p.map(a => a.id === alertId ? { ...a, status: newStatus } : a));
+  const riskBadgeColors: Record<RiskLevel, string> = { low: "bg-green-500/10 text-green-300 border-green-500/20", medium: "bg-yellow-500/10 text-yellow-300 border-yellow-500/20", high: "bg-orange-500/10 text-orange-300 border-orange-500/20", critical: "bg-red-500/10 text-red-300 border-red-500/20" };
   const formatTimeAgo = (date: Date) => { const min = Math.floor((new Date().getTime() - date.getTime()) / 6e4); if (min < 60) return `${min}m ago`; if (min < 1440) return `${Math.floor(min / 60)}h ago`; return `${Math.floor(min / 1440)}d ago`; };
-  const getPriorityColor = (p: string) => p === "high" ? "bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-200" : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-200";
-  const riskBadgeColors: Record<RiskLevel, string> = { low: "bg-green-500/10 text-green-400 border-green-500/20", medium: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20", high: "bg-orange-500/10 text-orange-400 border-orange-500/20", critical: "bg-red-500/10 text-red-400 border-red-500/20" };
-  const riskColors: Record<RiskLevel, string> = { low: "text-green-500", medium: "text-yellow-500", high: "text-orange-500", critical: "text-red-500" };
-
-  const handleSelectStudent = (student: Student) => {
-    setSelectedStudent(student);
-    setAdminNote(student.adminNotes || "");
-  };
-
-  const handleSaveNote = () => {
-    if (!selectedStudent) return;
-    setStudents(students.map(s => s.id === selectedStudent.id ? { ...s, adminNotes: adminNote } : s));
-    alert("Note saved!");
+  
+  const fadeUpVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: (i: number = 0) => ({
+        opacity: 1,
+        y: 0,
+        transition: { duration: 0.8, delay: 0.2 + i * 0.1, ease: [0.25, 1, 0.5, 1] },
+    }),
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <header className="border-b border-white/10 bg-background/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2"><Shield className="h-8 w-8 text-primary" /><h1 className="text-2xl font-bold">MindCare Admin</h1></div>
-          <Badge variant="secondary">Admin Dashboard</Badge>
+    <div className="relative min-h-screen w-full overflow-hidden bg-[#030303] text-white">
+        <div className="absolute inset-0">
+            <ElegantShape delay={0.3} gradient="from-indigo-500/[0.15]" className="left-[-10%] top-[15%]" parallaxStrength={60} />
+            <ElegantShape delay={0.5} gradient="from-rose-500/[0.15]" className="right-[-5%] top-[70%]" parallaxStrength={40} />
         </div>
-      </header>
+        <div className="absolute inset-0 bg-gradient-to-t from-[#030303] via-transparent to-[#030303]/80 pointer-events-none" />
+
+        <Header />
       
-      <main className="container mx-auto px-4 py-8">
-        <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4"><TabsTrigger value="overview">Dashboard</TabsTrigger><TabsTrigger value="students">Student Management</TabsTrigger><TabsTrigger value="crisis">Crisis & Moderation</TabsTrigger><TabsTrigger value="reports">Reporting</TabsTrigger></TabsList>
-          
-          <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"><Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Total Students</CardTitle></CardHeader><CardContent><div className="text-3xl font-bold">1247</div></CardContent></Card><Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Active This Week</CardTitle></CardHeader><CardContent><div className="text-3xl font-bold">892</div></CardContent></Card><Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">New Crisis Alerts</CardTitle></CardHeader><CardContent><div className="text-3xl font-bold text-red-500">{mockCrisisAlerts.filter(a => a.status === 'new').length}</div></CardContent></Card><Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Avg. Health Score</CardTitle></CardHeader><CardContent><div className="text-3xl font-bold">68</div><Progress value={68} className="mt-2" /></CardContent></Card></div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <Card className="lg:col-span-2"><CardHeader><CardTitle>Mental Health Trends</CardTitle></CardHeader>
-                <CardContent><ResponsiveContainer width="100%" height={300}>
-                  <AreaChart data={mentalHealthTrends} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-                    <defs><linearGradient id="colorAnxiety" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#f59e0b" stopOpacity={0.8}/><stop offset="95%" stopColor="#f59e0b" stopOpacity={0}/></linearGradient><linearGradient id="colorDepression" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#ef4444" stopOpacity={0.8}/><stop offset="95%" stopColor="#ef4444" stopOpacity={0}/></linearGradient></defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" /><XAxis dataKey="month" /><YAxis /><Tooltip content={<CustomTooltip />} />
-                    <Area type="monotone" dataKey="anxiety" stroke="#f59e0b" name="Anxiety" fill="url(#colorAnxiety)" isAnimationActive={true} />
-                    <Area type="monotone" dataKey="depression" stroke="#ef4444" name="Depression" fill="url(#colorDepression)" isAnimationActive={true} />
-                  </AreaChart></ResponsiveContainer>
-                </CardContent>
-              </Card>
-              <Card><CardHeader><CardTitle>Risk Distribution</CardTitle></CardHeader>
-                <CardContent><ResponsiveContainer width="100%" height={300}>
-                  <PieChart><Pie data={riskDistributionData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} labelLine={false} isAnimationActive={true} label={({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => { const RADIAN = Math.PI / 180; const radius = innerRadius + (outerRadius - innerRadius) * 0.5; const x = cx + radius * Math.cos(-midAngle * RADIAN); const y = cy + radius * Math.sin(-midAngle * RADIAN); return (<text x={x} y={y} fill="white" textAnchor="middle" dominantBaseline="central">{`${(percent * 100).toFixed(0)}%`}</text>);}}><Tooltip content={<CustomTooltip />} /></Pie></PieChart>
-                </ResponsiveContainer></CardContent>
-              </Card>
-            </div>
-             <div className="grid md:grid-cols-2 gap-6">
-                <Card><CardHeader><CardTitle className="flex items-center gap-2"><Brain className="text-primary" />AI-Powered Insights</CardTitle></CardHeader><CardContent className="space-y-3"><Alert><Heart className="h-4 w-4" /><AlertDescription><strong>Positive Insight:</strong> Students using audio resources show a 15% higher mood score.</AlertDescription></Alert><Alert variant="destructive"><AlertTriangle className="h-4 w-4" /><AlertDescription><strong>High-Priority:</strong> Ananya Singh's risk score has increased by 30% in 24h. Manual review advised.</AlertDescription></Alert><Alert><TrendingUp className="h-4 w-4" /><AlertDescription><strong>Trend Alert:</strong> 25% increase in stress-related keywords from final-year Engineering students.</AlertDescription></Alert></CardContent></Card>
-                <Card><CardHeader><CardTitle>Intervention Success Rate</CardTitle></CardHeader><CardContent><ResponsiveContainer width="100%" height={300}><BarChart data={interventionSuccessData} layout="vertical" margin={{ top: 5, right: 20, left: 20, bottom: 5 }}><CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" /><XAxis type="number" domain={[0, 100]} /><YAxis type="category" dataKey="name" width={80} /><Tooltip content={<CustomTooltip />} /><Bar dataKey="successRate" name="Success Rate" fill="#8884d8" isAnimationActive={true} /></BarChart></ResponsiveContainer></CardContent></Card>
-             </div>
-          </TabsContent>
+        <main className="relative z-10 container mx-auto px-4 py-8">
+            <motion.div initial="hidden" animate="visible" variants={fadeUpVariants} className="mb-8">
+                <h1 className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60 mb-2">Admin Dashboard</h1>
+                <p className="text-white/50 text-lg">Oversee, analyze, and act on student wellbeing data.</p>
+            </motion.div>
 
-          <TabsContent value="students" className="space-y-6">
-            <div className="flex gap-4"><div className="relative flex-1"><Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" /><Input placeholder="Search students by name or roll number..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10" /></div><Select value={riskFilter} onValueChange={setRiskFilter}><SelectTrigger className="w-48"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">All Risk</SelectItem><SelectItem value="critical">Critical</SelectItem><SelectItem value="high">High</SelectItem><SelectItem value="medium">Medium</SelectItem><SelectItem value="low">Low</SelectItem></SelectContent></Select></div>
-            <Card><Table><TableHeader><TableRow><TableHead>Student</TableHead><TableHead>Risk Level</TableHead><TableHead>Health Score</TableHead><TableHead>Last Active</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader><TableBody>{filteredStudents.map((student) => (<TableRow key={student.id}><TableCell><div className="flex items-center gap-3"><Avatar><AvatarImage src={student.avatar} /><AvatarFallback>{student.name.split(' ').map(n=>n[0]).join('')}</AvatarFallback></Avatar><div><div className="font-medium">{student.name}</div><div className="text-sm text-muted-foreground">{student.rollNo}</div></div></div></TableCell><TableCell><Badge variant="outline" className={riskBadgeColors[student.riskLevel]}>{student.riskLevel}</Badge></TableCell><TableCell><span className={riskColors[student.riskLevel]}>{student.mentalHealthScore}</span></TableCell><TableCell>{formatTimeAgo(student.lastActive)}</TableCell><TableCell className="text-right"><Dialog onOpenChange={(open) => !open && setSelectedStudent(null)}><DialogTrigger asChild><Button variant="ghost" size="icon" onClick={() => handleSelectStudent(student)}><Eye className="h-4 w-4" /></Button></DialogTrigger>
-                {selectedStudent && <DialogContent className="max-w-5xl"><DialogHeader><DialogTitle>{selectedStudent.name}'s Profile</DialogTitle><DialogDescription>{selectedStudent.course} - Year {selectedStudent.year} | {selectedStudent.email}</DialogDescription></DialogHeader>
-                  <div className="grid md:grid-cols-3 gap-6 mt-4"><div className="md:col-span-2 grid grid-cols-2 gap-6">
-                      <Card><CardHeader><CardTitle>Wellbeing Analysis</CardTitle></CardHeader><CardContent><ResponsiveContainer width="100%" height={250}><RadarChart data={selectedStudent.radarData}><PolarGrid /><PolarAngleAxis dataKey="subject" /><PolarRadiusAxis angle={30} domain={[0, 100]} /><Radar name={selectedStudent.name} dataKey="value" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} isAnimationActive={true} /><Tooltip content={<CustomTooltip />} /></RadarChart></ResponsiveContainer></CardContent></Card>
-                      <Card><CardHeader><CardTitle>Score History</CardTitle></CardHeader><CardContent><ResponsiveContainer width="100%" height={250}><LineChart data={selectedStudent.scoreHistory}><CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)"/><XAxis dataKey="month" /><YAxis domain={[0, 100]} /><Tooltip content={<CustomTooltip />} /><Line type="monotone" dataKey="score" name="Score" stroke="#8884d8" isAnimationActive={true} /></LineChart></ResponsiveContainer></CardContent></Card>
-                      <Card className="col-span-2"><CardHeader><CardTitle>Admin Notes</CardTitle></CardHeader><CardContent className="space-y-2"><Textarea placeholder="Add a new note..." value={adminNote} onChange={(e) => setAdminNote(e.target.value)} rows={4} /><Button onClick={handleSaveNote}>Save Note</Button></CardContent></Card>
+            <Tabs defaultValue="overview" onValueChange={setActiveTab}>
+                <motion.div initial="hidden" animate="visible" variants={fadeUpVariants} custom={1}>
+                    <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 bg-white/[0.03] border border-white/[0.08] p-1 h-auto rounded-lg mb-8">
+                        <TabsTrigger value="overview" className="relative data-[state=active]:text-gray-900 data-[state=active]:font-bold text-white/70 h-10 transition-colors duration-300">
+                            {activeTab === "overview" && <motion.div layoutId="admin-active-tab" className="absolute inset-0 bg-white rounded-md shadow-lg" />}
+                            <span className="relative z-10">Overview</span>
+                        </TabsTrigger>
+                        <TabsTrigger value="students" className="relative data-[state=active]:text-gray-900 data-[state=active]:font-bold text-white/70 h-10 transition-colors duration-300">
+                            {activeTab === "students" && <motion.div layoutId="admin-active-tab" className="absolute inset-0 bg-white rounded-md shadow-lg" />}
+                            <span className="relative z-10">Students</span>
+                        </TabsTrigger>
+                        <TabsTrigger value="crisis" className="relative data-[state=active]:text-gray-900 data-[state=active]:font-bold text-white/70 h-10 transition-colors duration-300">
+                            {activeTab === "crisis" && <motion.div layoutId="admin-active-tab" className="absolute inset-0 bg-white rounded-md shadow-lg" />}
+                            <span className="relative z-10">Crisis Alerts</span>
+                        </TabsTrigger>
+                        <TabsTrigger value="reports" className="relative data-[state=active]:text-gray-900 data-[state=active]:font-bold text-white/70 h-10 transition-colors duration-300">
+                            {activeTab === "reports" && <motion.div layoutId="admin-active-tab" className="absolute inset-0 bg-white rounded-md shadow-lg" />}
+                            <span className="relative z-10">Reporting</span>
+                        </TabsTrigger>
+                    </TabsList>
+                </motion.div>
+                
+                <TabsContent value="overview" className="space-y-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <motion.div custom={2} variants={fadeUpVariants} initial="hidden" animate="visible"><InteractiveGlassCard><CardTitle className="text-sm font-medium text-white/70">Total Students</CardTitle><div className="text-4xl font-bold mt-2">1,247</div></InteractiveGlassCard></motion.div>
+                        <motion.div custom={3} variants={fadeUpVariants} initial="hidden" animate="visible"><InteractiveGlassCard><CardTitle className="text-sm font-medium text-white/70">Active This Week</CardTitle><div className="text-4xl font-bold mt-2">892</div></InteractiveGlassCard></motion.div>
+                        <motion.div custom={4} variants={fadeUpVariants} initial="hidden" animate="visible"><InteractiveGlassCard><CardTitle className="text-sm font-medium text-white/70">New Crisis Alerts</CardTitle><div className="text-4xl font-bold mt-2 text-red-400">{mockCrisisAlerts.filter(a => a.status === 'new').length}</div></InteractiveGlassCard></motion.div>
+                        <motion.div custom={5} variants={fadeUpVariants} initial="hidden" animate="visible"><InteractiveGlassCard><CardTitle className="text-sm font-medium text-white/70">Avg. Health Score</CardTitle><div className="text-4xl font-bold mt-2">68</div><Progress value={68} className="mt-2 h-2 bg-white/10 [&>*]:bg-cyan-400" /></InteractiveGlassCard></motion.div>
                     </div>
-                    <div><Card><CardHeader><CardTitle>Recent Activity</CardTitle></CardHeader><CardContent className="space-y-4 max-h-[500px] overflow-y-auto">{selectedStudent.activityLog.map((log, i) => (<div key={i} className="flex items-start gap-3"><log.icon className="h-4 w-4 text-muted-foreground mt-1 shrink-0" /><div className="flex-1"><p className="text-sm">{log.activity}</p><p className="text-xs text-muted-foreground">{formatTimeAgo(log.time)}</p></div></div>))}</CardContent></Card></div>
-                  </div>
-                </DialogContent>}
-              </Dialog></TableCell></TableRow>))}</TableBody>
-            </Table></Card>
-          </TabsContent>
+                     <motion.div custom={6} variants={fadeUpVariants} initial="hidden" animate="visible">
+                        <InteractiveGlassCard className="!p-8">
+                           <CardTitle>Risk Distribution</CardTitle>
+                           <ResponsiveContainer width="100%" height={300}>
+                               <PieChart><Tooltip content={<CustomTooltip />} /><Pie data={riskDistributionData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={120} labelLine={false} isAnimationActive={true} label={({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => { const RADIAN = Math.PI / 180; const radius = innerRadius + (outerRadius - innerRadius) * 0.6; const x = cx + radius * Math.cos(-midAngle * RADIAN); const y = cy + radius * Math.sin(-midAngle * RADIAN); return (<text x={x} y={y} fill="white" textAnchor="middle" dominantBaseline="central" className="font-bold">{`${(percent * 100).toFixed(0)}%`}</text>);}} /></PieChart>
+                           </ResponsiveContainer>
+                        </InteractiveGlassCard>
+                     </motion.div>
+                </TabsContent>
 
-          <TabsContent value="crisis">
-            <div className="grid md:grid-cols-2 gap-6 items-start">
-              <div><h3 className="text-xl font-semibold mb-4">Crisis Alerts Queue</h3><div className="space-y-4">{crisisAlerts.map((alert) => (<Card key={alert.id} className={alert.severity === 'critical' ? 'border-red-500/50' : 'border-orange-500/50'}><CardHeader><div className="flex justify-between items-start"><div className="flex items-center gap-3"><AlertTriangle className={alert.severity === 'critical' ? 'text-red-500' : 'text-orange-500'} /><CardTitle>{alert.studentName}</CardTitle><Badge variant={alert.severity === 'critical' ? 'destructive' : 'secondary'}>{alert.severity}</Badge></div><Badge variant="outline">{alert.status}</Badge></div><CardDescription className="pt-2 pl-8">{alert.message}</CardDescription></CardHeader><CardContent className="flex items-center justify-between"><div className="text-sm text-muted-foreground">{formatTimeAgo(alert.timestamp)}</div><div className="flex gap-2"><Select value={alert.status} onValueChange={(v: "new" | "reviewing" | "resolved") => handleAlertStatusChange(alert.id, v)}><SelectTrigger className="w-32"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="new">New</SelectItem><SelectItem value="reviewing">Reviewing</SelectItem><SelectItem value="resolved">Resolved</SelectItem></SelectContent></Select><Button variant="outline" size="sm"><MessageSquare className="h-4 w-4" /></Button></div></CardContent></Card>))}</div></div>
-              <div><h3 className="text-xl font-semibold mb-4">Content Moderation Queue</h3><div className="space-y-4">{moderationQueue.map((item) => (<Card key={item.id}><CardContent className="p-4"><div className="flex items-center gap-2 mb-2"><Badge variant="outline">{item.type}</Badge><Badge className={getPriorityColor(item.priority)}>{item.priority}</Badge><span className="text-sm text-muted-foreground">{formatTimeAgo(item.timestamp)}</span></div><p className="p-3 bg-muted/50 rounded text-sm">"{item.content}"</p><div className="flex justify-end gap-2 mt-2"><Button size="sm" variant="destructive">Remove</Button><Button size="sm" variant="outline">Approve</Button></div></CardContent></Card>))}</div></div>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="reports" className="space-y-6">
-            <Card><CardHeader><CardTitle>Generate Reports</CardTitle><CardDescription>Select report type and date range to download.</CardDescription></CardHeader>
-              <CardContent className="flex flex-col sm:flex-row gap-4 items-end">
-                <div className="flex-1 w-full"><label className="text-sm font-medium mb-2 block">Report Type</label><Select><SelectTrigger><SelectValue placeholder="Select report type..." /></SelectTrigger><SelectContent><SelectItem value="analytics">Student Analytics</SelectItem><SelectItem value="crisis">Crisis Response</SelectItem><SelectItem value="engagement">User Engagement</SelectItem></SelectContent></Select></div>
-                <div className="flex-1 w-full"><label className="text-sm font-medium mb-2 block">Date Range</label><Select><SelectTrigger><SelectValue placeholder="Select date range..." /></SelectTrigger><SelectContent><SelectItem value="7d">Last 7 Days</SelectItem><SelectItem value="30d">Last 30 Days</SelectItem><SelectItem value="90d">Last 90 Days</SelectItem></SelectContent></Select></div>
-                <Button className="w-full sm:w-auto"><Download className="mr-2 h-4 w-4" />Download Report</Button>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </main>
+                <TabsContent value="students">
+                    <motion.div custom={2} variants={fadeUpVariants} initial="hidden" animate="visible">
+                        <InteractiveGlassCard>
+                             <Table>
+                                 <TableHeader>
+                                     <TableRow className="border-b-white/10">
+                                         <TableHead className="text-white">Student</TableHead>
+                                         <TableHead className="text-white">Risk Level</TableHead>
+                                         <TableHead className="text-white">Health Score</TableHead>
+                                         <TableHead className="text-white">Last Active</TableHead>
+                                         <TableHead className="text-right text-white">Actions</TableHead>
+                                     </TableRow>
+                                 </TableHeader>
+                                 <TableBody>
+                                     {mockStudents.map(student => (
+                                         <TableRow key={student.id} className="border-b-white/10">
+                                             <TableCell>
+                                                 <div className="flex items-center gap-3">
+                                                     <Avatar><AvatarImage src={student.avatar} /><AvatarFallback>{student.name.split(' ').map(n=>n[0]).join('')}</AvatarFallback></Avatar>
+                                                     <div>
+                                                         <div className="font-medium text-white">{student.name}</div>
+                                                         <div className="text-sm text-white/50">{student.rollNo}</div>
+                                                     </div>
+                                                 </div>
+                                             </TableCell>
+                                             <TableCell><Badge variant="outline" className={cn("capitalize", riskBadgeColors[student.riskLevel])}>{student.riskLevel}</Badge></TableCell>
+                                             <TableCell><span className="font-bold">{student.mentalHealthScore}</span></TableCell>
+                                             <TableCell>{formatTimeAgo(student.lastActive)}</TableCell>
+                                             <TableCell className="text-right"><Button variant="ghost" size="icon"><Eye className="h-4 w-4" /></Button></TableCell>
+                                         </TableRow>
+                                     ))}
+                                 </TableBody>
+                             </Table>
+                        </InteractiveGlassCard>
+                    </motion.div>
+                </TabsContent>
+
+                <TabsContent value="crisis">
+                     <motion.div custom={2} variants={fadeUpVariants} initial="hidden" animate="visible">
+                        <InteractiveGlassCard>
+                            <CardTitle>Crisis Alerts Queue</CardTitle>
+                             <div className="mt-4 space-y-4">
+                                {crisisAlerts.map((alert) => (
+                                    <div key={alert.id} className={cn("p-4 rounded-lg border flex justify-between items-center", alert.severity === 'critical' ? 'bg-red-500/10 border-red-500/20' : 'bg-orange-500/10 border-orange-500/20')}>
+                                        <div>
+                                            <div className="flex items-center gap-2">
+                                                 <AlertTriangle className={cn(alert.severity === 'critical' ? 'text-red-400' : 'text-orange-400')} />
+                                                 <span className="font-bold">{alert.studentName}</span>
+                                                 <Badge variant={alert.severity === 'critical' ? 'destructive' : 'secondary'}>{alert.severity}</Badge>
+                                            </div>
+                                            <p className="text-sm text-white/70 mt-1 ml-8">{alert.message}</p>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-sm text-white/50">{formatTimeAgo(alert.timestamp)}</span>
+                                            <Button variant="outline" className="bg-transparent text-white/70 border-white/20 hover:bg-white/10 hover:text-white rounded-full">Review</Button>
+                                        </div>
+                                    </div>
+                                ))}
+                             </div>
+                        </InteractiveGlassCard>
+                     </motion.div>
+                </TabsContent>
+            </Tabs>
+        </main>
     </div>
   )
 }
+
