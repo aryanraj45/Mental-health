@@ -7,20 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Heart, Menu, MessageCircle, Calendar, BookOpen, Users, Shield, User, LogOut, AlertTriangle } from "lucide-react"
 import { cn } from "@/lib/utils"
-
-//=================================================================
-// 1. MOCK AUTH HOOK (Replace with your actual import)
-//=================================================================
-const useAuth = () => {
-    // This is a placeholder. In your app, you would import your real useAuth hook.
-    // import { useAuth } from "@/contexts/auth-context";
-    const [isLoggedIn, setIsLoggedIn] = useState(true);
-    return {
-        user: { name: "Alex" },
-        isLoggedIn,
-        logout: () => setIsLoggedIn(false),
-    };
-};
+import { useAuth } from "@/contexts/auth-context"
 
 
 //=================================================================
@@ -41,12 +28,12 @@ function HeaderComponent() {
   }, []);
 
   const navLinks = [
-    { href: "/chat", icon: MessageCircle, label: "AI Support" },
-    { href: "/resources", icon: BookOpen, label: "Resources" },
-    { href: "/community", icon: Users, label: "Community" },
-    { href: "/book", icon: Calendar, label: "Book Session" },
-    { href: "/urgent", icon: AlertTriangle, label: "Urgent", urgent: true },
-    { href: "/emergency", icon: Shield, label: "Emergency", special: true },
+  { href: "/chat", icon: MessageCircle, label: "AI Support" },
+  { href: "/resources", icon: BookOpen, label: "Resources" },
+  { href: "/community", icon: Users, label: "Community" },
+  { href: "/book", icon: Calendar, label: "Book Session" },
+  { href: "/urgent", icon: AlertTriangle, label: "Emergency", urgent: true },
+  // { href: "/emergency", icon: Shield, label: "Emergency", special: true },
   ];
 
   return (
@@ -120,7 +107,7 @@ function HeaderComponent() {
                 </motion.div>
                 <motion.div variants={navItemVariants}>
                   <Button size="sm" asChild>
-                    <Link href="/signup">Sign Up</Link>
+                    {/* <Link href="/signup">Sign Up</Link> */}
                   </Button>
                 </motion.div>
               </>
@@ -163,6 +150,59 @@ function HeaderComponent() {
                     </motion.div>
                   ))}
                 </motion.nav>
+                
+                {/* Mobile Auth Actions */}
+                <div className="pt-4 border-t space-y-2">
+                  {isLoggedIn ? (
+                    <>
+                      <motion.div variants={mobileLinkVariants}>
+                        <Link
+                          href="/dashboard"
+                          className="flex items-center gap-4 p-3 rounded-lg hover:bg-muted transition-colors"
+                          onClick={() => setIsOpen(false)}
+                        >
+                          <User className="h-5 w-5 text-primary" />
+                          <span>{user?.name || 'Dashboard'}</span>
+                        </Link>
+                      </motion.div>
+                      <motion.div variants={mobileLinkVariants}>
+                        <button
+                          onClick={() => {
+                            logout();
+                            setIsOpen(false);
+                          }}
+                          className="flex items-center gap-4 p-3 rounded-lg hover:bg-muted transition-colors w-full text-left"
+                        >
+                          <LogOut className="h-5 w-5 text-red-500" />
+                          <span className="text-red-500">Logout</span>
+                        </button>
+                      </motion.div>
+                    </>
+                  ) : (
+                    <>
+                      <motion.div variants={mobileLinkVariants}>
+                        <Link
+                          href="/login"
+                          className="flex items-center gap-4 p-3 rounded-lg hover:bg-muted transition-colors"
+                          onClick={() => setIsOpen(false)}
+                        >
+                          <User className="h-5 w-5 text-primary" />
+                          <span>Login</span>
+                        </Link>
+                      </motion.div>
+                      <motion.div variants={mobileLinkVariants}>
+                        <Link
+                          href="/signup"
+                          className="flex items-center gap-4 p-3 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+                          onClick={() => setIsOpen(false)}
+                        >
+                          <User className="h-5 w-5" />
+                          {/* <span>Sign Up</span> */}
+                        </Link>
+                      </motion.div>
+                    </>
+                  )}
+                </div>
               </div>
             </SheetContent>
           </Sheet>

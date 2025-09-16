@@ -64,6 +64,7 @@ interface NGO {
   emergency: boolean;
   availability: string;
   languages: string[];
+  distance?: number; // Optional property for calculated distance
 }
 
 interface QuickAction {
@@ -142,24 +143,6 @@ const urgentContacts: UrgentContact[] = [
 
 // NGOs with enhanced information
 const emergencyNGOs: NGO[] = [
-  {
-    id: "1",
-    name: "Samaritans Mumbai",
-    description: "Crisis support and suicide prevention services with trained volunteers",
-    phone: "+91-22-2754-6669",
-    email: "help@samaritansmumbai.org",
-    website: "https://www.samaritansmumbai.org",
-    address: "Andheri West, Mumbai, Maharashtra 400058",
-    latitude: 19.1136,
-    longitude: 72.8697,
-    services: ["Crisis Counseling", "Suicide Prevention", "Emotional Support"],
-    specialization: ["Depression", "Anxiety", "Suicidal Thoughts", "Crisis Intervention"],
-    rating: 4.8,
-    verified: true,
-    emergency: true,
-    availability: "24/7",
-    languages: ["English", "Hindi", "Marathi"],
-  },
   {
     id: "2",
     name: "The Live Love Laugh Foundation",
@@ -354,11 +337,11 @@ export default function UrgentPage() {
     <div className="min-h-screen bg-gradient-to-br from-red-900/20 via-orange-900/20 to-yellow-900/20 text-white">
       <Header />
       
-      {/* Critical Alert Banner */}
+      {/* Emergency Help Banner */}
       <div className="bg-red-600 text-white p-3 text-center">
         <div className="flex items-center justify-center gap-2">
           <AlertTriangle className="h-5 w-5 animate-pulse" />
-          <span className="font-semibold">URGENT HELP AVAILABLE 24/7</span>
+          <span className="font-semibold">EMERGENCY HELP AVAILABLE 24/7</span>
           <AlertTriangle className="h-5 w-5 animate-pulse" />
         </div>
         <p className="text-sm">If you're in immediate danger, call 911 or go to your nearest emergency room</p>
@@ -374,7 +357,7 @@ export default function UrgentPage() {
           >
             <AlertTriangle className="h-12 w-12 text-red-400 animate-pulse" />
             <h1 className="text-4xl font-bold bg-gradient-to-r from-red-400 to-orange-400 bg-clip-text text-transparent">
-              Urgent Mental Health Support
+              Emergency Help & Mental Health Support
             </h1>
             <AlertTriangle className="h-12 w-12 text-red-400 animate-pulse" />
           </motion.div>
@@ -597,128 +580,277 @@ export default function UrgentPage() {
               </div>
             )}
 
-            <div className="space-y-4">
-              {emergencyNGOs.map((ngo, index) => (
-                <motion.div
-                  key={ngo.id}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <Card className="bg-white/5 border-white/10 hover:bg-white/10 transition-all duration-300">
-                    <CardContent className="p-4">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h3 className="font-bold text-lg">{ngo.name}</h3>
-                            {ngo.verified && (
-                              <Badge className="bg-green-500/10 text-green-300 border-green-500/20">
-                                <CheckCircle className="h-3 w-3 mr-1" />
-                                Verified
-                              </Badge>
-                            )}
-                            {ngo.emergency && (
-                              <Badge className="bg-red-500/10 text-red-300 border-red-500/20">
-                                <Zap className="h-3 w-3 mr-1" />
-                                Emergency
-                              </Badge>
-                            )}
-                          </div>
-                          
-                          <p className="text-white/70 mb-3">{ngo.description}</p>
-                          
-                          <div className="grid md:grid-cols-2 gap-3 mb-3">
-                            <div>
-                              <p className="text-sm text-white/50">Specialization:</p>
-                              <div className="flex flex-wrap gap-1">
-                                {ngo.specialization.slice(0, 3).map((spec) => (
-                                  <Badge key={spec} variant="outline" className="border-white/20 text-white/70 text-xs">
-                                    {spec}
-                                  </Badge>
-                                ))}
-                              </div>
-                            </div>
-                            
-                            <div>
-                              <p className="text-sm text-white/50">Services:</p>
-                              <div className="flex flex-wrap gap-1">
-                                {ngo.services.slice(0, 2).map((service) => (
-                                  <Badge key={service} variant="outline" className="border-white/20 text-white/70 text-xs">
-                                    {service}
-                                  </Badge>
-                                ))}
-                              </div>
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center gap-4 text-sm text-white/60 mb-3">
-                            <div className="flex items-center gap-1">
-                              <Star className="h-4 w-4 text-yellow-400" />
-                              {ngo.rating}
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Clock className="h-4 w-4" />
-                              {ngo.availability}
-                            </div>
-                            <div>Languages: {ngo.languages.join(", ")}</div>
-                          </div>
-                          
-                          <div className="flex items-center gap-1 text-sm text-white/50">
-                            <MapPin className="h-4 w-4" />
-                            {ngo.address}
-                          </div>
-                        </div>
-                      </div>
+{isMapView ? (
+              // Map View
+              <div className="space-y-6">
+                {/* Interactive Google Maps */}
+                <Card className="bg-white/5 border-white/10 overflow-hidden">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <MapPin className="h-5 w-5 text-blue-400" />
+                      Mental Health Services Near You
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <div className="relative">
+                      {/* Google Maps Embed */}
+                      <iframe
+                        width="100%"
+                        height="500"
+                        style={{ border: 0 }}
+                        loading="lazy"
+                        allowFullScreen
+                        src={`https://www.google.com/maps/embed/v1/search?key=AIzaSyBjYYEiP7l0RTYZqP7Q9mJt0M0E7R0g8fU&q=mental+health+services+near+me&zoom=12`}
+                        className="rounded-lg"
+                      ></iframe>
                       
-                      <div className="flex flex-wrap gap-2">
-                        <Button
-                          onClick={() => callNumber(ngo.phone)}
-                          className="bg-blue-600 hover:bg-blue-700 text-white"
-                          size="sm"
-                        >
-                          <Phone className="h-4 w-4 mr-2" />
-                          Call Now
-                        </Button>
-                        
-                        <Button
-                          onClick={() => openDirections(ngo)}
-                          variant="outline"
-                          size="sm"
-                          className="border-white/20 text-white hover:bg-white/10"
-                        >
-                          <Navigation className="h-4 w-4 mr-2" />
-                          Directions
-                        </Button>
-                        
-                        {ngo.website && (
-                          <Button
-                            onClick={() => window.open(ngo.website, "_blank")}
-                            variant="outline"
-                            size="sm"
-                            className="border-white/20 text-white hover:bg-white/10"
-                          >
-                            <ExternalLink className="h-4 w-4 mr-2" />
-                            Website
-                          </Button>
-                        )}
-                        
-                        {ngo.email && (
-                          <Button
-                            onClick={() => window.open(`mailto:${ngo.email}`)}
-                            variant="outline"
-                            size="sm"
-                            className="border-white/20 text-white hover:bg-white/10"
-                          >
-                            <Mail className="h-4 w-4 mr-2" />
-                            Email
-                          </Button>
-                        )}
+                      {/* Map Overlay with Emergency Locations */}
+                      <div className="absolute top-4 left-4 right-4 z-10">
+                        <Card className="bg-black/80 backdrop-blur-sm border-white/20">
+                          <CardContent className="p-3">
+                            <h4 className="font-semibold text-white mb-2 flex items-center gap-2">
+                              <Zap className="h-4 w-4 text-red-400" />
+                              Emergency Locations
+                            </h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                              {emergencyNGOs.filter(ngo => ngo.emergency).slice(0, 4).map((ngo) => (
+                                <div key={ngo.id} className="flex items-center gap-2 text-white/80">
+                                  <div className="w-2 h-2 bg-red-400 rounded-full animate-pulse"></div>
+                                  <span className="truncate">{ngo.name}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Map Legend and Quick Actions */}
+                <div className="grid md:grid-cols-2 gap-6">
+                  <Card className="bg-white/5 border-white/10">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Building className="h-5 w-5 text-green-400" />
+                        Map Legend
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-3 h-3 bg-red-400 rounded-full animate-pulse"></div>
+                        <span className="text-white/80">Emergency 24/7 Services</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="w-3 h-3 bg-blue-400 rounded-full"></div>
+                        <span className="text-white/80">Mental Health Centers</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="w-3 h-3 bg-green-400 rounded-full"></div>
+                        <span className="text-white/80">NGOs & Support Groups</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="w-3 h-3 bg-purple-400 rounded-full"></div>
+                        <span className="text-white/80">Crisis Helplines</span>
                       </div>
                     </CardContent>
                   </Card>
-                </motion.div>
-              ))}
-            </div>
+
+                  <Card className="bg-white/5 border-white/10">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Navigation className="h-5 w-5 text-blue-400" />
+                        Quick Map Actions
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      <Button
+                        onClick={() => {
+                          if (navigator.geolocation) {
+                            navigator.geolocation.getCurrentPosition((position) => {
+                              const { latitude, longitude } = position.coords;
+                              window.open(`https://www.google.com/maps/search/mental+health+services/@${latitude},${longitude},12z`);
+                            });
+                          }
+                        }}
+                        className="w-full bg-blue-600 hover:bg-blue-700"
+                        size="sm"
+                      >
+                        <Navigation className="h-4 w-4 mr-2" />
+                        Find Nearest Services
+                      </Button>
+                      <Button
+                        onClick={() => window.open('https://www.google.com/maps/search/emergency+mental+health+crisis+centers', '_blank')}
+                        className="w-full bg-red-600 hover:bg-red-700"
+                        size="sm"
+                      >
+                        <AlertTriangle className="h-4 w-4 mr-2" />
+                        Emergency Centers
+                      </Button>
+                      <Button
+                        onClick={() => window.open('https://www.google.com/maps/search/suicide+prevention+centers', '_blank')}
+                        className="w-full bg-purple-600 hover:bg-purple-700"
+                        size="sm"
+                      >
+                        <Heart className="h-4 w-4 mr-2" />
+                        Crisis Prevention
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Location Cards for Map View */}
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {emergencyNGOs.map((ngo, index) => (
+                    <motion.div
+                      key={ngo.id}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: index * 0.1 }}
+                    >
+                      <Card className="bg-white/5 border-white/10 hover:bg-white/10 transition-all duration-300 h-full">
+                        <CardContent className="p-4">
+                          <div className="flex items-start gap-3 mb-3">
+                            <div className={`w-3 h-3 rounded-full mt-2 ${ngo.emergency ? 'bg-red-400 animate-pulse' : 'bg-blue-400'}`}></div>
+                            <div className="flex-1">
+                              <h3 className="font-bold text-sm mb-1">{ngo.name}</h3>
+                              <p className="text-xs text-white/60 mb-2">{ngo.address}</p>
+                              <div className="flex items-center gap-2 text-xs text-white/50 mb-2">
+                                <Star className="h-3 w-3 text-yellow-400" />
+                                {ngo.rating}
+                                <Clock className="h-3 w-3" />
+                                {ngo.availability}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex gap-1">
+                            <Button
+                              onClick={() => callNumber(ngo.phone)}
+                              size="sm"
+                              className="flex-1 bg-green-600 hover:bg-green-700 text-xs"
+                            >
+                              <Phone className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              onClick={() => openDirections(ngo)}
+                              size="sm"
+                              variant="outline"
+                              className="flex-1 border-white/20 text-white hover:bg-white/10 text-xs"
+                            >
+                              <Navigation className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              // List View
+              <div className="space-y-4">
+                {emergencyNGOs.map((ngo, index) => (
+                  <motion.div
+                    key={ngo.id}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                  >
+                    <Card className="bg-white/5 border-white/10 hover:bg-white/10 transition-all duration-300">
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <h3 className="font-bold text-lg">{ngo.name}</h3>
+                              {ngo.verified && (
+                                <Badge className="bg-green-500/10 text-green-300 border-green-500/20">
+                                  <CheckCircle className="h-3 w-3 mr-1" />
+                                  Verified
+                                </Badge>
+                              )}
+                              {ngo.emergency && (
+                                <Badge className="bg-red-500/10 text-red-300 border-red-500/20">
+                                  <Zap className="h-3 w-3 mr-1" />
+                                  Emergency
+                                </Badge>
+                              )}
+                            </div>
+                            
+                            <p className="text-white/70 mb-3">{ngo.description}</p>
+                            
+                            <div className="grid md:grid-cols-2 gap-3 mb-3">
+                              <div>
+                                <p className="text-sm text-white/50">Specialization:</p>
+                                <div className="flex flex-wrap gap-1">
+                                  {ngo.specialization.slice(0, 3).map((spec) => (
+                                    <Badge key={spec} variant="outline" className="border-white/20 text-white/70 text-xs">
+                                      {spec}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+                              
+                              <div>
+                                <p className="text-sm text-white/50">Services:</p>
+                                <div className="flex flex-wrap gap-1">
+                                  {ngo.services.slice(0, 2).map((service) => (
+                                    <Badge key={service} variant="outline" className="border-white/20 text-white/70 text-xs">
+                                      {service}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-center gap-4 text-sm text-white/60 mb-3">
+                              <div className="flex items-center gap-1">
+                                <Star className="h-4 w-4 text-yellow-400" />
+                                {ngo.rating}
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Clock className="h-4 w-4" />
+                                {ngo.availability}
+                              </div>
+                              <div>Languages: {ngo.languages.join(", ")}</div>
+                            </div>
+                            
+                            <div className="flex items-center gap-1 text-sm text-white/50">
+                              <MapPin className="h-4 w-4" />
+                              {ngo.address}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex flex-wrap gap-2">
+                          <Button
+                            onClick={() => callNumber(ngo.phone)}
+                            className="bg-blue-600 hover:bg-blue-700 text-white"
+                            size="sm"
+                          >
+                            <Phone className="h-4 w-4 mr-2" />
+                            Call Now
+                          </Button>
+                          
+                          
+                          {ngo.website && (
+                            <Button
+                              onClick={() => window.open(ngo.website, "_blank")}
+                              variant="outline"
+                              size="sm"
+                              className="border-white/20 text-white hover:bg-white/10"
+                            >
+                              <ExternalLink className="h-4 w-4 mr-2" />
+                              Website
+                            </Button>
+                          )}
+                          
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 

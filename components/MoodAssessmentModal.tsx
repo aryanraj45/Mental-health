@@ -172,7 +172,7 @@ export function MoodAssessmentModal({ isOpen, onClose, userName }: MoodAssessmen
         ],
         recommendations: [
           { icon: Smile, title: 'Mood Tracker & Journal', description: "Capture this positive moment in your journal to reflect on later.", action: 'Use Tool', href: '/tools/journal', isPrimary: true },
-          { icon: Video, title: 'Building Healthy Sleep Habits', description: "Proactively support your well-being by improving your sleep.", action: 'Watch Video', href: '/resources/video/sleep-habits' },
+          { icon: Video, title: 'Building Healthy Sleep Habits', description: "Proactively support your well-being by improving your sleep.", action: 'Watch Video', href: '/resources' },
         ],
       };
     } else if (finalScore >= 45) {
@@ -189,8 +189,8 @@ export function MoodAssessmentModal({ isOpen, onClose, userName }: MoodAssessmen
         recommendations: [
           { icon: Bot, title: 'Start AI Chat', description: "Talk through your feelings in a safe, judgment-free space.", action: 'Chat Now', href: '/chat', isPrimary: true },
           selectedContext === 'Academics & Exams' 
-            ? { icon: Music, title: 'Guided Meditation for Exam Stress', description: "Find calm and focus with this guided audio.", action: 'Listen Now', href: '/resources/audio/exam-stress' }
-            : { icon: BookOpen, title: 'Read about Stress Management', description: "Learn new techniques for managing daily stressors.", action: 'Read Article', href: '/resources/article/stress-management' }
+            ? { icon: Music, title: 'Guided Meditation for Exam Stress', description: "Find calm and focus with this guided audio.", action: 'Listen Now', href: '/resources' }
+            : { icon: BookOpen, title: 'Read about Stress Management', description: "Learn new techniques for managing daily stressors.", action: 'Read Article', href: '/resources' }
         ],
       };
     } else {
@@ -207,7 +207,7 @@ export function MoodAssessmentModal({ isOpen, onClose, userName }: MoodAssessmen
         recommendations: [
           { icon: Users, title: 'Book a Session', description: "Connect with a professional who can provide the support you need.", action: 'Book Now', href: '/book', isPrimary: true },
           { icon: Bot, title: 'Start AI Chat', description: "For immediate support, our AI is available to listen 24/7.", action: 'Chat Now', href: '/chat' },
-          { icon: Video, title: 'Breathing Exercises for Anxiety', description: "Learn techniques to manage overwhelming feelings.", action: 'Watch Video', href: '/resources/video/breathing' },
+          { icon: Video, title: 'Breathing Exercises for Anxiety', description: "Learn techniques to manage overwhelming feelings.", action: 'Watch Video', href: '/resources/' },
         ],
       };
     }

@@ -30,7 +30,7 @@ export const translations = {
     'dashboard': 'Dashboard',
     'login': 'Login',
     'logout': 'Logout',
-    'signup': 'Sign Up',
+    // 'signup': 'Sign Up',
     
     // Common
     'loading': 'Loading...',

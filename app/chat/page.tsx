@@ -14,6 +14,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Header } from "@/components/header";
+import { SuggestedPrompts } from "@/components/suggestedPrompts";
+import { MentalHealthReportChart } from "@/components/mental-health-report-chart";
 import {
   Send,
   Mic,
@@ -99,6 +101,15 @@ const contextualResponses = [
   {
     keywords: ["as-salamu alaykum", "salam", "آس-سلامو علیکم"],
     response: "Wa alaikum assalam! Tuhī chiv wuzul pǎṭhī?",
+  },
+  {
+    keywords: ["report", "progress", "how am i doing", "گزارش", "رپورٹ"],
+    response: "Of course, I can generate a summary of your recent activity. Here is your weekly wellness report:",
+    component: MentalHealthReportChart,
+  },
+  {
+    keywords: ["feel better", "improve mood", "what can i do", "کیاہ کرِ"],
+    response: "I'm sorry to hear you're feeling this way. Sometimes a small, structured activity can help. Would you like to try a quick breathing exercise or a simple grounding technique?",
   },
 ];
 
@@ -764,7 +775,8 @@ export default function SukoonChatAssistant() {
       handleSendMessage(voiceText);
       setVoiceText("");
     }
-  }, [voiceText]);
+  }, [voiceText, setVoiceText]); // Added dependencies
+
   useEffect(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop =
@@ -793,15 +805,88 @@ export default function SukoonChatAssistant() {
     window.speechSynthesis.speak(utterance);
   };
 
+  const getAIResponse = (
+    query: string
+  ): { text: string; component?: React.ReactNode } => {
+    const lowerCaseQuery = query.toLowerCase();
+
+    // Check for specific interactive components first
+    if (
+      lowerCaseQuery.includes("breathing") ||
+      lowerCaseQuery.includes("breathe")
+    ) {
+      return {
+        text: "Of course. Here is a guided breathing exercise to help you find a moment of calm.",
+        component: <EnhancedBreathingExercise />,
+      };
+    }
+    if (
+      lowerCaseQuery.includes("grounding") ||
+      lowerCaseQuery.includes("54321") ||
+      lowerCaseQuery.includes("disconnected")
+    ) {
+      return {
+        text: "A grounding exercise can be very helpful. Let's walk through it together.",
+        component: <InteractiveGroundingExercise />,
+      };
+    }
+    if (
+      lowerCaseQuery.includes("gratitude") ||
+      lowerCaseQuery.includes("thankful") ||
+      lowerCaseQuery.includes("journal")
+    ) {
+      return {
+        text: "Focusing on gratitude is a wonderful idea. Let's try it.",
+        component: <MultiStepGratitudeJournal />,
+      };
+    }
+    if (
+      lowerCaseQuery.includes("affirmation") ||
+      lowerCaseQuery.includes("positive thought")
+    ) {
+      return {
+        text: "Let's focus on some positive thoughts. Here is an affirmation for you.",
+        component: <EngagingAffirmation />,
+      };
+    }
+
+    // Check for contextual keyword responses (including the report)
+    for (const item of contextualResponses) {
+      for (const keyword of item.keywords) {
+        if (lowerCaseQuery.includes(keyword)) {
+          const response: { text: string; component?: React.ReactNode } = {
+            text: item.response,
+          };
+          if (item.component) {
+            // Pass the required onFollowUp prop
+            response.component = React.createElement(item.component, {
+              onFollowUp: handleSendMessage,
+            });
+          }
+          return response;
+        }
+      }
+    }
+
+    // Fallback response
+    return {
+      text: "I'm not sure how to respond to that. Could you try rephrasing? Or we could try a different activity like 'breathing' or 'grounding'.",
+    };
+  };
+
   const handleSendMessage = async (text: string) => {
     const query = text.trim();
     if (!query) return;
+
     setView("chat");
+
     const userMessage: Message = {
       id: Date.now().toString(),
       sender: "user",
       text: query,
     };
+
+    // Add welcome message if it's the first message
     setMessages((prev) =>
       prev.length === 0
         ? [
@@ -814,80 +899,37 @@ export default function SukoonChatAssistant() {
           ]
         : [...prev, userMessage]
     );
+
     setInputValue("");
     setIsTyping(true);
 
-    setTimeout(async () => {
-      let aiMessage: Message;
+    // --- REFACTORED AND SIMPLIFIED RESPONSE LOGIC ---
+    setTimeout(() => {
       const lowerCaseQuery = query.toLowerCase();
 
+      // 1. Check for critical words
       if (criticalWords.some((word) => lowerCaseQuery.includes(word))) {
         setIsTyping(false);
         setShowCrisisAlert(true);
-        return;
-      } else if (
-        lowerCaseQuery.includes("breathing") ||
-        lowerCaseQuery.includes("breathe")
-      ) {
-        aiMessage = {
-          id: (Date.now() + 1).toString(),
-          sender: "ai",
-          component: <EnhancedBreathingExercise />,
-          text: "Of course. Here is a guided breathing exercise to help you find a moment of calm.",
-        };
-      } else if (
-        lowerCaseQuery.includes("grounding") ||
-        lowerCaseQuery.includes("54321") ||
-        lowerCaseQuery.includes("disconnected")
-      ) {
-        aiMessage = {
-          id: (Date.now() + 1).toString(),
-          sender: "ai",
-          component: <InteractiveGroundingExercise />,
-          text: "A grounding exercise can be very helpful. Let's walk through it together.",
-        };
-      } else if (
-        lowerCaseQuery.includes("gratitude") ||
-        lowerCaseQuery.includes("thankful") ||
-        lowerCaseQuery.includes("journal")
-      ) {
-        aiMessage = {
-          id: (Date.now() + 1).toString(),
-          sender: "ai",
-          component: <MultiStepGratitudeJournal />,
-          text: "Focusing on gratitude is a wonderful idea. Let's try it.",
-        };
-      } else if (
-        lowerCaseQuery.includes("affirmation") ||
-        lowerCaseQuery.includes("positive thought")
-      ) {
-        aiMessage = {
-          id: (Date.now() + 1).toString(),
-          sender: "ai",
-          component: <EngagingAffirmation />,
-          text: "Let's focus on some positive thoughts. Here is an affirmation for you.",
-        };
-      } else {
-        let responseText =
-          "Thank you for sharing. It's helpful to talk about these things. Could you tell me a little more about what's on your mind?";
-        for (const item of contextualResponses) {
-          if (
-            item.keywords.some((keyword) => lowerCaseQuery.includes(keyword))
-          ) {
-            responseText = item.response;
-            break;
-          }
-        }
-        aiMessage = {
-          id: (Date.now() + 1).toString(),
-          sender: "ai",
-          text: responseText,
-        };
+        return; // Stop further processing
       }
 
+      // 2. Get the AI response using the new, robust function
+      const response = getAIResponse(lowerCaseQuery);
+
+      const aiMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        sender: "ai",
+        text: response.text,
+        component: response.component,
+      };
+
+      // 3. Update state and speak
       setMessages((prev) => [...prev, aiMessage]);
       setIsTyping(false);
-      if (aiMessage.text) speakText(aiMessage.text);
+      if (aiMessage.text) {
+        speakText(aiMessage.text);
+      }
     }, 1500);
   };
 
@@ -1143,6 +1185,7 @@ const SukoonCommandBar = ({
       query: "Guide me through a breathing exercise",
     },
     { label: "Positive Affirmation", query: "Show me a positive affirmation" },
+    { label: "how am i doing", query: "how am i doing" },
   ];
   return (
     <motion.div className={cn("w-full mx-auto", !inChatView && "max-w-3xl")}>
@@ -1260,3 +1303,4 @@ const SukoonCommandBar = ({
     </motion.div>
   );
 };
+

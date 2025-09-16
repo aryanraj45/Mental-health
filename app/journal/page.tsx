@@ -220,9 +220,9 @@ export default function JournalPage() {
             <select
               value={selectedMood}
               onChange={(e) => setSelectedMood(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-md text-white appearance-none cursor-pointer"
+              className="w-full pl-10 pr-4 py-2 bg-gray/5 border border-white/10 rounded-md text-black appearance-none cursor-pointer"
             >
-              <option value="all">All Moods</option>
+              <option value="all"> All moods</option>
               <option value="happy">Happy</option>
               <option value="excited">Excited</option>
               <option value="neutral">Neutral</option>

@@ -3,8 +3,16 @@ import type { NextRequest } from "next/server"
 import { decrypt } from "./lib/auth"
 
 // Protected routes that require authentication
-const protectedRoutes = ["/dashboard", "/admin", "/chat", "/book", "/community"]
-const adminRoutes = ["/admin"]
+const protectedRoutes = [
+  "/dashboard",
+  "/chat",
+  "/book",
+  "/community",
+  "/administrator",
+  "/admin-profile",
+  "/journal",
+];
+const adminRoutes = ["/administrator", "/admin-profile"];
 
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname

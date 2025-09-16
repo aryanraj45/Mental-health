@@ -149,7 +149,7 @@ export default function LoginPage() {
           email: email,
           role: "admin",
         });
-        router.push("/admin"); 
+        router.push("/administrator"); 
       } else {
         throw new Error("Invalid credentials");
       }
@@ -332,12 +332,12 @@ export default function LoginPage() {
               </Link>
               <p>
                 Don't have an account?{" "}
-                <Link
+                {/* <Link
                   href="/signup"
                   className="font-semibold text-white hover:underline"
                 >
                   Sign Up
-                </Link>
+                </Link> */}
               </p>
             </motion.div>
           </form>

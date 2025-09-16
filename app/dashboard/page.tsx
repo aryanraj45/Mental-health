@@ -167,10 +167,267 @@ const InteractiveGlassCard = ({
   );
 };
 
-type Appointment = { id: string; date: string; time: string; counselor: string; type: "video" | "phone"; status: "confirmed" | "completed"; bookingId: string; };
-const upcomingAppointments: Appointment[] = [ { id: "1", date: "2025-09-20", time: "2:00 PM", counselor: "Dr. Priya Sharma", type: "video", status: "confirmed", bookingId: "MC-123456" }, { id: "2", date: "2025-09-27", time: "10:00 AM", counselor: "Dr. Rajesh Kumar", type: "phone", status: "confirmed", bookingId: "MC-789012" }, ]
-const pastAppointments: Appointment[] = [ { id: "3", date: "2025-09-08", time: "3:00 PM", counselor: "Dr. Anita Menon", type: "video", status: "completed", bookingId: "MC-345678" }, ]
-const MindfulMomentCard = () => { const moments = [ { title: "Quick Breather", description: "Take 5 deep belly breaths. Inhale for 4, hold for 4, exhale for 6.", icon: Zap, }, { title: "Mindful Observation", description: "Notice 3 things you can see, 2 things you can hear, and 1 thing you can feel.", icon: Eye, }, { title: "Positive Affirmation", description: "Say to yourself: 'I am capable and I am enough, just as I am.'", icon: Sparkles, }, ]; const [moment, setMoment] = useState(moments[0]); useEffect(() => { setMoment(moments[Math.floor(Math.random() * moments.length)]); }, []); return ( <InteractiveGlassCard className="lg:col-span-3"> <div className="flex items-center gap-4"> <div className="p-3 rounded-lg bg-gradient-to-br from-violet-500 to-purple-500"> <Sparkles className="h-6 w-6 text-white" /> </div> <div> <h3 className="font-bold text-lg text-white">Your Mindful Moment</h3> <p className="text-sm text-white/60">{moment.title}</p> </div> </div> <p className="text-white/80 mt-4 text-lg">{moment.description}</p> </InteractiveGlassCard> ); };
+type Appointment = { 
+  id: string; 
+  date: string; 
+  time: string; 
+  counselor: string; 
+  type: "video" | "phone" | "in-person"; 
+  status: "confirmed" | "completed" | "pending" | "rescheduled"; 
+  bookingId: string; 
+  specialty?: string;
+  sessionType?: string;
+  duration?: string;
+  notes?: string;
+  location?: string;
+};
+
+const upcomingAppointments: Appointment[] = [
+  { 
+    id: "1", 
+    date: "2025-09-18", 
+    time: "2:00 PM", 
+    counselor: "Dr. Priya Sharma", 
+    type: "video", 
+    status: "confirmed", 
+    bookingId: "MC-123456",
+    specialty: "Anxiety & Stress Management",
+    sessionType: "Individual Therapy",
+    duration: "50 minutes",
+    notes: "Follow-up session to discuss coping strategies"
+  },
+  { 
+    id: "2", 
+    date: "2025-09-20", 
+    time: "10:00 AM", 
+    counselor: "Dr. Rajesh Kumar", 
+    type: "phone", 
+    status: "confirmed", 
+    bookingId: "MC-789012",
+    specialty: "Academic Stress & Performance",
+    sessionType: "Counseling Session",
+    duration: "45 minutes",
+    notes: "Discussion about exam preparation strategies"
+  },
+  { 
+    id: "3", 
+    date: "2025-09-22", 
+    time: "4:30 PM", 
+    counselor: "Dr. Meera Joshi", 
+    type: "video", 
+    status: "pending", 
+    bookingId: "MC-345123",
+    specialty: "Depression & Mood Disorders",
+    sessionType: "Therapy Session",
+    duration: "60 minutes",
+    notes: "Initial assessment and treatment planning"
+  },
+  { 
+    id: "4", 
+    date: "2025-09-25", 
+    time: "11:30 AM", 
+    counselor: "Dr. Arjun Patel", 
+    type: "in-person", 
+    status: "confirmed", 
+    bookingId: "MC-567890",
+    specialty: "Relationship & Social Anxiety",
+    sessionType: "Group Therapy",
+    duration: "90 minutes",
+    location: "Wellness Center, Room 204",
+    notes: "Social skills development group session"
+  },
+];
+
+const pastAppointments: Appointment[] = [
+  { 
+    id: "7", 
+    date: "2025-09-15", 
+    time: "3:00 PM", 
+    counselor: "Dr. Anita Menon", 
+    type: "video", 
+    status: "completed", 
+    bookingId: "MC-345678",
+    specialty: "General Mental Health",
+    sessionType: "Initial Consultation",
+    duration: "60 minutes",
+    notes: "Completed initial assessment and goal setting"
+  },
+  { 
+    id: "8", 
+    date: "2025-09-12", 
+    time: "11:00 AM", 
+    counselor: "Dr. Vikram Singh", 
+    type: "phone", 
+    status: "completed", 
+    bookingId: "MC-456789",
+    specialty: "Academic Pressure",
+    sessionType: "Crisis Counseling",
+    duration: "30 minutes",
+    notes: "Emergency session for exam stress management"
+  },
+  { 
+    id: "9", 
+    date: "2025-09-08", 
+    time: "2:30 PM", 
+    counselor: "Dr. Priya Sharma", 
+    type: "video", 
+    status: "completed", 
+    bookingId: "MC-567123",
+    specialty: "Anxiety & Stress Management",
+    sessionType: "Individual Therapy",
+    duration: "50 minutes",
+    notes: "Practiced relaxation techniques and reviewed progress"
+  },
+  { 
+    id: "10", 
+    date: "2025-09-05", 
+    time: "4:00 PM", 
+    counselor: "Dr. Deepa Nair", 
+    type: "in-person", 
+    status: "completed", 
+    bookingId: "MC-678234",
+    specialty: "Self-Esteem & Confidence",
+    sessionType: "Therapy Session",
+    duration: "55 minutes",
+    location: "Wellness Center, Room 101",
+    notes: "Cognitive behavioral therapy techniques for self-confidence"
+  },
+  { 
+    id: "11", 
+    date: "2025-09-01", 
+    time: "10:30 AM", 
+    counselor: "Dr. Rahul Verma", 
+    type: "video", 
+    status: "completed", 
+    bookingId: "MC-789345",
+    specialty: "ADHD & Focus Issues",
+    sessionType: "Assessment Session",
+    duration: "75 minutes",
+    notes: "Comprehensive ADHD assessment and diagnosis discussion"
+  }
+];
+const MindfulMomentCard = () => { 
+  const moments = [ 
+    { 
+      title: "Quick Breather", 
+      description: "Take 5 deep belly breaths. Inhale for 4, hold for 4, exhale for 6. Feel your body releasing tension with each breath.", 
+      icon: Zap,
+      color: "from-blue-500 to-cyan-500",
+      bgColor: "from-blue-500/10 to-cyan-500/10"
+    }, 
+    { 
+      title: "Mindful Observation", 
+      description: "Ground yourself using the 5-4-3-2-1 technique: Notice 5 things you see, 4 things you feel, 3 things you hear, 2 things you smell, 1 thing you taste.", 
+      icon: Eye,
+      color: "from-green-500 to-emerald-500",
+      bgColor: "from-green-500/10 to-emerald-500/10"
+    }, 
+    { 
+      title: "Positive Affirmation", 
+      description: "Say to yourself: 'I am capable and I am enough, just as I am. Every challenge I face is an opportunity to grow stronger.'", 
+      icon: Sparkles,
+      color: "from-purple-500 to-pink-500",
+      bgColor: "from-purple-500/10 to-pink-500/10"
+    },
+    { 
+      title: "Gratitude Moment", 
+      description: "Think of three specific things you're grateful for today. Feel the warmth of appreciation fill your heart.", 
+      icon: Heart,
+      color: "from-rose-500 to-red-500",
+      bgColor: "from-rose-500/10 to-red-500/10"
+    },
+    { 
+      title: "Body Scan", 
+      description: "Starting from your toes, slowly scan your body. Notice any tension and consciously relax each muscle group as you move upward.", 
+      icon: User,
+      color: "from-orange-500 to-yellow-500",
+      bgColor: "from-orange-500/10 to-yellow-500/10"
+    },
+    { 
+      title: "Present Moment", 
+      description: "Pause and ask yourself: 'What am I experiencing right now?' Notice your thoughts, feelings, and sensations without judgment.", 
+      icon: Clock,
+      color: "from-indigo-500 to-purple-500",
+      bgColor: "from-indigo-500/10 to-purple-500/10"
+    }
+  ]; 
+  
+  const [moment, setMoment] = useState(moments[0]); 
+  const [currentIndex, setCurrentIndex] = useState(0);
+  
+  useEffect(() => { 
+    const randomIndex = Math.floor(Math.random() * moments.length);
+    setMoment(moments[randomIndex]); 
+    setCurrentIndex(randomIndex);
+  }, []);
+
+  const nextMoment = () => {
+    const nextIndex = (currentIndex + 1) % moments.length;
+    setMoment(moments[nextIndex]);
+    setCurrentIndex(nextIndex);
+  };
+
+  const prevMoment = () => {
+    const prevIndex = currentIndex === 0 ? moments.length - 1 : currentIndex - 1;
+    setMoment(moments[prevIndex]);
+    setCurrentIndex(prevIndex);
+  };
+  
+  return ( 
+    <InteractiveGlassCard className="lg:col-span-3 relative overflow-hidden">
+      <div className={`absolute inset-0 bg-gradient-to-br ${moment.bgColor} opacity-30`}></div>
+      <div className="relative z-10">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
+            <div className={`p-3 rounded-lg bg-gradient-to-br ${moment.color} shadow-lg`}>
+              <moment.icon className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h3 className="font-bold text-xl text-white">Your Mindful Moment</h3>
+              <p className="text-sm text-white/60">{moment.title}</p>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              onClick={prevMoment}
+              size="sm"
+              variant="outline"
+              className="border-white/30 text-white hover:bg-white/10 w-8 h-8 p-0"
+            >
+              ←
+            </Button>
+            <Button
+              onClick={nextMoment}
+              size="sm"
+              variant="outline"
+              className="border-white/30 text-white hover:bg-white/10 w-8 h-8 p-0"
+            >
+              →
+            </Button>
+          </div>
+        </div>
+        <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+          <p className="text-white/90 text-lg leading-relaxed">{moment.description}</p>
+        </div>
+        <div className="flex items-center justify-between mt-4">
+          <div className="flex gap-1">
+            {moments.map((_, index) => (
+              <div
+                key={index}
+                className={`w-2 h-2 rounded-full transition-colors ${
+                  index === currentIndex ? 'bg-white' : 'bg-white/30'
+                }`}
+              />
+            ))}
+          </div>
+          <p className="text-white/50 text-sm">
+            Take a moment to practice this mindfulness exercise
+          </p>
+        </div>
+      </div>
+    </InteractiveGlassCard> 
+  ); 
+};
 
 // --- Main Dashboard Component ---
 export default function DashboardPage() {
@@ -297,21 +554,142 @@ export default function DashboardPage() {
                         </Tabs>
                     </motion.div>
 
-                    <motion.div custom={3} variants={fadeUpVariants} initial="hidden" animate="visible" className="space-y-8">
+                    <motion.div custom={3} variants={fadeUpVariants} initial="hidden" animate="visible" className="space-y-6">
+                        {/* Quick Actions */}
                         <InteractiveGlassCard>
-                            <CardTitle className="text-lg text-white mb-4">Quick Actions</CardTitle>
+                            <CardTitle className="text-lg text-white mb-4 flex items-center gap-2">
+                                <Zap className="h-5 w-5 text-yellow-400" />
+                                Quick Actions
+                            </CardTitle>
                             <div className="space-y-3">
-                                <ActionButton href="/chat">Start AI Chat</ActionButton>
-                                <ActionButton href="/book">Book a Session</ActionButton>
-                                <ActionButton href="/resources">Browse Resources</ActionButton>
+                                <ActionButton href="/chat">
+                                    <MessageCircle className="h-4 w-4" />
+                                    Start AI Chat
+                                </ActionButton>
+                                <ActionButton href="/book">
+                                    <Calendar className="h-4 w-4" />
+                                    Book a Session
+                                </ActionButton>
+                                <ActionButton href="/resources">
+                                    <Heart className="h-4 w-4" />
+                                    Browse Resources
+                                </ActionButton>
+                                <ActionButton href="/community">
+                                    <User className="h-4 w-4" />
+                                    Join Community
+                                </ActionButton>
+                                <ActionButton href="/wellness">
+                                    <Sparkles className="h-4 w-4" />
+                                    Wellness Tools
+                                </ActionButton>
                             </div>
                         </InteractiveGlassCard>
+
+                        {/* Mental Health Stats */}
                         <InteractiveGlassCard>
-                            <CardTitle className="text-lg text-white mb-2">Emergency Support</CardTitle>
-                            <CardDescription className="text-white/50 mb-4">24/7 crisis support</CardDescription>
-                            <div className="space-y-2 text-sm text-white/80">
-                                <div><strong>NIMHANS:</strong> 080-26995000</div>
-                                <div><strong>Vandrevala:</strong> 9999666555</div>
+                            <CardTitle className="text-lg text-white mb-4 flex items-center gap-2">
+                                <Eye className="h-5 w-5 text-blue-400" />
+                                Your Progress
+                            </CardTitle>
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-white/70 text-sm">Sessions Completed</span>
+                                    <span className="text-white font-bold">12</span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <span className="text-white/70 text-sm">Mood Check-ins</span>
+                                    <span className="text-white font-bold">28</span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <span className="text-white/70 text-sm">Wellness Streak</span>
+                                    <span className="text-green-400 font-bold">7 days</span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <span className="text-white/70 text-sm">Resources Saved</span>
+                                    <span className="text-white font-bold">15</span>
+                                </div>
+                                <div className="w-full bg-white/10 rounded-full h-2 mt-4">
+                                    <div className="bg-gradient-to-r from-purple-500 to-blue-500 h-2 rounded-full w-3/4"></div>
+                                </div>
+                                <p className="text-white/60 text-xs text-center">75% of monthly wellness goals achieved</p>
+                            </div>
+                        </InteractiveGlassCard>
+
+                        {/* Emergency Support */}
+                        <InteractiveGlassCard>
+                            <CardTitle className="text-lg text-white mb-2 flex items-center gap-2">
+                                <Phone className="h-5 w-5 text-red-400" />
+                                Emergency Support
+                            </CardTitle>
+                            <CardDescription className="text-white/50 mb-4">24/7 crisis support available</CardDescription>
+                            <div className="space-y-3 text-sm">
+                                <div className="flex items-center justify-between p-2 bg-red-500/10 rounded-lg border border-red-500/20">
+                                    <div>
+                                        <div className="text-white font-medium">NIMHANS Crisis</div>
+                                        <div className="text-red-300 text-xs">National Emergency Line</div>
+                                    </div>
+                                    <div className="text-red-300 font-mono">080-26995000</div>
+                                </div>
+                                <div className="flex items-center justify-between p-2 bg-orange-500/10 rounded-lg border border-orange-500/20">
+                                    <div>
+                                        <div className="text-white font-medium">Vandrevala Foundation</div>
+                                        <div className="text-orange-300 text-xs">Mental Health Support</div>
+                                    </div>
+                                    <div className="text-orange-300 font-mono">9999666555</div>
+                                </div>
+                                <div className="flex items-center justify-between p-2 bg-purple-500/10 rounded-lg border border-purple-500/20">
+                                    <div>
+                                        <div className="text-white font-medium">Crisis Text Line</div>
+                                        <div className="text-purple-300 text-xs">Text "HOME" to</div>
+                                    </div>
+                                    <div className="text-purple-300 font-mono">741741</div>
+                                </div>
+                            </div>
+                            <div className="mt-4">
+                                <Button asChild className="w-full bg-red-600 hover:bg-red-700 text-white">
+                                    <Link href="/urgent">
+                                        <Phone className="h-4 w-4 mr-2" />
+                                        Access Emergency Support
+                                    </Link>
+                                </Button>
+                            </div>
+                        </InteractiveGlassCard>
+
+                        {/* Recent Activity */}
+                        <InteractiveGlassCard>
+                            <CardTitle className="text-lg text-white mb-4 flex items-center gap-2">
+                                <Clock className="h-5 w-5 text-green-400" />
+                                Recent Activity
+                            </CardTitle>
+                            <div className="space-y-3">
+                                <div className="flex items-center gap-3 p-2 bg-white/5 rounded-lg">
+                                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                                    <div className="flex-1">
+                                        <p className="text-white/80 text-sm">Completed mood check-in</p>
+                                        <p className="text-white/50 text-xs">2 hours ago</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-3 p-2 bg-white/5 rounded-lg">
+                                    <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                                    <div className="flex-1">
+                                        <p className="text-white/80 text-sm">Saved anxiety management resource</p>
+                                        <p className="text-white/50 text-xs">Yesterday</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-3 p-2 bg-white/5 rounded-lg">
+                                    <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
+                                    <div className="flex-1">
+                                        <p className="text-white/80 text-sm">Completed session with Dr. Priya</p>
+                                        <p className="text-white/50 text-xs">3 days ago</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-3 p-2 bg-white/5 rounded-lg">
+                                    <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+                                    <div className="flex-1">
+                                        <p className="text-white/80 text-sm">Started meditation practice</p>
+                                        <p className="text-white/50 text-xs">1 week ago</p>
+                                    </div>
+                                </div>
                             </div>
                         </InteractiveGlassCard>
                     </motion.div>
@@ -321,7 +699,125 @@ export default function DashboardPage() {
     );
 }
 
-// Reusable components (Unchanged)
-const AppointmentCard = ({ appointment }: { appointment: Appointment }) => ( <InteractiveGlassCard> <div className="flex items-start justify-between"> <div className="space-y-3"> <InfoItem icon={<Calendar />}>{new Date(appointment.date).toLocaleDateString("en-IN", { weekday: "long", month: "long", day: "numeric" })}</InfoItem> {appointment.time && <InfoItem icon={<Clock />}>{appointment.time}</InfoItem>} <InfoItem icon={<User />}>{appointment.counselor}</InfoItem> <InfoItem icon={appointment.type === 'video' ? <Video/> : <Phone/>}>{appointment.type === 'video' ? 'Video Session' : 'Phone Session'}</InfoItem> </div> <div className="flex flex-col items-end gap-2"> {appointment.status === 'confirmed' ? <Badge className="bg-green-500/10 text-green-300 border border-green-500/20">Confirmed</Badge> : <Badge className="bg-white/10 text-white/70 border border-white/20">Completed</Badge>} </div> </div> </InteractiveGlassCard> );
-const ActionButton = ({ href, children, }: { href: string; children: React.ReactNode; }) => ( <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}> <Link href={href} className="flex items-center justify-between w-full p-3 bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 transition-colors duration-300"> <span className="font-semibold">{children}</span> <ArrowRight className="h-4 w-4" /> </Link> </motion.div> );
+// Reusable components
+const AppointmentCard = ({ appointment }: { appointment: Appointment }) => (
+  <InteractiveGlassCard>
+    <div className="space-y-4">
+      {/* Header with counselor and status */}
+      <div className="flex items-start justify-between">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <h4 className="font-semibold text-white text-lg">{appointment.counselor}</h4>
+            {appointment.specialty && (
+              <Badge variant="outline" className="text-xs border-purple-500/30 text-purple-300">
+                {appointment.specialty}
+              </Badge>
+            )}
+          </div>
+          {appointment.sessionType && (
+            <p className="text-white/60 text-sm">{appointment.sessionType}</p>
+          )}
+        </div>
+        <div className="flex flex-col items-end gap-2">
+          {appointment.status === 'confirmed' && (
+            <Badge className="bg-green-500/10 text-green-300 border border-green-500/20">
+              Confirmed
+            </Badge>
+          )}
+          {appointment.status === 'pending' && (
+            <Badge className="bg-yellow-500/10 text-yellow-300 border border-yellow-500/20">
+              Pending
+            </Badge>
+          )}
+          {appointment.status === 'rescheduled' && (
+            <Badge className="bg-orange-500/10 text-orange-300 border border-orange-500/20">
+              Rescheduled
+            </Badge>
+          )}
+          {appointment.status === 'completed' && (
+            <Badge className="bg-white/10 text-white/70 border border-white/20">
+              Completed
+            </Badge>
+          )}
+        </div>
+      </div>
+
+      {/* Appointment details */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <InfoItem icon={<Calendar />}>
+          {new Date(appointment.date).toLocaleDateString("en-IN", { 
+            weekday: "long", 
+            month: "long", 
+            day: "numeric",
+            year: "numeric"
+          })}
+        </InfoItem>
+        {appointment.time && (
+          <InfoItem icon={<Clock />}>
+            {appointment.time}
+            {appointment.duration && ` (${appointment.duration})`}
+          </InfoItem>
+        )}
+        <InfoItem icon={appointment.type === 'video' ? <Video/> : appointment.type === 'phone' ? <Phone/> : <MapPin/>}>
+          {appointment.type === 'video' ? 'Video Session' : 
+           appointment.type === 'phone' ? 'Phone Session' : 
+           'In-Person Session'}
+        </InfoItem>
+        {appointment.location && (
+          <InfoItem icon={<MapPin />}>
+            {appointment.location}
+          </InfoItem>
+        )}
+      </div>
+
+      {/* Notes and booking ID */}
+      {appointment.notes && (
+        <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+          <p className="text-white/70 text-sm">
+            <span className="font-medium text-white/90">Notes: </span>
+            {appointment.notes}
+          </p>
+        </div>
+      )}
+
+      <div className="flex items-center justify-between pt-2 border-t border-white/10">
+        <span className="text-white/50 text-xs">
+          Booking ID: {appointment.bookingId}
+        </span>
+        {appointment.status === 'confirmed' && (
+          <div className="flex gap-2">
+            {appointment.type === 'video' && (
+              <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
+                <Video className="h-3 w-3 mr-1" />
+                Join Call
+              </Button>
+            )}
+            <Button size="sm" variant="outline" className="border-white/30 text-white hover:bg-white/10">
+              Reschedule
+            </Button>
+          </div>
+        )}
+      </div>
+    </div>
+  </InteractiveGlassCard>
+);
+const ActionButton = ({ 
+  href, 
+  children, 
+}: { 
+  href: string; 
+  children: React.ReactNode; 
+}) => (
+  <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+    <Link 
+      href={href} 
+      className="flex items-center justify-between w-full p-3 bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 transition-all duration-300 group"
+    >
+      <div className="flex items-center gap-3">
+        {children}
+      </div>
+      <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform duration-300" />
+    </Link>
+  </motion.div>
+);
 const InfoItem = ({ icon, children, }: { icon: React.ReactNode; children: React.ReactNode; }) => ( <div className="flex items-center gap-3 text-white/80"> <div className="bg-white/5 p-1.5 rounded-full"> {React.cloneElement(icon as React.ReactElement, { className: "h-4 w-4 text-white/70", })} </div> <span>{children}</span> </div> );

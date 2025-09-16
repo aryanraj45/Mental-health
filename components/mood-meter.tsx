@@ -144,7 +144,7 @@ export function MoodAssessmentModal({ isOpen, onClose, userName }: MoodAssessmen
         recommendations: [
           { icon: Users, title: 'Book a Session', description: "Connect with a professional who can provide the support you need.", action: 'Book Now', href: '/book', isPrimary: true },
           { icon: Bot, title: 'Start AI Chat', description: "For immediate support, our AI is available to listen 24/7.", action: 'Chat Now', href: '/chat' },
-          { icon: Video, title: 'Breathing Exercises for Anxiety', description: "Learn techniques to manage overwhelming feelings.", action: 'Watch Video', href: '/resources/video/breathing' },
+          { icon: Video, title: 'Breathing Exercises for Anxiety', description: "Learn techniques to manage overwhelming feelings.", action: 'Watch Video', href: '/resources' },
         ],
       };
     }

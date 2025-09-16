@@ -38,8 +38,11 @@ import {
   Zap,
   Moon,
   Target,
+  Sparkles,
+  TrendingUp,
 } from "lucide-react";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Resource {
   id: string;
@@ -159,7 +162,7 @@ const categories = [
   "Crisis Management",
   "Self-Assessment",
 ];
-const languages = ["All", "English", "Hindi", "Tamil", "Bengali", "Telugu"];
+const languages = ["All", "English", "Hindi", "Kashmiri","Tamil", "Bengali", "Telugu"];
 const resourceTypes = ["All", "article", "video", "audio", "tool"];
 
 function DrawingPad() {
@@ -211,67 +214,85 @@ function DrawingPad() {
   };
 
   return (
-    <Card className="w-full mt-6">
-      <CardHeader>
-        <div className="flex items-center gap-2">
-          <Palette className="h-6 w-6 text-primary" />
-          <CardTitle>Creative Drawing Pad</CardTitle>
-        </div>
-        <CardDescription>
-          A space to express your feelings visually. Don't worry about making it
-          perfect.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="flex flex-wrap items-center gap-4 p-2 mb-4 bg-muted rounded-lg">
-          <div className="flex items-center gap-2">
-            <label htmlFor="color-picker" className="text-sm font-medium">
-              Color:
-            </label>
-            <input
-              id="color-picker"
-              type="color"
-              value={currentColor}
-              onChange={(e) => setCurrentColor(e.target.value)}
-              className="w-8 h-8 rounded border-none cursor-pointer bg-transparent"
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+      className="mb-8"
+    >
+      <Card className="bg-white/5 border-white/10 backdrop-blur-xl">
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-full flex items-center justify-center">
+              <Palette className="h-6 w-6 text-purple-400" />
+            </div>
+            <div>
+              <CardTitle className="text-white">Creative Drawing Pad</CardTitle>
+              <CardDescription className="text-white/70">
+                A space to express your feelings visually. Don't worry about making it perfect.
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap items-center gap-4 p-4 mb-6 bg-white/5 rounded-lg backdrop-blur-sm border border-white/10">
+            <div className="flex items-center gap-2">
+              <label htmlFor="color-picker" className="text-sm font-medium text-white/80">
+                Color:
+              </label>
+              <input
+                id="color-picker"
+                type="color"
+                value={currentColor}
+                onChange={(e) => setCurrentColor(e.target.value)}
+                className="w-8 h-8 rounded border-0 cursor-pointer bg-transparent"
+              />
+            </div>
+            <div className="flex items-center gap-2 flex-1 min-w-[150px]">
+              <label className="text-sm font-medium text-white/80">Size:</label>
+              <Slider
+                value={brushSize}
+                onValueChange={setBrushSize}
+                max={50}
+                min={1}
+                step={1}
+                className="flex-1"
+              />
+              <span className="text-sm font-semibold w-8 text-center text-white/80">
+                {brushSize[0]}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={clearCanvas}
+                title="Clear Canvas"
+                className="border-white/30 text-white hover:bg-white/10"
+              >
+                <RotateCcw className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+          <div className="border border-white/20 rounded-lg overflow-hidden bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm">
+            <canvas
+              ref={canvasRef}
+              onMouseDown={startDrawing}
+              onMouseMove={draw}
+              onMouseUp={stopDrawing}
+              onMouseLeave={stopDrawing}
+              className="cursor-crosshair w-full h-[400px]"
             />
           </div>
-          <div className="flex items-center gap-2 flex-1 min-w-[150px]">
-            <label className="text-sm font-medium">Size:</label>
-            <Slider
-              value={brushSize}
-              onValueChange={setBrushSize}
-              max={50}
-              min={1}
-              step={1}
-            />
-            <span className="text-sm font-semibold w-8 text-center">
-              {brushSize[0]}
-            </span>
+          <div className="mt-4 text-center">
+            <p className="text-sm text-white/60">
+              Use this space to draw, doodle, or express your emotions visually. 
+              Art therapy can help process feelings and reduce stress.
+            </p>
           </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={clearCanvas}
-              title="Clear Canvas"
-            >
-              <RotateCcw className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-        <div className="border rounded-lg overflow-hidden bg-white">
-          <canvas
-            ref={canvasRef}
-            onMouseDown={startDrawing}
-            onMouseMove={draw}
-            onMouseUp={stopDrawing}
-            onMouseLeave={stopDrawing}
-            className="cursor-crosshair w-full h-[600px]"
-          />
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 }
 
@@ -281,6 +302,13 @@ export default function ResourcesPage() {
   const [selectedLanguage, setSelectedLanguage] = useState("All");
   const [selectedType, setSelectedType] = useState("All");
   const [filteredResources, setFilteredResources] = useState(resources);
+  const [favorites, setFavorites] = useState<string[]>([]);
+  const isFavorite = (id: string) => favorites.includes(id);
+  const toggleFavorite = (id: string) => {
+    setFavorites((prev) =>
+      prev.includes(id) ? prev.filter((fid) => fid !== id) : [...prev, id]
+    );
+  };
 
   const filterResources = () => {
     let filtered = resources;
@@ -346,323 +374,452 @@ export default function ResourcesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-purple-900/20 via-blue-900/20 to-indigo-900/20 text-white relative overflow-hidden">
+      {/* Background Orbs */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <motion.div
+          animate={{
+            x: [0, 100, 0],
+            y: [0, -100, 0],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: "linear",
+          }}
+          className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"
+        />
+        <motion.div
+          animate={{
+            x: [0, -150, 0],
+            y: [0, 100, 0],
+          }}
+          transition={{
+            duration: 25,
+            repeat: Infinity,
+            ease: "linear",
+          }}
+          className="absolute top-3/4 right-1/4 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl"
+        />
+        <motion.div
+          animate={{
+            x: [0, 80, 0],
+            y: [0, -80, 0],
+          }}
+          transition={{
+            duration: 15,
+            repeat: Infinity,
+            ease: "linear",
+          }}
+          className="absolute top-1/2 left-3/4 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl"
+        />
+      </div>
+
       <Header />
 
-      <div className="container mx-auto px-4 py-6 max-w-7xl">
+      <main className="container mx-auto px-4 py-6 max-w-7xl relative z-10">
         {/* Hero Section */}
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold mb-4">
-            Mental Health Resource Hub
-          </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Discover evidence-based resources, tools, and content to support
-            your mental health journey. Available in multiple languages and
-            designed specifically for students.
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-12"
+        >
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+            >
+              <BookOpen className="h-12 w-12 text-purple-400" />
+            </motion.div>
+            <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent">
+              Resource Hub
+            </h1>
+            <motion.div
+              animate={{ rotate: -360 }}
+              transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+            >
+              <Sparkles className="h-8 w-8 text-blue-400" />
+            </motion.div>
+          </div>
+          <p className="text-white/80 text-lg max-w-3xl mx-auto leading-relaxed">
+            Discover evidence-based resources, tools, and content to support your mental health journey. 
+            Available in multiple languages and designed specifically for students.
           </p>
-        </div>
+        </motion.div>
 
         {/* Search and Filters */}
-        <div className="mb-8 space-y-4">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search resources, topics, or keywords..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <Button onClick={filterResources} className="md:w-auto">
-              <Filter className="h-4 w-4 mr-2" />
-              Apply Filters
-            </Button>
-          </div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="mb-8 space-y-6"
+        >
+          <Card className="bg-white/5 border-white/10 backdrop-blur-xl">
+            <CardContent className="p-6">
+              <div className="flex flex-col md:flex-row gap-4 mb-4">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
+                  <Input
+                    placeholder="Search resources, topics, or keywords..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/60 focus:border-purple-400"
+                  />
+                </div>
+                <Button 
+                  onClick={filterResources} 
+                  className="md:w-auto bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                >
+                  <Filter className="h-4 w-4 mr-2" />
+                  Apply Filters
+                </Button>
+              </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Select
-              value={selectedCategory}
-              onValueChange={setSelectedCategory}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select Category" />
-              </SelectTrigger>
-              <SelectContent>
-                {categories.map((category) => (
-                  <SelectItem key={category} value={category}>
-                    {category}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Select
+                  value={selectedCategory}
+                  onValueChange={setSelectedCategory}
+                >
+                  <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                    <SelectValue placeholder="Select Category" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-900/95 backdrop-blur-xl border-white/20">
+                    {categories.map((category) => (
+                      <SelectItem key={category} value={category} className="text-white hover:bg-white/10">
+                        {category}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
 
-            <Select
-              value={selectedLanguage}
-              onValueChange={setSelectedLanguage}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select Language" />
-              </SelectTrigger>
-              <SelectContent>
-                {languages.map((language) => (
-                  <SelectItem key={language} value={language}>
-                    {language}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+                <Select
+                  value={selectedLanguage}
+                  onValueChange={setSelectedLanguage}
+                >
+                  <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                    <SelectValue placeholder="Select Language" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-900/95 backdrop-blur-xl border-white/20">
+                    {languages.map((language) => (
+                      <SelectItem key={language} value={language} className="text-white hover:bg-white/10">
+                        {language}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
 
-            <Select value={selectedType} onValueChange={setSelectedType}>
-              <SelectTrigger>
-                <SelectValue placeholder="Resource Type" />
-              </SelectTrigger>
-              <SelectContent>
-                {resourceTypes.map((type) => (
-                  <SelectItem key={type} value={type}>
-                    {type === "All"
-                      ? "All Types"
-                      : type.charAt(0).toUpperCase() + type.slice(1)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+                <Select value={selectedType} onValueChange={setSelectedType}>
+                  <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                    <SelectValue placeholder="Resource Type" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-900/95 backdrop-blur-xl border-white/20">
+                    {resourceTypes.map((type) => (
+                      <SelectItem key={type} value={type} className="text-white hover:bg-white/10">
+                        {type === "All"
+                          ? "All Types"
+                          : type.charAt(0).toUpperCase() + type.slice(1)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
 
         <Tabs defaultValue="browse" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="browse">Browse Resources</TabsTrigger>
-            <TabsTrigger value="tools">Wellness Tools</TabsTrigger>
-            <TabsTrigger value="music">Calming Music</TabsTrigger>
-            <TabsTrigger value="favorites">My Favorites</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-4 bg-white/5 backdrop-blur-xl border-white/10">
+            <TabsTrigger value="browse" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+              Browse Resources
+            </TabsTrigger>
+            <TabsTrigger value="tools" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+              Wellness Tools
+            </TabsTrigger>
+            <TabsTrigger value="music" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+              Calming Music
+            </TabsTrigger>
+            <TabsTrigger value="favorites" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+              My Favorites
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="browse">
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredResources.map((resource) => (
-                <Card
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6 }}
+              className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+            >
+              {filteredResources.map((resource, index) => (
+                <motion.div
                   key={resource.id}
-                  className="hover:shadow-lg transition-shadow"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  whileHover={{ y: -5 }}
                 >
-                  <div className="relative">
-                    <img
-                      src={
-                        resource.thumbnail ||
-                        "/placeholder.svg?height=200&width=400"
-                      }
-                      alt={resource.title}
-                      className="w-full h-48 object-cover rounded-t-lg"
-                    />
-                    <div className="absolute top-2 left-2">
-                      <Badge
-                        className={`${getDifficultyColor(resource.difficulty)}`}
-                      >
-                        {resource.difficulty}
-                      </Badge>
-                    </div>
-                    <div className="absolute top-2 right-2">
-                      <Badge
-                        variant="secondary"
-                        className="flex items-center gap-1"
-                      >
-                        {getResourceIcon(resource.type)}
-                        {resource.type}
-                      </Badge>
-                    </div>
-                  </div>
-                  <CardHeader className="pb-2">
-                    <div className="flex items-start justify-between">
-                      <CardTitle className="text-lg leading-tight">
-                        {resource.title}
-                      </CardTitle>
-                      <div className="flex items-center gap-1 text-sm">
-                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                        {resource.rating}
+                  <Card className="bg-white/5 border-white/10 backdrop-blur-xl hover:bg-white/10 transition-all duration-300 group overflow-hidden">
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
+                      <img
+                        src={
+                          resource.thumbnail ||
+                          "/placeholder.svg?height=200&width=400"
+                        }
+                        alt={resource.title}
+                        className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                      <div className="absolute top-3 left-3 z-20">
+                        <Badge
+                          className={`${getDifficultyColor(resource.difficulty)} backdrop-blur-sm`}
+                        >
+                          {resource.difficulty}
+                        </Badge>
+                      </div>
+                      <div className="absolute top-3 right-3 z-20">
+                        <Badge
+                          variant="secondary"
+                          className="flex items-center gap-1 bg-white/20 backdrop-blur-sm text-white border-white/20"
+                        >
+                          {getResourceIcon(resource.type)}
+                          {resource.type}
+                        </Badge>
                       </div>
                     </div>
-                    <CardDescription className="text-sm">
-                      {resource.description}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <Clock className="h-4 w-4" />
-                          {resource.duration}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <User className="h-4 w-4" />
-                          {resource.author}
+                    <CardHeader className="pb-2">
+                      <div className="flex items-start justify-between">
+                        <CardTitle className="text-lg leading-tight text-white group-hover:text-purple-300 transition-colors">
+                          {resource.title}
+                        </CardTitle>
+                        <div className="flex items-center gap-1 text-sm">
+                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                          <span className="text-white/80">{resource.rating}</span>
                         </div>
                       </div>
-                      <div className="flex flex-wrap gap-1">
-                        {resource.tags.slice(0, 3).map((tag) => (
-                          <Badge
-                            key={tag}
-                            variant="outline"
-                            className="text-xs"
+                      <CardDescription className="text-sm text-white/70">
+                        {resource.description}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between text-sm text-white/60">
+                          <div className="flex items-center gap-1">
+                            <Clock className="h-4 w-4" />
+                            {resource.duration}
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <User className="h-4 w-4" />
+                            {resource.author}
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap gap-1">
+                          {resource.tags.slice(0, 3).map((tag) => (
+                            <Badge
+                              key={tag}
+                              variant="outline"
+                              className="text-xs border-white/30 text-white/70 hover:bg-white/10"
+                            >
+                              {tag}
+                            </Badge>
+                          ))}
+                        </div>
+                        <div className="flex gap-2">
+                          <Button 
+                            size="sm" 
+                            className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
                           >
-                            {tag}
-                          </Badge>
-                        ))}
+                            {resource.type === "tool"
+                              ? "Use Tool"
+                              : resource.type === "video"
+                              ? "Watch"
+                              : "Read"}
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant={isFavorite(resource.id) ? "default" : "outline"}
+                            className={`border-white/30 text-white hover:bg-white/10 ${isFavorite(resource.id) ? 'bg-pink-600 text-white' : ''}`}
+                            onClick={() => toggleFavorite(resource.id)}
+                            aria-label={isFavorite(resource.id) ? "Remove from favorites" : "Add to favorites"}
+                          >
+                            <Heart className={`h-4 w-4 ${isFavorite(resource.id) ? 'fill-pink-400 text-pink-400' : ''}`} />
+                          </Button>
+                        </div>
                       </div>
-                      <div className="flex gap-2">
-                        <Button size="sm" className="flex-1">
-                          {resource.type === "tool"
-                            ? "Use Tool"
-                            : resource.type === "video"
-                            ? "Watch"
-                            : "Read"}
-                        </Button>
-                        <Button size="sm" variant="outline">
-                          <Heart className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           </TabsContent>
           <TabsContent value="music">
-            <div className=" ">
-              <Card>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6 }}
+            >
+              <Card className="bg-white/5 border-white/10 backdrop-blur-xl">
                 <CardHeader>
-                  <CardTitle>Peaceful Piano</CardTitle>
-                  <CardDescription>
-                    Relaxing piano music to help you focus, study, or unwind.
-                  </CardDescription>
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-full flex items-center justify-center">
+                      <Headphones className="h-6 w-6 text-purple-400" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-white">Peaceful Piano</CardTitle>
+                      <CardDescription className="text-white/70">
+                        Relaxing piano music to help you focus, study, or unwind.
+                      </CardDescription>
+                    </div>
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <iframe
-                    title="Spotify Embed: Peaceful Piano"
-                    style={{ borderRadius: "12px" }}
-                    src="https://open.spotify.com/embed/playlist/37i9dQZF1DX4sWSpwq3LiO?utm_source=generator"
-                    width="100%"
-                    height="800"
-                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                    loading="lazy"
-                  ></iframe>
+                  <div className="rounded-xl overflow-hidden bg-black/20 backdrop-blur-sm">
+                    <iframe
+                      title="Spotify Embed: Peaceful Piano"
+                      style={{ borderRadius: "12px" }}
+                      src="https://open.spotify.com/embed/playlist/37i9dQZF1DX4sWSpwq3LiO?utm_source=generator"
+                      width="100%"
+                      height="800"
+                      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                      loading="lazy"
+                    ></iframe>
+                  </div>
                 </CardContent>
               </Card>
-            </div>
+            </motion.div>
           </TabsContent>
 
           <TabsContent value="tools">
-            <DrawingPad />
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <Card className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
-                    <Brain className="h-6 w-6 text-primary" />
-                  </div>
-                  <CardTitle>Mood Tracker</CardTitle>
-                  <CardDescription>
-                    Track your daily emotions and identify patterns over time
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button className="w-full">Start Tracking</Button>
-                </CardContent>
-              </Card>
-
-              <Card className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="w-12 h-12 bg-secondary/10 rounded-lg flex items-center justify-center mb-4">
-                    <Target className="h-6 w-6 text-secondary" />
-                  </div>
-                  <CardTitle>Anxiety Assessment</CardTitle>
-                  <CardDescription>
-                    Quick self-assessment to understand your anxiety levels
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button className="w-full">Take Assessment</Button>
-                </CardContent>
-              </Card>
-
-              <Card className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center mb-4">
-                    <Moon className="h-6 w-6 text-accent" />
-                  </div>
-                  <CardTitle>Sleep Tracker</CardTitle>
-                  <CardDescription>
-                    Monitor your sleep patterns and get personalized
-                    recommendations
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button className="w-full">Track Sleep</Button>
-                </CardContent>
-              </Card>
-
-              <Card className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
-                    <Zap className="h-6 w-6 text-primary" />
-                  </div>
-                  <CardTitle>Stress Buster</CardTitle>
-                  <CardDescription>
-                    Quick 5-minute exercises to reduce stress and anxiety
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button className="w-full">Start Exercise</Button>
-                </CardContent>
-              </Card>
-
-              <Card className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="w-12 h-12 bg-secondary/10 rounded-lg flex items-center justify-center mb-4">
-                    <Heart className="h-6 w-6 text-secondary" />
-                  </div>
-                  <CardTitle>Gratitude Journal</CardTitle>
-                  <CardDescription>
-                    Daily gratitude practice to improve your mental wellbeing
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button className="w-full">Write Entry</Button>
-                </CardContent>
-              </Card>
-
-              <Card className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center mb-4">
-                    <Play className="h-6 w-6 text-accent" />
-                  </div>
-                  <CardTitle>Guided Meditation</CardTitle>
-                  <CardDescription>
-                    Collection of meditation sessions for different needs
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button className="w-full">Start Session</Button>
-                </CardContent>
-              </Card>
-            </div>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6 }}
+              className="space-y-6"
+            >
+              <DrawingPad />
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[
+                  {
+                    icon: Brain,
+                    title: "Mood Tracker",
+                    description: "Track your daily emotions and identify patterns over time",
+                    color: "from-purple-500/20 to-pink-500/20",
+                    iconColor: "text-purple-400",
+                    buttonColor: "from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                  },
+                  {
+                    icon: Target,
+                    title: "Anxiety Assessment",
+                    description: "Quick self-assessment to understand your anxiety levels",
+                    color: "from-blue-500/20 to-indigo-500/20",
+                    iconColor: "text-blue-400",
+                    buttonColor: "from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+                  },
+                  {
+                    icon: Moon,
+                    title: "Sleep Tracker",
+                    description: "Monitor your sleep patterns and get personalized recommendations",
+                    color: "from-indigo-500/20 to-purple-500/20",
+                    iconColor: "text-indigo-400",
+                    buttonColor: "from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
+                  },
+                  {
+                    icon: Zap,
+                    title: "Stress Buster",
+                    description: "Quick 5-minute exercises to reduce stress and anxiety",
+                    color: "from-yellow-500/20 to-orange-500/20",
+                    iconColor: "text-yellow-400",
+                    buttonColor: "from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700"
+                  },
+                  {
+                    icon: Heart,
+                    title: "Gratitude Journal",
+                    description: "Daily gratitude practice to improve your mental wellbeing",
+                    color: "from-red-500/20 to-pink-500/20",
+                    iconColor: "text-red-400",
+                    buttonColor: "from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700"
+                  },
+                  {
+                    icon: Play,
+                    title: "Guided Meditation",
+                    description: "Collection of meditation sessions for different needs",
+                    color: "from-green-500/20 to-teal-500/20",
+                    iconColor: "text-green-400",
+                    buttonColor: "from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700"
+                  }
+                ].map((tool, index) => (
+                  <motion.div
+                    key={tool.title}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: index * 0.1 }}
+                    whileHover={{ y: -5 }}
+                  >
+                    <Card className="bg-white/5 border-white/10 backdrop-blur-xl hover:bg-white/10 transition-all duration-300 group">
+                      <CardHeader>
+                        <div className={`w-12 h-12 bg-gradient-to-br ${tool.color} rounded-lg flex items-center justify-center mb-4 backdrop-blur-sm`}>
+                          <tool.icon className={`h-6 w-6 ${tool.iconColor}`} />
+                        </div>
+                        <CardTitle className="text-white group-hover:text-purple-300 transition-colors">
+                          {tool.title}
+                        </CardTitle>
+                        <CardDescription className="text-white/70">
+                          {tool.description}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <Button className={`w-full bg-gradient-to-r ${tool.buttonColor} text-white`}>
+                          {tool.title === "Mood Tracker" ? "Start Tracking" :
+                           tool.title === "Anxiety Assessment" ? "Take Assessment" :
+                           tool.title === "Sleep Tracker" ? "Track Sleep" :
+                           tool.title === "Stress Buster" ? "Start Exercise" :
+                           tool.title === "Gratitude Journal" ? "Write Entry" :
+                           "Start Session"}
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
           </TabsContent>
 
           <TabsContent value="favorites">
-            <Card>
-              <CardContent className="p-6 text-center">
-                <Heart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="font-semibold mb-2">No Favorites Yet</h3>
-                <p className="text-muted-foreground mb-4">
-                  Start exploring resources and save your favorites for quick
-                  access
-                </p>
-                <Button asChild>
-                  <Link href="#browse">Browse Resources</Link>
-                </Button>
-              </CardContent>
-            </Card>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6 }}
+            >
+              <Card className="bg-white/5 border-white/10 backdrop-blur-xl">
+                <CardContent className="p-12 text-center">
+                  <motion.div
+                    animate={{ 
+                      scale: [1, 1.1, 1],
+                      rotate: [0, 10, 0]
+                    }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    <Heart className="h-16 w-16 text-pink-400 mx-auto mb-6" />
+                  </motion.div>
+                  <p className="mb-6 text-white/80 text-lg">
+                    Start exploring resources and save your favorites for quick access. 
+                    Build your personalized mental health toolkit.
+                  </p>
+                  <Button 
+                    asChild 
+                    className="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700"
+                  >
+                    <Link href="#browse">
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Browse Resources
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            </motion.div>
           </TabsContent>
         </Tabs>
-      </div>
+      </main>
     </div>
   );
 }

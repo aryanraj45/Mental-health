@@ -30,6 +30,9 @@ import {
   IconCaretLeftFilled,
   IconCaretDownFilled,
 } from "@tabler/icons-react";
+import { LanguageSwitcher } from "@/components/language-switcher";
+import { useLanguage } from "@/contexts/language-context";
+import { useTheme } from "next-themes";
 
 const pacifico = Pacifico({
   subsets: ["latin"],
@@ -140,50 +143,52 @@ function ElegantShape({
 
 // --- Main Page Component ---
 export default function HomePage() {
+  const { t } = useLanguage();
+  const { theme, setTheme } = useTheme();
+
+  // Animation variants for Framer Motion (static, compatible)
   const fadeUpVariants = {
     hidden: { opacity: 0, y: 30 },
-    visible: (i: number = 0) => ({
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 1,
-        delay: 0.2 + i * 0.2,
-        ease: [0.25, 0.4, 0.25, 1],
-      },
-    }),
+    visible: { opacity: 1, y: 0, transition: { duration: 1, delay: 0.2 } },
   };
 
   return (
     <div className="w-full bg-background text-foreground relative overflow-hidden">
       <Stars />
       {/* <Header /> */}
-
       {/* Hero Section */}
       <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden">
         {/* Navigation Header */}
         <div className="absolute top-0 left-0 w-full p-6 sm:p-8 z-30">
           <div className="container mx-auto flex justify-between items-center">
             <Link href="/" className="flex items-center gap-3 group">
-              {/* Replaced Heart icon with Image component */}
               <Image
                 src="/logoo.png"
                 alt="Sukoon Logo"
-                width={150} // Adjust width as needed
-                height={200} // Adjust height as needed
+                width={150}
+                height={200}
                 className="transition-all duration-300 group-hover:scale-110 neon-glow"
               />
-            
             </Link>
             <div className="flex items-center gap-4">
+              <LanguageSwitcher />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                className="border-primary/30 text-foreground hover:bg-primary/10 hover:border-primary/50 transition-all duration-300 px-3 py-2"
+              >
+                {theme === "dark" ? "🌙" : "☀️"}
+              </Button>
               <Button
                 variant="outline"
                 asChild
                 className="glass-effect border-primary/30 text-foreground hover:bg-primary/10 hover:border-primary/50 transition-all duration-300 px-6 py-3"
               >
-                <Link href="/login">Login</Link>
+                <Link href="/login">{t("login")}</Link>
               </Button>
               <Button asChild className="btn-neon px-6 py-3">
-                <Link href="/signup">Sign Up</Link>
+                {/* <Link href="/signup">Sign Up</Link> */}
               </Button>
             </div>
           </div>
@@ -213,7 +218,6 @@ export default function HomePage() {
         <div className="relative z-10 container mx-auto px-6 md:px-8">
           <div className="max-w-4xl mx-auto text-center modern-spacing-lg">
             <motion.div
-              custom={0}
               variants={fadeUpVariants}
               initial="hidden"
               animate="visible"
@@ -221,19 +225,18 @@ export default function HomePage() {
             >
               <Heart className="h-6 w-6 text-primary animate-pulse-glow" />
               <span className="text-sm text-muted-foreground tracking-wide font-medium">
-                Sukoon for Students
+                {t('mental-wellness-platform')}
               </span>
             </motion.div>
 
             <motion.div
-              custom={1}
               variants={fadeUpVariants}
               initial="hidden"
               animate="visible"
             >
               <h1 className="text-4xl sm:text-6xl md:text-8xl font-bold mb-6 md:mb-8 tracking-tight">
                 <span className="bg-clip-text text-transparent bg-gradient-to-b from-white to-white/80">
-                  A Safe Space For
+                  {t('mental-wellness-platform')}
                 </span>
                 <br />
                 <span
@@ -242,25 +245,22 @@ export default function HomePage() {
                     pacifico.className
                   )}
                 >
-                  Your Mental Wellbeing
+                  {t('your-mental-wellness')}
                 </span>
               </h1>
             </motion.div>
 
             <motion.div
-              custom={2}
               variants={fadeUpVariants}
               initial="hidden"
               animate="visible"
             >
               <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground mb-12 leading-relaxed font-light tracking-wide max-w-2xl mx-auto">
-                Confidential support, AI companionship, and professional
-                guidance, all designed for the modern student. You're not alone.
+                {t('ai-support')}
               </p>
             </motion.div>
 
             <motion.div
-              custom={3}
               variants={fadeUpVariants}
               initial="hidden"
               animate="visible"
@@ -270,7 +270,7 @@ export default function HomePage() {
                 size="lg"
                 className="btn-neon px-12 py-4 text-xl font-semibold rounded-2xl animate-float"
               >
-                {/* <Link href="/chat">Get Started</Link> */}
+                {/* <Link href="/chat">{t('get-started')}</Link> */}
               </Button>
             </motion.div>
           </div>

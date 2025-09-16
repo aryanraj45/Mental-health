@@ -7,8 +7,9 @@ import { useLanguage } from "@/contexts/language-context"
 
 export function LanguageSwitcher() {
   const { currentLanguage, setLanguage, availableLanguages } = useLanguage()
-  
-  const currentLang = availableLanguages.find(lang => lang.code === currentLanguage) || availableLanguages[0]
+  // Only show English, Hindi, Kashmiri
+  const filteredLanguages = availableLanguages.filter(lang => ['en', 'hi', 'ks'].includes(lang.code))
+  const currentLang = filteredLanguages.find(lang => lang.code === currentLanguage) || filteredLanguages[0]
 
   const handleLanguageChange = (languageCode: string) => {
     setLanguage(languageCode as any)
@@ -25,7 +26,7 @@ export function LanguageSwitcher() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
-        {availableLanguages.map((language) => (
+        {filteredLanguages.map((language) => (
           <DropdownMenuItem
             key={language.code}
             onClick={() => handleLanguageChange(language.code)}
