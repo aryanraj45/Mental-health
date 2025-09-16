@@ -35,6 +35,7 @@ import {
 } from "framer-motion";
 import { cn } from "@/lib/utils";
 import React, { useState, useRef, useEffect, ReactNode } from "react";
+import { MoodAssessmentModal } from "@/components/MoodAssessmentModal";
 
 // --- Reusable UI Components & Hooks ---
 
@@ -164,6 +165,17 @@ const InteractiveGlassCard = ({
   );
 };
 
+// --- Appointment Type ---
+type Appointment = {
+  id: string;
+  date: string;
+  time: string;
+  counselor: string;
+  type: "video" | "phone";
+  status: "confirmed" | "completed";
+  bookingId: string;
+};
+
 // --- Page Data ---
 const upcomingAppointments: Appointment[] = [
   { id: "1", date: "2025-09-20", time: "2:00 PM", counselor: "Dr. Priya Sharma", type: "video", status: "confirmed", bookingId: "MC-123456" },
@@ -250,13 +262,15 @@ export default function DashboardPage() {
 
     return (
         <div className="relative min-h-screen w-full overflow-hidden bg-[#030303] text-white">
-            {/* --- 4. RENDER THE MODAL --- */}
-            <MoodAssessmentModal 
-                isOpen={isModalOpen} 
-                onClose={() => setIsModalOpen(false)}
-                // You can pass the actual user's name here
-                userName="there" 
-            />
+                        {/* --- 4. RENDER THE MODAL --- */}
+                        <MoodAssessmentModal 
+                            isOpen={isModalOpen} 
+                            onClose={() => setIsModalOpen(false)}
+                            // You can pass the actual user's name here
+                            userName="there" 
+                        />
+            
+            {/* MoodAssessmentModal is imported and rendered above, no need to redefine it here */}
 
             <div className="absolute inset-0">
                 <ElegantShape delay={0.3} gradient="from-indigo-500/[0.15]" className="left-[-10%] top-[15%]" parallaxStrength={60} />
@@ -441,4 +455,6 @@ const InfoItem = ({
         className: "h-4 w-4 text-white/70",
       })}
     </div>
+    {children}
+  </div>
 )
