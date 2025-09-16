@@ -15,7 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Header } from "@/components/header";
 import { SuggestedPrompts } from "@/components/suggestedPrompts";
-import { MentalHealthReportChart } from "@/components/mental-health-report-chart";
+// import { MentalHealthReportChart } from "@/components/mental-health-report-chart";
 import {
   Send,
   Mic,
@@ -105,7 +105,7 @@ const contextualResponses = [
   {
     keywords: ["report", "progress", "how am i doing", "گزارش", "رپورٹ"],
     response: "Of course, I can generate a summary of your recent activity. Here is your weekly wellness report:",
-    component: MentalHealthReportChart,
+    // component: MentalHealthReportChart,
   },
   {
     keywords: ["feel better", "improve mood", "what can i do", "کیاہ کرِ"],
