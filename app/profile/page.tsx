@@ -1,7 +1,7 @@
 // app/profile/page.tsx
 "use client";
 
-import React from "react";
+import React, { useState, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image"; // Import the Next.js Image component
 import { motion, useScroll, useTransform } from "framer-motion";
@@ -11,7 +11,9 @@ import { Badge } from "@/components/ui/badge";
 import { Pacifico } from "next/font/google";
 import { cn } from "@/lib/utils";
 // Import all the icons you'll need
-import { User, Edit, Brain, BookOpen, Wind, CheckCircle, Flame, Trophy, Award, Heart } from "lucide-react";
+import { User, Edit, Brain, BookOpen, Wind, CheckCircle, Flame, Trophy, Award, Heart, Camera, Upload, X } from "lucide-react";
+import { Header } from "@/components/header";
+import Head from "next/head";
 
 const pacifico = Pacifico({
   subsets: ["latin"],
@@ -22,6 +24,7 @@ const pacifico = Pacifico({
 // --- Mock Data for the profile page ---
 const userProfile = {
     name: "Alex",
+    profileImage: "/placeholder-user.jpg", // Default profile image
     intention: "To be present in each moment.",
     weeklyReport: {
         dateRange: "September 8 - September 14, 2025",
@@ -148,6 +151,8 @@ function ElegantShape({
 
 // --- This is the main component for your new page ---
 export default function ProfilePage() {
+    const [profileImage, setProfileImage] = useState(userProfile.profileImage);
+    
     const fadeUpVariants = {
         hidden: { opacity: 0, y: 30 },
         visible: (i: number) => ({
@@ -156,7 +161,7 @@ export default function ProfilePage() {
           transition: {
             duration: 0.8,
             delay: 0.2 + i * 0.1,
-            ease: [0.25, 1, 0.5, 1],
+            ease: "easeOut" as const,
           },
         }),
       };
@@ -164,6 +169,7 @@ export default function ProfilePage() {
     return (
         <div className="relative min-h-screen w-full overflow-hidden bg-[#030303] text-white">
             <Stars />
+            <Header />
             
             {/* Background Gradients & Shapes */}
             <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.05] via-transparent to-accent/[0.05] blur-3xl" />
@@ -186,19 +192,16 @@ export default function ProfilePage() {
               />
             </div>
 
-            <header className="sticky top-0 z-50 border-b border-white/10 bg-black/30 backdrop-blur-xl">
-                 <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-                    <Link href="/" className="flex items-center gap-2 group">
-                        <Heart className="h-8 w-8 text-primary transition-all duration-300 group-hover:scale-110 neon-glow" />
-                        <h1 className="text-2xl font-bold text-gradient">MindCare</h1>
-                    </Link>
-                    {/* Your navigation would go here */}
-                </div>
-            </header>
+
             
             <main className="relative z-10 container mx-auto px-4 py-8 max-w-4xl space-y-8">
                 <motion.div initial="hidden" animate="visible" variants={fadeUpVariants} custom={0}>
-                    <ProfileHeader name={userProfile.name} intention={userProfile.intention} />
+                    <ProfileHeader 
+                        name={userProfile.name} 
+                        intention={userProfile.intention} 
+                        profileImage={profileImage}
+                        onImageUpdate={setProfileImage}
+                    />
                 </motion.div>
                 
                 <motion.div initial="hidden" animate="visible" variants={fadeUpVariants} custom={1}>
@@ -212,10 +215,6 @@ export default function ProfilePage() {
                 <motion.div initial="hidden" animate="visible" variants={fadeUpVariants} custom={3}>
                     <Suggestions recommendations={userProfile.recommendations} />
                 </motion.div>
-                
-                <motion.div initial="hidden" animate="visible" variants={fadeUpVariants} custom={4}>
-                    <QuickAccess />
-                </motion.div>
             </main>
 
             <div className="absolute inset-0 bg-gradient-to-t from-[#030303] via-transparent to-[#030303]/80 pointer-events-none" />
@@ -225,20 +224,184 @@ export default function ProfilePage() {
 
 // --- All the UI components for the profile page will go below ---
 
-const ProfileHeader = ({ name, intention }: { name: string; intention: string }) => (
-    <div className="flex items-center gap-6">
-        <div className="w-24 h-24 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center neon-glow-accent">
-            <User className="w-12 h-12 text-white" />
+const ProfileHeader = ({ 
+    name, 
+    intention, 
+    profileImage, 
+    onImageUpdate 
+}: { 
+    name: string; 
+    intention: string; 
+    profileImage: string;
+    onImageUpdate: (image: string) => void;
+}) => {
+    const [isHovering, setIsHovering] = useState(false);
+    const [isDragging, setIsDragging] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const validateAndProcessFile = (file: File) => {
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+            alert('Please select a valid image file (JPG, PNG, GIF, etc.)');
+            return false;
+        }
+        
+        // Validate file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            alert('File size must be less than 5MB');
+            return false;
+        }
+
+        // Create a preview URL
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            if (e.target?.result) {
+                onImageUpdate(e.target.result as string);
+            }
+        };
+        reader.readAsDataURL(file);
+        return true;
+    };
+
+    const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            validateAndProcessFile(file);
+        }
+        // Reset the input value so the same file can be selected again
+        event.target.value = '';
+    };
+
+    const handleDragOver = (event: React.DragEvent) => {
+        event.preventDefault();
+        setIsDragging(true);
+    };
+
+    const handleDragLeave = (event: React.DragEvent) => {
+        event.preventDefault();
+        setIsDragging(false);
+    };
+
+    const handleDrop = (event: React.DragEvent) => {
+        event.preventDefault();
+        setIsDragging(false);
+        
+        const files = Array.from(event.dataTransfer.files);
+        const imageFile = files.find(file => file.type.startsWith('image/'));
+        
+        if (imageFile) {
+            validateAndProcessFile(imageFile);
+        } else if (files.length > 0) {
+            alert('Please drop an image file');
+        }
+    };
+
+    const triggerFileInput = () => {
+        fileInputRef.current?.click();
+    };
+
+    const removeImage = () => {
+        onImageUpdate("/placeholder-user.jpg");
+    };
+
+    return (
+        <div className="flex items-center gap-6">
+            <div 
+                className="relative group cursor-pointer"
+                onMouseEnter={() => setIsHovering(true)}
+                onMouseLeave={() => setIsHovering(false)}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                onClick={triggerFileInput}
+            >
+                <div className={`w-24 h-24 rounded-full overflow-hidden border-2 transition-all duration-200 relative ${
+                    isDragging 
+                        ? 'border-blue-400 scale-105 shadow-lg shadow-blue-400/25' 
+                        : isHovering 
+                            ? 'border-white/40' 
+                            : 'border-white/20'
+                }`}>
+                    {profileImage ? (
+                        <Image
+                            src={profileImage}
+                            alt={`${name}'s profile picture`}
+                            width={96}
+                            height={96}
+                            className="w-full h-full object-cover"
+                        />
+                    ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center neon-glow-accent">
+                            <User className="w-12 h-12 text-white" />
+                        </div>
+                    )}
+                    
+                    {/* Hover/Drag overlay */}
+                    <div className={`absolute inset-0 bg-black/60 flex flex-col items-center justify-center transition-opacity duration-200 ${
+                        isHovering || isDragging ? 'opacity-100' : 'opacity-0'
+                    }`}>
+                        <Camera className="w-6 h-6 text-white mb-1" />
+                        <span className="text-xs text-white/80 text-center px-1">
+                            {isDragging ? 'Drop here' : 'Change photo'}
+                        </span>
+                    </div>
+                </div>
+
+                {/* Image upload options - only show on hover, not when dragging */}
+                {isHovering && !isDragging && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9, y: -10 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 bg-gray-900/90 backdrop-blur border border-white/10 rounded-lg p-2 z-50 min-w-[140px] shadow-xl"
+                        onClick={(e) => e.stopPropagation()} // Prevent triggering file input when clicking options
+                    >
+                        <button
+                            onClick={triggerFileInput}
+                            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-white hover:bg-white/10 rounded transition-colors"
+                        >
+                            <Upload className="w-4 h-4" />
+                            Upload Photo
+                        </button>
+                        {profileImage !== "/placeholder-user.jpg" && (
+                            <button
+                                onClick={removeImage}
+                                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 rounded transition-colors"
+                            >
+                                <X className="w-4 h-4" />
+                                Remove Photo
+                            </button>
+                        )}
+                        <div className="px-3 py-1 text-xs text-white/50 border-t border-white/10 mt-1">
+                            Drag & drop or click to upload
+                        </div>
+                    </motion.div>
+                )}
+
+                {/* Hidden file input */}
+                <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                />
+            </div>
+            
+            <div>
+                <h2 className="text-4xl font-bold text-white">Good evening, {name}.</h2>
+                <p className="text-white/60 text-lg mt-1 italic flex items-center gap-2">
+                    "{intention}"
+                    <button className="text-white/40 hover:text-white transition-colors">
+                        <Edit className="h-4 w-4" />
+                    </button>
+                </p>
+                <p className="text-white/40 text-sm mt-2">
+                    Click or drag an image to update your profile picture
+                </p>
+            </div>
         </div>
-        <div>
-            <h2 className="text-4xl font-bold text-white">Good evening, {name}.</h2>
-            <p className="text-white/60 text-lg mt-1 italic flex items-center gap-2">
-                "{intention}"
-                <button className="text-white/40 hover:text-white transition-colors"><Edit className="h-4 w-4" /></button>
-            </p>
-        </div>
-    </div>
-);
+    );
+};
 
 const WeeklyReflection = ({ report }: { report: typeof userProfile.weeklyReport }) => (
     <Card className="glass-effect border-white/[0.08] backdrop-blur-lg">
@@ -249,7 +412,7 @@ const WeeklyReflection = ({ report }: { report: typeof userProfile.weeklyReport 
         <CardContent className="space-y-8">
             <div>
                 <h3 className="font-semibold text-lg text-white/90 mb-3">Your Mood Journey</h3>
-                <div className="w-full h-48 bg-white/5 rounded-lg border border-white/10 overflow-x-auto flex items-center">
+                <div className="w-full h-100 bg-white/5 rounded-lg border border-white/10 overflow-x-auto flex items-center">
                     <Image 
                         src="/chart.png" 
                         alt="Weekly mood flow chart" 
@@ -318,34 +481,20 @@ const StreaksAndMilestones = ({ streaks }: { streaks: typeof userProfile.streaks
 const Suggestions = ({ recommendations }: { recommendations: typeof userProfile.recommendations }) => (
     <div>
         <h2 className="text-2xl font-bold text-white mb-4">A Few Ideas for the Coming Week</h2>
-        .
         <div className="grid md:grid-cols-2 gap-4">
-            {recommendations.map(rec => (
-                <Link key={rec.title} href={rec.link} className="block p-4 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 transition-colors">
-                    <p className="font-bold text-white">{rec.title}</p>
-                    <p className="text-white/60 text-sm mt-1">{rec.description}</p>
-                </Link>
-            ))}
-        </div>
-    </div>
-);
-
-const QuickAccess = () => (
-    <div className="mt-12">
-        <h2 className="text-2xl font-bold text-white mb-4 text-center">Quick Access</h2>
-        <div className="flex flex-wrap justify-center gap-4">
-            <Button asChild variant="outline" className="glass-effect border-primary/30 text-foreground hover:bg-primary/10 hover:border-primary/50 transition-all duration-300 px-6 py-3 rounded-full">
+            <Button asChild variant="outline" className="glass-effect border-primary/30 text-white hover:text-white hover:bg-primary/10 hover:border-primary/50 transition-all duration-300 px-6 py-3 rounded-full">
                 <Link href="/journal">View Full Journal History</Link>
             </Button>
-            <Button asChild variant="outline" className="glass-effect border-primary/30 text-foreground hover:bg-primary/10 hover:border-primary/50 transition-all duration-300 px-6 py-3 rounded-full">
+            <Button asChild variant="outline" className="glass-effect border-primary/30 text-white hover:text-white hover:bg-primary/10 hover:border-primary/50 transition-all duration-300 px-6 py-3 rounded-full">
                 <Link href="/favorites">My Favorite Meditations</Link>
             </Button>
-            <Button asChild variant="outline" className="glass-effect border-primary/30 text-foreground hover:bg-primary/10 hover:border-primary/50 transition-all duration-300 px-6 py-3 rounded-full">
+            <Button asChild variant="outline" className="glass-effect border-primary/30 text-white hover:text-white hover:bg-primary/10 hover:border-primary/50 transition-all duration-300 px-6 py-3 rounded-full">
                 <Link href="/goals">Review My Goals</Link>
             </Button>
-            <Button asChild variant="outline" className="glass-effect border-primary/30 text-foreground hover:bg-primary/10 hover:border-primary/50 transition-all duration-300 px-6 py-3 rounded-full">
+            <Button asChild variant="outline" className="glass-effect border-primary/30 text-white hover:text-white hover:bg-primary/10 hover:border-primary/50 transition-all duration-300 px-6 py-3 rounded-full">
                 <Link href="/settings">Settings & Preferences</Link>
             </Button>
         </div>
     </div>
 );
+
