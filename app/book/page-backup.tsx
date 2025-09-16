@@ -1,30 +1,46 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Calendar, Clock, User, Shield, Heart, CheckCircle, Phone, Video, MapPin } from "lucide-react"
-import Link from "next/link"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Calendar,
+  Clock,
+  User,
+  Shield,
+  Heart,
+  CheckCircle,
+  Phone,
+  Video,
+  MapPin,
+} from "lucide-react";
+import Link from "next/link";
 
 interface TimeSlot {
-  id: string
-  time: string
-  available: boolean
+  id: string;
+  time: string;
+  available: boolean;
 }
 
 interface Counselor {
-  id: string
-  name: string
-  specialization: string[]
-  languages: string[]
-  experience: string
-  avatar: string
+  id: string;
+  name: string;
+  specialization: string[];
+  languages: string[];
+  experience: string;
+  avatar: string;
 }
 
 const counselors: Counselor[] = [
@@ -39,7 +55,11 @@ const counselors: Counselor[] = [
   {
     id: "2",
     name: "Dr. Rajesh Kumar",
-    specialization: ["Relationship Issues", "Social Anxiety", "Career Counseling"],
+    specialization: [
+      "Relationship Issues",
+      "Social Anxiety",
+      "Career Counseling",
+    ],
     languages: ["English", "Hindi", "Bengali"],
     experience: "12 years",
     avatar: "/professional-counselor-man.jpg",
@@ -52,7 +72,7 @@ const counselors: Counselor[] = [
     experience: "10 years",
     avatar: "/professional-counselor-woman-therapist.jpg",
   },
-]
+];
 
 const timeSlots: TimeSlot[] = [
   { id: "1", time: "09:00 AM", available: true },
@@ -62,17 +82,17 @@ const timeSlots: TimeSlot[] = [
   { id: "5", time: "03:00 PM", available: true },
   { id: "6", time: "04:00 PM", available: true },
   { id: "7", time: "05:00 PM", available: false },
-]
+];
 
 export default function BookingPage() {
-  const [selectedDate, setSelectedDate] = useState<string>("")
-  const [selectedTime, setSelectedTime] = useState<string>("")
-  const [selectedCounselor, setSelectedCounselor] = useState<string>("")
-  const [sessionType, setSessionType] = useState<string>("")
-  const [isAnonymous, setIsAnonymous] = useState(false)
-  const [concerns, setConcerns] = useState<string>("")
-  const [isUrgent, setIsUrgent] = useState(false)
-  const [step, setStep] = useState(1)
+  const [selectedDate, setSelectedDate] = useState<string>("");
+  const [selectedTime, setSelectedTime] = useState<string>("");
+  const [selectedCounselor, setSelectedCounselor] = useState<string>("");
+  const [sessionType, setSessionType] = useState<string>("");
+  const [isAnonymous, setIsAnonymous] = useState(false);
+  const [concerns, setConcerns] = useState<string>("");
+  const [isUrgent, setIsUrgent] = useState(false);
+  const [step, setStep] = useState(1);
 
   const handleBooking = () => {
     // Here you would typically send the booking data to your backend
@@ -84,24 +104,28 @@ export default function BookingPage() {
       isAnonymous,
       concerns,
       isUrgent,
-    })
-    setStep(4) // Move to confirmation step
-  }
+    });
+    setStep(4); // Move to confirmation step
+  };
 
   const generateDates = () => {
-    const dates = []
-    const today = new Date()
+    const dates = [];
+    const today = new Date();
     for (let i = 1; i <= 14; i++) {
-      const date = new Date(today)
-      date.setDate(today.getDate() + i)
+      const date = new Date(today);
+      date.setDate(today.getDate() + i);
       dates.push({
         value: date.toISOString().split("T")[0],
-        label: date.toLocaleDateString("en-IN", { weekday: "short", month: "short", day: "numeric" }),
+        label: date.toLocaleDateString("en-IN", {
+          weekday: "short",
+          month: "short",
+          day: "numeric",
+        }),
         disabled: date.getDay() === 0, // Disable Sundays
-      })
+      });
     }
-    return dates
-  }
+    return dates;
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -110,7 +134,7 @@ export default function BookingPage() {
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <Heart className="h-8 w-8 text-primary" />
-            <h1 className="text-2xl font-bold text-foreground">MindCare</h1>
+            <h1 className="text-2xl font-bold text-foreground">Sukoon</h1>
           </Link>
           <Badge variant="secondary" className="flex items-center gap-1">
             <Calendar className="h-4 w-4" />
@@ -124,8 +148,9 @@ export default function BookingPage() {
         <Alert className="mb-6 border-primary/50 bg-primary/10">
           <Shield className="h-4 w-4" />
           <AlertDescription>
-            <strong>Your Privacy Matters:</strong> All sessions are confidential. You can choose to book anonymously,
-            and your personal information is protected according to our privacy policy.
+            <strong>Your Privacy Matters:</strong> All sessions are
+            confidential. You can choose to book anonymously, and your personal
+            information is protected according to our privacy policy.
           </AlertDescription>
         </Alert>
 
@@ -136,13 +161,23 @@ export default function BookingPage() {
               <div key={stepNumber} className="flex items-center">
                 <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                    step >= stepNumber ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                    step >= stepNumber
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground"
                   }`}
                 >
-                  {step > stepNumber ? <CheckCircle className="h-4 w-4" /> : stepNumber}
+                  {step > stepNumber ? (
+                    <CheckCircle className="h-4 w-4" />
+                  ) : (
+                    stepNumber
+                  )}
                 </div>
                 {stepNumber < 4 && (
-                  <div className={`w-12 h-0.5 mx-2 ${step > stepNumber ? "bg-primary" : "bg-muted"}`} />
+                  <div
+                    className={`w-12 h-0.5 mx-2 ${
+                      step > stepNumber ? "bg-primary" : "bg-muted"
+                    }`}
+                  />
                 )}
               </div>
             ))}
@@ -157,7 +192,9 @@ export default function BookingPage() {
                 <Calendar className="h-5 w-5 text-primary" />
                 Select Date & Time
               </CardTitle>
-              <CardDescription>Choose when you'd like to have your session</CardDescription>
+              <CardDescription>
+                Choose when you'd like to have your session
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div>
@@ -166,14 +203,20 @@ export default function BookingPage() {
                   {generateDates().map((date) => (
                     <Button
                       key={date.value}
-                      variant={selectedDate === date.value ? "default" : "outline"}
+                      variant={
+                        selectedDate === date.value ? "default" : "outline"
+                      }
                       className="h-auto p-3 text-left"
                       disabled={date.disabled}
                       onClick={() => setSelectedDate(date.value)}
                     >
                       <div>
                         <div className="font-medium">{date.label}</div>
-                        {date.disabled && <div className="text-xs text-muted-foreground">Closed</div>}
+                        {date.disabled && (
+                          <div className="text-xs text-muted-foreground">
+                            Closed
+                          </div>
+                        )}
                       </div>
                     </Button>
                   ))}
@@ -187,7 +230,9 @@ export default function BookingPage() {
                     {timeSlots.map((slot) => (
                       <Button
                         key={slot.id}
-                        variant={selectedTime === slot.id ? "default" : "outline"}
+                        variant={
+                          selectedTime === slot.id ? "default" : "outline"
+                        }
                         disabled={!slot.available}
                         onClick={() => setSelectedTime(slot.id)}
                         className="flex items-center gap-2"
@@ -201,7 +246,10 @@ export default function BookingPage() {
               )}
 
               <div className="flex justify-end">
-                <Button onClick={() => setStep(2)} disabled={!selectedDate || !selectedTime}>
+                <Button
+                  onClick={() => setStep(2)}
+                  disabled={!selectedDate || !selectedTime}
+                >
                   Next: Choose Counselor
                 </Button>
               </div>
@@ -218,14 +266,25 @@ export default function BookingPage() {
                 Choose Your Counselor
               </CardTitle>
               <CardDescription>
-                Select a counselor based on their specialization and language preference
+                Select a counselor based on their specialization and language
+                preference
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <RadioGroup value={selectedCounselor} onValueChange={setSelectedCounselor}>
+              <RadioGroup
+                value={selectedCounselor}
+                onValueChange={setSelectedCounselor}
+              >
                 {counselors.map((counselor) => (
-                  <div key={counselor.id} className="flex items-start space-x-3 p-4 border rounded-lg">
-                    <RadioGroupItem value={counselor.id} id={counselor.id} className="mt-1" />
+                  <div
+                    key={counselor.id}
+                    className="flex items-start space-x-3 p-4 border rounded-lg"
+                  >
+                    <RadioGroupItem
+                      value={counselor.id}
+                      id={counselor.id}
+                      className="mt-1"
+                    />
                     <div className="flex-1">
                       <div className="flex items-start gap-4">
                         <img
@@ -235,21 +294,33 @@ export default function BookingPage() {
                         />
                         <div className="flex-1">
                           <h3 className="font-semibold">{counselor.name}</h3>
-                          <p className="text-sm text-muted-foreground mb-2">{counselor.experience} experience</p>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            {counselor.experience} experience
+                          </p>
                           <div className="space-y-2">
                             <div>
-                              <span className="text-sm font-medium">Specializations: </span>
+                              <span className="text-sm font-medium">
+                                Specializations:{" "}
+                              </span>
                               <div className="flex flex-wrap gap-1 mt-1">
                                 {counselor.specialization.map((spec) => (
-                                  <Badge key={spec} variant="secondary" className="text-xs">
+                                  <Badge
+                                    key={spec}
+                                    variant="secondary"
+                                    className="text-xs"
+                                  >
                                     {spec}
                                   </Badge>
                                 ))}
                               </div>
                             </div>
                             <div>
-                              <span className="text-sm font-medium">Languages: </span>
-                              <span className="text-sm text-muted-foreground">{counselor.languages.join(", ")}</span>
+                              <span className="text-sm font-medium">
+                                Languages:{" "}
+                              </span>
+                              <span className="text-sm text-muted-foreground">
+                                {counselor.languages.join(", ")}
+                              </span>
                             </div>
                           </div>
                         </div>
@@ -260,9 +331,14 @@ export default function BookingPage() {
               </RadioGroup>
 
               <div className="flex items-center space-x-2">
-                <Checkbox id="anonymous" checked={isAnonymous} onCheckedChange={setIsAnonymous} />
+                <Checkbox
+                  id="anonymous"
+                  checked={isAnonymous}
+                  onCheckedChange={setIsAnonymous}
+                />
                 <Label htmlFor="anonymous" className="text-sm">
-                  Book anonymously (counselor won't see your name until the session)
+                  Book anonymously (counselor won't see your name until the
+                  session)
                 </Label>
               </div>
 
@@ -270,7 +346,10 @@ export default function BookingPage() {
                 <Button variant="outline" onClick={() => setStep(1)}>
                   Back
                 </Button>
-                <Button onClick={() => setStep(3)} disabled={!selectedCounselor}>
+                <Button
+                  onClick={() => setStep(3)}
+                  disabled={!selectedCounselor}
+                >
                   Next: Session Details
                 </Button>
               </div>
@@ -283,12 +362,19 @@ export default function BookingPage() {
           <Card>
             <CardHeader>
               <CardTitle>Session Details</CardTitle>
-              <CardDescription>Provide additional information to help us prepare for your session</CardDescription>
+              <CardDescription>
+                Provide additional information to help us prepare for your
+                session
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div>
                 <Label className="text-base font-medium">Session Type</Label>
-                <RadioGroup value={sessionType} onValueChange={setSessionType} className="mt-2">
+                <RadioGroup
+                  value={sessionType}
+                  onValueChange={setSessionType}
+                  className="mt-2"
+                >
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="video" id="video" />
                     <Label htmlFor="video" className="flex items-center gap-2">
@@ -305,7 +391,10 @@ export default function BookingPage() {
                   </div>
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="in-person" id="in-person" />
-                    <Label htmlFor="in-person" className="flex items-center gap-2">
+                    <Label
+                      htmlFor="in-person"
+                      className="flex items-center gap-2"
+                    >
                       <MapPin className="h-4 w-4" />
                       In-Person (Campus Counseling Center)
                     </Label>
@@ -326,12 +415,17 @@ export default function BookingPage() {
                   rows={4}
                 />
                 <p className="text-xs text-muted-foreground mt-1">
-                  This information helps your counselor prepare, but you can discuss anything during the session.
+                  This information helps your counselor prepare, but you can
+                  discuss anything during the session.
                 </p>
               </div>
 
               <div className="flex items-center space-x-2">
-                <Checkbox id="urgent" checked={isUrgent} onCheckedChange={setIsUrgent} />
+                <Checkbox
+                  id="urgent"
+                  checked={isUrgent}
+                  onCheckedChange={setIsUrgent}
+                />
                 <Label htmlFor="urgent" className="text-sm">
                   This is urgent - I need support as soon as possible
                 </Label>
@@ -340,8 +434,9 @@ export default function BookingPage() {
               {isUrgent && (
                 <Alert className="border-destructive/50 bg-destructive/10">
                   <AlertDescription>
-                    For immediate crisis support, please call: NIMHANS (080-26995000), Vandrevala Foundation
-                    (9999666555), or visit your nearest emergency room.
+                    For immediate crisis support, please call: NIMHANS
+                    (080-26995000), Vandrevala Foundation (9999666555), or visit
+                    your nearest emergency room.
                   </AlertDescription>
                 </Alert>
               )}
@@ -366,7 +461,9 @@ export default function BookingPage() {
                 <CheckCircle className="h-8 w-8 text-primary" />
               </div>
               <CardTitle>Session Booked Successfully!</CardTitle>
-              <CardDescription>Your appointment has been confirmed</CardDescription>
+              <CardDescription>
+                Your appointment has been confirmed
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="bg-muted/50 rounded-lg p-4 space-y-3">
@@ -379,20 +476,27 @@ export default function BookingPage() {
                       month: "long",
                       day: "numeric",
                     })}{" "}
-                    at {timeSlots.find((slot) => slot.id === selectedTime)?.time}
+                    at{" "}
+                    {timeSlots.find((slot) => slot.id === selectedTime)?.time}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="font-medium">Counselor:</span>
-                  <span>{counselors.find((c) => c.id === selectedCounselor)?.name}</span>
+                  <span>
+                    {counselors.find((c) => c.id === selectedCounselor)?.name}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="font-medium">Session Type:</span>
-                  <span className="capitalize">{sessionType?.replace("-", " ")}</span>
+                  <span className="capitalize">
+                    {sessionType?.replace("-", " ")}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="font-medium">Booking ID:</span>
-                  <span className="font-mono">MC-{Date.now().toString().slice(-6)}</span>
+                  <span className="font-mono">
+                    MC-{Date.now().toString().slice(-6)}
+                  </span>
                 </div>
               </div>
 
@@ -400,10 +504,19 @@ export default function BookingPage() {
                 <AlertDescription>
                   <strong>What's Next:</strong>
                   <ul className="list-disc list-inside mt-2 space-y-1 text-sm">
-                    <li>You'll receive a confirmation email with session details</li>
-                    <li>A reminder will be sent 24 hours before your appointment</li>
-                    <li>For video calls, you'll receive a secure meeting link</li>
-                    <li>You can reschedule or cancel up to 4 hours before the session</li>
+                    <li>
+                      You'll receive a confirmation email with session details
+                    </li>
+                    <li>
+                      A reminder will be sent 24 hours before your appointment
+                    </li>
+                    <li>
+                      For video calls, you'll receive a secure meeting link
+                    </li>
+                    <li>
+                      You can reschedule or cancel up to 4 hours before the
+                      session
+                    </li>
                   </ul>
                 </AlertDescription>
               </Alert>
@@ -412,7 +525,11 @@ export default function BookingPage() {
                 <Button asChild className="flex-1">
                   <Link href="/dashboard">View My Appointments</Link>
                 </Button>
-                <Button variant="outline" asChild className="flex-1 bg-transparent">
+                <Button
+                  variant="outline"
+                  asChild
+                  className="flex-1 bg-transparent"
+                >
                   <Link href="/">Return Home</Link>
                 </Button>
               </div>
@@ -421,5 +538,5 @@ export default function BookingPage() {
         )}
       </div>
     </div>
-  )
+  );
 }

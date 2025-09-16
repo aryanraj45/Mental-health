@@ -1,12 +1,24 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   BookOpen,
   Video,
@@ -22,29 +34,30 @@ import {
   Zap,
   Moon,
   Target,
-} from "lucide-react"
-import Link from "next/link"
+} from "lucide-react";
+import Link from "next/link";
 
 interface Resource {
-  id: string
-  title: string
-  description: string
-  type: "article" | "video" | "audio" | "tool"
-  category: string
-  duration: string
-  language: string
-  difficulty: "beginner" | "intermediate" | "advanced"
-  rating: number
-  thumbnail: string
-  author: string
-  tags: string[]
+  id: string;
+  title: string;
+  description: string;
+  type: "article" | "video" | "audio" | "tool";
+  category: string;
+  duration: string;
+  language: string;
+  difficulty: "beginner" | "intermediate" | "advanced";
+  rating: number;
+  thumbnail: string;
+  author: string;
+  tags: string[];
 }
 
 const resources: Resource[] = [
   {
     id: "1",
     title: "Understanding Anxiety: A Student's Guide",
-    description: "Learn about anxiety symptoms, triggers, and coping strategies specifically for college students.",
+    description:
+      "Learn about anxiety symptoms, triggers, and coping strategies specifically for college students.",
     type: "article",
     category: "Anxiety",
     duration: "8 min read",
@@ -58,7 +71,8 @@ const resources: Resource[] = [
   {
     id: "2",
     title: "Guided Meditation for Exam Stress",
-    description: "A 15-minute guided meditation to help you relax and focus before exams.",
+    description:
+      "A 15-minute guided meditation to help you relax and focus before exams.",
     type: "audio",
     category: "Stress Management",
     duration: "15 min",
@@ -72,7 +86,8 @@ const resources: Resource[] = [
   {
     id: "3",
     title: "Building Healthy Sleep Habits",
-    description: "Video guide on creating a sleep routine that supports your mental health and academic performance.",
+    description:
+      "Video guide on creating a sleep routine that supports your mental health and academic performance.",
     type: "video",
     category: "Sleep & Wellness",
     duration: "12 min",
@@ -95,7 +110,7 @@ const resources: Resource[] = [
     difficulty: "beginner",
     rating: 4.6,
     thumbnail: "/mood-tracker-tool-thumbnail.jpg",
-    author: "MindCare Team",
+    author: "Sukoon Team",
     tags: ["mood", "tracking", "journal", "self-care"],
   },
   {
@@ -116,7 +131,8 @@ const resources: Resource[] = [
   {
     id: "6",
     title: "Breathing Exercises for Panic Attacks",
-    description: "Learn effective breathing techniques to manage panic attacks and acute anxiety episodes.",
+    description:
+      "Learn effective breathing techniques to manage panic attacks and acute anxiety episodes.",
     type: "video",
     category: "Crisis Management",
     duration: "8 min",
@@ -127,7 +143,7 @@ const resources: Resource[] = [
     author: "Anxiety Specialist",
     tags: ["panic", "breathing", "crisis", "techniques"],
   },
-]
+];
 
 const categories = [
   "All",
@@ -138,71 +154,79 @@ const categories = [
   "Social Anxiety",
   "Crisis Management",
   "Self-Assessment",
-]
-const languages = ["All", "English", "Hindi", "Tamil", "Bengali", "Telugu"]
-const resourceTypes = ["All", "article", "video", "audio", "tool"]
+];
+const languages = ["All", "English", "Hindi", "Tamil", "Bengali", "Telugu"];
+const resourceTypes = ["All", "article", "video", "audio", "tool"];
 
 export default function ResourcesPage() {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState("All")
-  const [selectedLanguage, setSelectedLanguage] = useState("All")
-  const [selectedType, setSelectedType] = useState("All")
-  const [filteredResources, setFilteredResources] = useState(resources)
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedLanguage, setSelectedLanguage] = useState("All");
+  const [selectedType, setSelectedType] = useState("All");
+  const [filteredResources, setFilteredResources] = useState(resources);
 
   const filterResources = () => {
-    let filtered = resources
+    let filtered = resources;
 
     if (searchTerm) {
       filtered = filtered.filter(
         (resource) =>
           resource.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          resource.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          resource.tags.some((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase())),
-      )
+          resource.description
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          resource.tags.some((tag) =>
+            tag.toLowerCase().includes(searchTerm.toLowerCase())
+          )
+      );
     }
 
     if (selectedCategory !== "All") {
-      filtered = filtered.filter((resource) => resource.category === selectedCategory)
+      filtered = filtered.filter(
+        (resource) => resource.category === selectedCategory
+      );
     }
 
     if (selectedLanguage !== "All") {
-      filtered = filtered.filter((resource) => resource.language === selectedLanguage)
+      filtered = filtered.filter(
+        (resource) => resource.language === selectedLanguage
+      );
     }
 
     if (selectedType !== "All") {
-      filtered = filtered.filter((resource) => resource.type === selectedType)
+      filtered = filtered.filter((resource) => resource.type === selectedType);
     }
 
-    setFilteredResources(filtered)
-  }
+    setFilteredResources(filtered);
+  };
 
   const getResourceIcon = (type: string) => {
     switch (type) {
       case "article":
-        return <BookOpen className="h-5 w-5" />
+        return <BookOpen className="h-5 w-5" />;
       case "video":
-        return <Video className="h-5 w-5" />
+        return <Video className="h-5 w-5" />;
       case "audio":
-        return <Headphones className="h-5 w-5" />
+        return <Headphones className="h-5 w-5" />;
       case "tool":
-        return <Zap className="h-5 w-5" />
+        return <Zap className="h-5 w-5" />;
       default:
-        return <BookOpen className="h-5 w-5" />
+        return <BookOpen className="h-5 w-5" />;
     }
-  }
+  };
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case "beginner":
-        return "bg-green-100 text-green-800"
+        return "bg-green-100 text-green-800";
       case "intermediate":
-        return "bg-yellow-100 text-yellow-800"
+        return "bg-yellow-100 text-yellow-800";
       case "advanced":
-        return "bg-red-100 text-red-800"
+        return "bg-red-100 text-red-800";
       default:
-        return "bg-gray-100 text-gray-800"
+        return "bg-gray-100 text-gray-800";
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -211,7 +235,7 @@ export default function ResourcesPage() {
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <Heart className="h-8 w-8 text-primary" />
-            <h1 className="text-2xl font-bold text-foreground">MindCare</h1>
+            <h1 className="text-2xl font-bold text-foreground">Sukoon</h1>
           </Link>
           <Badge variant="secondary" className="flex items-center gap-1">
             <BookOpen className="h-4 w-4" />
@@ -223,10 +247,13 @@ export default function ResourcesPage() {
       <div className="container mx-auto px-4 py-6 max-w-7xl">
         {/* Hero Section */}
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold mb-4">Mental Health Resource Hub</h2>
+          <h2 className="text-3xl font-bold mb-4">
+            Mental Health Resource Hub
+          </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Discover evidence-based resources, tools, and content to support your mental health journey. Available in
-            multiple languages and designed specifically for students.
+            Discover evidence-based resources, tools, and content to support
+            your mental health journey. Available in multiple languages and
+            designed specifically for students.
           </p>
         </div>
 
@@ -249,7 +276,10 @@ export default function ResourcesPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+            <Select
+              value={selectedCategory}
+              onValueChange={setSelectedCategory}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select Category" />
               </SelectTrigger>
@@ -262,7 +292,10 @@ export default function ResourcesPage() {
               </SelectContent>
             </Select>
 
-            <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
+            <Select
+              value={selectedLanguage}
+              onValueChange={setSelectedLanguage}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select Language" />
               </SelectTrigger>
@@ -282,7 +315,9 @@ export default function ResourcesPage() {
               <SelectContent>
                 {resourceTypes.map((type) => (
                   <SelectItem key={type} value={type}>
-                    {type === "All" ? "All Types" : type.charAt(0).toUpperCase() + type.slice(1)}
+                    {type === "All"
+                      ? "All Types"
+                      : type.charAt(0).toUpperCase() + type.slice(1)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -300,18 +335,31 @@ export default function ResourcesPage() {
           <TabsContent value="browse">
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredResources.map((resource) => (
-                <Card key={resource.id} className="hover:shadow-lg transition-shadow">
+                <Card
+                  key={resource.id}
+                  className="hover:shadow-lg transition-shadow"
+                >
                   <div className="relative">
                     <img
-                      src={resource.thumbnail || "/placeholder.svg?height=200&width=400"}
+                      src={
+                        resource.thumbnail ||
+                        "/placeholder.svg?height=200&width=400"
+                      }
                       alt={resource.title}
                       className="w-full h-48 object-cover rounded-t-lg"
                     />
                     <div className="absolute top-2 left-2">
-                      <Badge className={`${getDifficultyColor(resource.difficulty)}`}>{resource.difficulty}</Badge>
+                      <Badge
+                        className={`${getDifficultyColor(resource.difficulty)}`}
+                      >
+                        {resource.difficulty}
+                      </Badge>
                     </div>
                     <div className="absolute top-2 right-2">
-                      <Badge variant="secondary" className="flex items-center gap-1">
+                      <Badge
+                        variant="secondary"
+                        className="flex items-center gap-1"
+                      >
                         {getResourceIcon(resource.type)}
                         {resource.type}
                       </Badge>
@@ -319,13 +367,17 @@ export default function ResourcesPage() {
                   </div>
                   <CardHeader className="pb-2">
                     <div className="flex items-start justify-between">
-                      <CardTitle className="text-lg leading-tight">{resource.title}</CardTitle>
+                      <CardTitle className="text-lg leading-tight">
+                        {resource.title}
+                      </CardTitle>
                       <div className="flex items-center gap-1 text-sm">
                         <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                         {resource.rating}
                       </div>
                     </div>
-                    <CardDescription className="text-sm">{resource.description}</CardDescription>
+                    <CardDescription className="text-sm">
+                      {resource.description}
+                    </CardDescription>
                   </CardHeader>
                   <CardContent className="pt-0">
                     <div className="space-y-3">
@@ -341,14 +393,22 @@ export default function ResourcesPage() {
                       </div>
                       <div className="flex flex-wrap gap-1">
                         {resource.tags.slice(0, 3).map((tag) => (
-                          <Badge key={tag} variant="outline" className="text-xs">
+                          <Badge
+                            key={tag}
+                            variant="outline"
+                            className="text-xs"
+                          >
                             {tag}
                           </Badge>
                         ))}
                       </div>
                       <div className="flex gap-2">
                         <Button size="sm" className="flex-1">
-                          {resource.type === "tool" ? "Use Tool" : resource.type === "video" ? "Watch" : "Read"}
+                          {resource.type === "tool"
+                            ? "Use Tool"
+                            : resource.type === "video"
+                            ? "Watch"
+                            : "Read"}
                         </Button>
                         <Button size="sm" variant="outline">
                           <Heart className="h-4 w-4" />
@@ -369,7 +429,9 @@ export default function ResourcesPage() {
                     <Brain className="h-6 w-6 text-primary" />
                   </div>
                   <CardTitle>Mood Tracker</CardTitle>
-                  <CardDescription>Track your daily emotions and identify patterns over time</CardDescription>
+                  <CardDescription>
+                    Track your daily emotions and identify patterns over time
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Button className="w-full">Start Tracking</Button>
@@ -382,7 +444,9 @@ export default function ResourcesPage() {
                     <Target className="h-6 w-6 text-secondary" />
                   </div>
                   <CardTitle>Anxiety Assessment</CardTitle>
-                  <CardDescription>Quick self-assessment to understand your anxiety levels</CardDescription>
+                  <CardDescription>
+                    Quick self-assessment to understand your anxiety levels
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Button className="w-full">Take Assessment</Button>
@@ -395,7 +459,10 @@ export default function ResourcesPage() {
                     <Moon className="h-6 w-6 text-accent" />
                   </div>
                   <CardTitle>Sleep Tracker</CardTitle>
-                  <CardDescription>Monitor your sleep patterns and get personalized recommendations</CardDescription>
+                  <CardDescription>
+                    Monitor your sleep patterns and get personalized
+                    recommendations
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Button className="w-full">Track Sleep</Button>
@@ -408,7 +475,9 @@ export default function ResourcesPage() {
                     <Zap className="h-6 w-6 text-primary" />
                   </div>
                   <CardTitle>Stress Buster</CardTitle>
-                  <CardDescription>Quick 5-minute exercises to reduce stress and anxiety</CardDescription>
+                  <CardDescription>
+                    Quick 5-minute exercises to reduce stress and anxiety
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Button className="w-full">Start Exercise</Button>
@@ -421,7 +490,9 @@ export default function ResourcesPage() {
                     <Heart className="h-6 w-6 text-secondary" />
                   </div>
                   <CardTitle>Gratitude Journal</CardTitle>
-                  <CardDescription>Daily gratitude practice to improve your mental wellbeing</CardDescription>
+                  <CardDescription>
+                    Daily gratitude practice to improve your mental wellbeing
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Button className="w-full">Write Entry</Button>
@@ -434,7 +505,9 @@ export default function ResourcesPage() {
                     <Play className="h-6 w-6 text-accent" />
                   </div>
                   <CardTitle>Guided Meditation</CardTitle>
-                  <CardDescription>Collection of meditation sessions for different needs</CardDescription>
+                  <CardDescription>
+                    Collection of meditation sessions for different needs
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Button className="w-full">Start Session</Button>
@@ -449,7 +522,8 @@ export default function ResourcesPage() {
                 <Heart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <h3 className="font-semibold mb-2">No Favorites Yet</h3>
                 <p className="text-muted-foreground mb-4">
-                  Start exploring resources and save your favorites for quick access
+                  Start exploring resources and save your favorites for quick
+                  access
                 </p>
                 <Button asChild>
                   <Link href="#browse">Browse Resources</Link>
@@ -460,5 +534,5 @@ export default function ResourcesPage() {
         </Tabs>
       </div>
     </div>
-  )
+  );
 }

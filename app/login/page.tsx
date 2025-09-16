@@ -1,275 +1,266 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Heart, User, Shield, Mail, Lock } from "lucide-react";
+import { motion } from "framer-motion";
+import { Pacifico } from "next/font/google";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
-let THREE: any; // For global three.js use
+// --- Font Definition from HomePage ---
+const pacifico = Pacifico({
+  subsets: ["latin"],
+  weight: ["400"],
+  variable: "--font-pacifico",
+});
 
+// --- Helper & Effect Components from HomePage ---
+
+const Stars = () => {
+  const randomMove = () => Math.random() * 4 - 2;
+  const randomOpacity = () => Math.random() * 0.5 + 0.5;
+  const randomSize = () => Math.random() * 2 + 1;
+
+  return (
+    <div className="absolute inset-0 h-full w-full z-0">
+      {[...Array(100)].map((_, i) => (
+        <motion.div
+          key={`star-${i}`}
+          className="absolute rounded-full bg-white"
+          animate={{
+            x: `${randomMove()}rem`,
+            y: `${randomMove()}rem`,
+            opacity: [randomOpacity(), randomOpacity(), randomOpacity()],
+            transition: {
+              duration: Math.random() * 10 + 5,
+              repeat: Infinity,
+              repeatType: "mirror",
+            },
+          }}
+          style={{
+            top: `${Math.random() * 100}%`,
+            left: `${Math.random() * 100}%`,
+            width: `${randomSize()}px`,
+            height: `${randomSize()}px`,
+          }}
+        />
+      ))}
+    </div>
+  );
+};
+
+function ElegantShape({ className, delay = 0, gradient = "from-white/[0.08]" }: { className?: string; delay?: number; gradient?: string; }) {
+    const width = Math.random() * 400 + 200;
+    const height = Math.random() * 100 + 50;
+    const rotate = Math.random() * 360;
+  
+    return (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.5, rotate: rotate - 15 }}
+        animate={{ opacity: 1, scale: 1, rotate: rotate }}
+        transition={{ duration: 1.5, delay, ease: [0.16, 1, 0.3, 1] }}
+        className={cn("absolute", className)}
+      >
+        <motion.div
+          animate={{ scale: [1, 1.05, 1] }}
+          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+          style={{ width, height }}
+          className="relative"
+        >
+          <div className={cn("absolute inset-0 rounded-full", "bg-gradient-to-r to-transparent", gradient, "backdrop-blur-md border border-white/[0.1]", "shadow-[0_8px_32px_0_rgba(0,0,0,0.3)]")} />
+          <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1),transparent_60%)]" />
+        </motion.div>
+      </motion.div>
+    );
+}
+
+// --- Combined Login Page Component ---
 export default function LoginPage() {
   const [role, setRole] = useState<"student" | "admin">("student");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const mountRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
-  // 3D Background Effect
+  // --- NEW: Autofill useEffect ---
   useEffect(() => {
-    const script = document.createElement("script");
-    script.src = "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js";
-    script.async = true;
-    script.onload = () => {
-      THREE = (window as any).THREE;
-      init3D();
-    };
-    document.body.appendChild(script);
-
-    function init3D() {
-      if (!THREE || !mountRef.current) return;
-      const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-      const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      (mountRef.current as any).appendChild(renderer.domElement);
-
-      const createParticleSystem = (count: number, color: number, size: number, speedFactor: number) => {
-        const positions = new Float32Array(count * 3);
-        for (let i = 0; i < count * 3; i++) {
-          positions[i] = (Math.random() - 0.5) * 25;
-        }
-        const geometry = new THREE.BufferGeometry();
-        geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-
-        const material = new THREE.PointsMaterial({
-          color: color,
-          size: size,
-          blending: THREE.AdditiveBlending,
-          transparent: true,
-          depthWrite: false,
-        });
-        const system = new THREE.Points(geometry, material);
-        (system.userData as any).speedFactor = speedFactor;
-        scene.add(system);
-        return system;
-      };
-
-      const particleSystem1 = createParticleSystem(5000, 0x00c5ce, 0.02, 0.05);
-      const particleSystem2 = createParticleSystem(2000, 0xffffff, 0.03, 0.02);
-
-      camera.position.z = 5;
-      const clock = new THREE.Clock();
-      let mouse = new THREE.Vector2();
-
-      const animate = () => {
-        requestAnimationFrame(animate);
-        const elapsedTime = clock.getElapsedTime();
-
-        [particleSystem1, particleSystem2].forEach(system => {
-          system.rotation.y = elapsedTime * (system.userData as any).speedFactor;
-          system.rotation.x = elapsedTime * (system.userData as any).speedFactor;
-          system.rotation.y += (mouse.x - system.rotation.y) * 0.01;
-          system.rotation.x += (mouse.y - system.rotation.x) * 0.01;
-        });
-
-        renderer.render(scene, camera);
-      };
-
-      const handleResize = () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-      };
-      const handleMouseMove3D = (event: MouseEvent) => {
-        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-      };
-      window.addEventListener("resize", handleResize);
-      window.addEventListener("mousemove", handleMouseMove3D);
-      animate();
-
-      // Clean-up
-      return () => {
-        window.removeEventListener("resize", handleResize);
-        window.removeEventListener("mousemove", handleMouseMove3D);
-        if (mountRef.current && renderer.domElement) {
-          (mountRef.current as any).removeChild(renderer.domElement);
-        }
-        document.body.removeChild(script);
-      };
+    if (role === "student") {
+      setEmail("student@university.edu");
+      setPassword("password123");
+    } else if (role === "admin") {
+      setEmail("admin@university.edu");
+      setPassword("password123");
     }
-  }, []);
+    setError(""); // Clear error on role change
+  }, [role]);
 
-  // Login
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
+    // Using demo credentials for frontend-only example
     try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, role }),
-      });
-      const data = await response.json();
-      if (data.success) {
-        router.push(data.user.role === "admin" ? "/admin" : "/dashboard");
-      } else {
-        setError(data.error || "Login failed");
-      }
-    } catch {
+      // Simulate network delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
       if (
-        (email === "student@university.edu" && password === "password123" && role === "student") ||
+        (email === "student@university.edu" && password === "password123" && role === "student")
+      ) {
+        router.push("/dashboard"); // Or your student dashboard route
+      } else if (
         (email === "admin@university.edu" && password === "password123" && role === "admin")
       ) {
-        router.push(role === "admin" ? "/admin" : "/dashboard");
+        router.push("/admin"); // Or your admin dashboard route
       } else {
-        setError("Invalid credentials. Please use the demo credentials.");
+        throw new Error("Invalid credentials");
       }
+    } catch {
+      setError("Invalid credentials. Please use the demo credentials.");
     } finally {
       setIsLoading(false);
     }
   };
 
+  const fadeUpVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: (i: number = 0) => ({
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.8,
+        delay: 0.1 * i,
+        ease: [0.25, 0.4, 0.25, 1],
+      },
+    }),
+  };
+
   return (
-    <>
-      <style jsx global>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        @keyframes fade-in {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-in {
-          animation: fade-in 1.5s ease-out forwards;
-        }
-        @keyframes aurora {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
-        .aurora-border::before {
-          content: '';
-          position: absolute;
-          inset: -2px;
-          border-radius: 0.6rem;
-          background: linear-gradient(45deg, #00c5ce, #00a0a8, #ffffff, #00c5ce);
-          background-size: 400% 400%;
-          animation: aurora 6s ease infinite;
-          z-index: -1;
-        }
-        .input-group:focus-within .input-icon {
-          color: #00c5ce;
-          transform: scale(1.1);
-        }
-      `}</style>
-
-      <div className="relative min-h-screen w-full text-gray-800 overflow-hidden bg-[#0a0a2a]">
-        <div ref={mountRef} className="absolute inset-0 z-0 opacity-70" />
-
-        <div className="relative z-10 flex min-h-screen items-center justify-center p-4">
-          <div className="w-full max-w-xs rounded-2xl bg-black/50 backdrop-blur-2xl border border-white/20 shadow-2xl animate-fade-in">
-            <div className="p-8 md:p-10">
-              <div className="flex items-center justify-center gap-3 mb-2">
-                <Heart className="h-8 w-8 text-[#00c5ce]" />
-                <span className="text-3xl font-bold tracking-wider text-white" style={{ textShadow: "0 0 10px rgba(0,197,206,0.5)" }}>
-                  Sukoon
-                </span>
-              </div>
-              <p className="text-center text-gray-300 mb-8 text-sm">
-                Your personal space for peace and clarity.
-              </p>
-
-              <form onSubmit={handleLogin} className="space-y-5">
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setRole("student")}
-                    className={`relative flex items-center justify-center gap-2 p-3 rounded-lg z-10 transition-all duration-300 bg-black/50 text-white ${role === "student" ? "aurora-border" : ""}`}
-                  >
-                    <User className="h-5 w-5" />
-                    <span className="font-semibold">Student</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setRole("admin")}
-                    className={`relative flex items-center justify-center gap-2 p-3 rounded-lg z-10 transition-all duration-300 bg-black/50 text-white ${role === "admin" ? "aurora-border" : ""}`}
-                  >
-                    <Shield className="h-5 w-5" />
-                    <span className="font-semibold">Admin</span>
-                  </button>
-                </div>
-
-                <div className="relative input-group">
-                  <Mail className="absolute left-3.5 top-3.5 h-5 w-5 text-gray-400 z-10 input-icon transition-all duration-300" />
-                  <input
-                    id="email"
-                    type="email"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    className="relative w-full pl-11 pr-3 py-3 border-2 border-white/20 bg-black/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00c5ce] focus:border-[#00c5ce] transition-all duration-300"
-                  />
-                </div>
-
-                <div className="relative input-group">
-                  <Lock className="absolute left-3.5 top-3.5 h-5 w-5 text-gray-400 z-10 input-icon transition-all duration-300" />
-                  <input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    className="relative w-full pl-11 pr-3 py-3 border-2 border-white/20 bg-black/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00c5ce] focus:border-[#00c5ce] transition-all duration-300"
-                    placeholder="Password"
-                  />
-                </div>
-
-                {error && (
-                  <div className="text-sm text-red-300 bg-red-800/50 p-3 rounded-lg border border-red-500/50">
-                    {error}
-                  </div>
-                )}
-
-                <div className="text-xs text-gray-400 bg-black/30 p-3 rounded-lg text-center">
-                  <p className="font-medium mb-1 text-gray-300">Demo Credentials</p>
-                  <p>Student: student@university.edu / password123</p>
-                  <p>Admin: admin@university.edu / password123</p>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full bg-gradient-to-r from-[#00c5ce] to-[#008b8b] text-white font-bold py-3 px-4 rounded-lg hover:shadow-2xl hover:shadow-[#00c5ce]/40 focus:outline-none focus:ring-4 focus:ring-[#00c5ce]/50 transition-all duration-300 transform hover:scale-105 disabled:bg-[#00c5ce]/50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none flex items-center justify-center gap-2"
-                >
-                  {isLoading && (
-                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                  )}
-                  {isLoading ? "Signing In..." : "Sign In"}
-                </button>
-
-                <div className="text-center text-sm text-gray-400 space-y-2 mt-4">
-                  <Link href="/forgot-password" className="font-semibold text-gray-400 hover:text-[#00c5ce] hover:underline">
-                    Forgot Password?
-                  </Link>
-                  <p>
-                    Don't have an account?{" "}
-                    <Link href="/signup" className="font-semibold text-[#00c5ce] hover:underline">
-                      Sign Up
-                    </Link>
-                  </p>
-                </div>
-              </form>
-            </div>
+    <div className="relative min-h-screen w-full overflow-hidden bg-[#030303] text-white">
+      <Stars />
+      <ElegantShape delay={0.3} gradient="from-indigo-500/[0.15]" className="left-[-10%] top-[15%]" />
+      <ElegantShape delay={0.5} gradient="from-rose-500/[0.15]" className="right-[-5%] top-[70%]" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#030303] via-transparent to-[#030303]/80 pointer-events-none" />
+      
+      <div className="relative z-10 flex min-h-screen items-center justify-center p-4">
+        <motion.div 
+          initial="hidden"
+          animate="visible"
+          className="w-full max-w-md rounded-2xl bg-white/[0.03] backdrop-blur-lg border border-white/[0.08] shadow-2xl shadow-black/30 p-8 md:p-10"
+        >
+          <div className="text-center">
+            <motion.div custom={0} variants={fadeUpVariants} className="flex items-center justify-center gap-3 mb-4">
+              <Heart className="h-8 w-8 text-white" />
+              <h1 className={cn("text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-300 via-white/90 to-rose-300", pacifico.className)}>
+                Sukoon
+              </h1>
+            </motion.div>
+            <motion.p custom={1} variants={fadeUpVariants} className="text-center text-white/50 mb-8">
+              Welcome back. A safe space awaits.
+            </motion.p>
           </div>
-        </div>
+
+          <form onSubmit={handleLogin} className="space-y-5">
+            <motion.div custom={2} variants={fadeUpVariants} className="grid grid-cols-2 gap-3">
+              <Button
+                type="button"
+                onClick={() => setRole("student")}
+                className={cn(
+                    "flex items-center justify-center gap-2 p-3 rounded-lg transition-all duration-300 w-full h-12 text-sm",
+                    role === "student"
+                        ? "bg-white text-black hover:bg-white/90"
+                        : "bg-transparent text-white border-white/20 hover:bg-white/10"
+                )}
+              >
+                <User className="h-5 w-5" />
+                <span>Student</span>
+              </Button>
+              <Button
+                type="button"
+                onClick={() => setRole("admin")}
+                className={cn(
+                    "flex items-center justify-center gap-2 p-3 rounded-lg transition-all duration-300 w-full h-12 text-sm",
+                    role === "admin"
+                        ? "bg-white text-black hover:bg-white/90"
+                        : "bg-transparent text-white border-white/20 hover:bg-white/10"
+                )}
+              >
+                <Shield className="h-5 w-5" />
+                <span>Admin</span>
+              </Button>
+            </motion.div>
+
+            <motion.div custom={3} variants={fadeUpVariants} className="relative">
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/30 z-10" />
+              <input
+                id="email"
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="relative w-full h-14 pl-12 pr-4 border border-white/10 bg-white/5 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition-all duration-300"
+              />
+            </motion.div>
+
+            <motion.div custom={4} variants={fadeUpVariants} className="relative">
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/30 z-10" />
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="relative w-full h-14 pl-12 pr-4 border border-white/10 bg-white/5 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition-all duration-300"
+                placeholder="Password"
+              />
+            </motion.div>
+
+            {error && (
+              <motion.div custom={5} variants={fadeUpVariants} className="text-sm text-rose-300 bg-rose-800/20 p-3 rounded-lg border border-rose-500/30">
+                {error}
+              </motion.div>
+            )}
+
+            {/* --- NEW: Demo Credentials Info Box --- */}
+            <motion.div custom={5} variants={fadeUpVariants} className="text-xs text-center text-white/40 bg-white/5 p-3 rounded-lg border border-white/10">
+                <p className="font-medium mb-1 text-white/60">Demo Credentials</p>
+                <p>Click a role above to autofill.</p>
+            </motion.div>
+
+            <motion.div custom={6} variants={fadeUpVariants}>
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="w-full h-14 bg-white text-black font-bold text-base rounded-lg hover:bg-white/90 focus:outline-none focus:ring-4 focus:ring-white/50 transition-all duration-300 transform hover:scale-105 disabled:bg-white/50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
+              >
+                {isLoading && (
+                  <svg className="animate-spin h-5 w-5 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                )}
+                {isLoading ? "Signing In..." : "Sign In"}
+              </Button>
+            </motion.div>
+
+            <motion.div custom={7} variants={fadeUpVariants} className="text-center text-sm text-white/40 space-y-2 pt-4">
+              <Link href="/forgot-password" className="font-semibold text-white/60 hover:text-white hover:underline">
+                Forgot Password?
+              </Link>
+              <p>
+                Don't have an account?{" "}
+                <Link href="/signup" className="font-semibold text-white hover:underline">
+                  Sign Up
+                </Link>
+              </p>
+            </motion.div>
+          </form>
+        </motion.div>
       </div>
-    </>
+    </div>
   );
 }
