@@ -233,19 +233,15 @@ const MindfulMomentCard = () => {
 // --- Main Dashboard Component ---
 export default function DashboardPage() {
     const [activeTab, setActiveTab] = useState("appointments");
-    // --- 2. ADD STATE TO CONTROL THE MODAL ---
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    // --- 3. USE EFFECT TO OPEN THE MODAL ON PAGE LOAD ---
     useEffect(() => {
-        // Open the modal 1 second after the component mounts
         const timer = setTimeout(() => {
             setIsModalOpen(true);
         }, 1000);
 
-        // Cleanup the timer if the component unmounts
         return () => clearTimeout(timer);
-    }, []); // Empty dependency array ensures this runs only once
+    }, []); 
 
   const fadeUpVariants = {
     hidden: { opacity: 0, y: 30 },
@@ -262,16 +258,12 @@ export default function DashboardPage() {
 
     return (
         <div className="relative min-h-screen w-full overflow-hidden bg-[#030303] text-white">
-                        {/* --- 4. RENDER THE MODAL --- */}
-                        <MoodAssessmentModal 
-                            isOpen={isModalOpen} 
-                            onClose={() => setIsModalOpen(false)}
-                            // You can pass the actual user's name here
-                            userName="there" 
-                        />
+            <MoodAssessmentModal 
+                isOpen={isModalOpen} 
+                onClose={() => setIsModalOpen(false)}
+                userName="there" 
+            />
             
-            {/* MoodAssessmentModal is imported and rendered above, no need to redefine it here */}
-
             <div className="absolute inset-0">
                 <ElegantShape delay={0.3} gradient="from-indigo-500/[0.15]" className="left-[-10%] top-[15%]" parallaxStrength={60} />
                 <ElegantShape delay={0.5} gradient="from-rose-500/[0.15]" className="right-[-5%] top-[70%]" parallaxStrength={40} />
@@ -289,6 +281,12 @@ export default function DashboardPage() {
                          <Button asChild variant="outline" className="bg-transparent text-white/70 border-white/20 hover:bg-white/10 hover:text-white rounded-full">
                             <Link href="/"><Home className="mr-2 h-4 w-4" /> Home</Link>
                         </Button>
+                        
+                        {/* --- NEW PROFILE BUTTON ADDED HERE --- */}
+                        <Button asChild variant="outline" className="bg-transparent text-white/70 border-white/20 hover:bg-white/10 hover:text-white rounded-full">
+                            <Link href="/profile"><User className="mr-2 h-4 w-4" /> Profile</Link>
+                        </Button>
+
                         <Badge className="bg-white/10 text-white/70 border border-white/20">Dashboard</Badge>
                     </div>
                 </div>
@@ -311,7 +309,6 @@ export default function DashboardPage() {
         </motion.div>
 
                 <div className="grid lg:grid-cols-3 gap-8">
-                    {/* ... (rest of your dashboard JSX is unchanged) ... */}
                      <div className="lg:col-span-3">
                          <motion.div custom={1} variants={fadeUpVariants} initial="hidden" animate="visible">
                            <MindfulMomentCard />
@@ -407,7 +404,7 @@ export default function DashboardPage() {
   );
 }
 
-// Reusable components (now typed)
+// Reusable components
 const AppointmentCard = ({ appointment }: { appointment: Appointment }) => (
     <InteractiveGlassCard>
         <div className="flex items-start justify-between">
@@ -455,6 +452,7 @@ const InfoItem = ({
         className: "h-4 w-4 text-white/70",
       })}
     </div>
-    {children}
-  </div>
-)
+    {/* --- BUG FIX APPLIED: WRAPPED CHILDREN IN SPAN --- */}
+    <span>{children}</span>
+  </div> // --- BUG FIX APPLIED: MISSING DIV TAG ADDED ---
+);

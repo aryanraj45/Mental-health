@@ -1,0 +1,351 @@
+// app/profile/page.tsx
+"use client";
+
+import React from "react";
+import Link from "next/link";
+import Image from "next/image"; // Import the Next.js Image component
+import { motion, useScroll, useTransform } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Pacifico } from "next/font/google";
+import { cn } from "@/lib/utils";
+// Import all the icons you'll need
+import { User, Edit, Brain, BookOpen, Wind, CheckCircle, Flame, Trophy, Award, Heart } from "lucide-react";
+
+const pacifico = Pacifico({
+  subsets: ["latin"],
+  weight: ["400"],
+  variable: "--font-pacifico",
+});
+
+// --- Mock Data for the profile page ---
+const userProfile = {
+    name: "Alex",
+    intention: "To be present in each moment.",
+    weeklyReport: {
+        dateRange: "September 8 - September 14, 2025",
+        moodSummary: "It looks like this was a week of upward trends for you, Alex. We noticed your mood consistently peaked in the evenings, especially on the days you practiced a Sleep Meditation. You logged 'Happy' as your most frequent mood.",
+        activities: {
+            meditations: { sessions: 5, minutes: 60 },
+            journalEntries: 3,
+            breathingExercises: 7,
+            goalsAchieved: { completed: 2, total: 3 },
+        },
+        journalThemes: ["work", "family", "gratitude", "anxiety", "self-care"],
+    },
+    streaks: {
+        current: 12,
+        longest: 45,
+        recentAchievement: "You just earned the 'Mindful Morning' badge for meditating 5 days in a row before 10 AM!",
+    },
+    recommendations: [
+        { title: "Managing Stress Course", description: "Since anxiety was a recurring theme, you might find our 7-day course helpful.", link: "/courses/stress" },
+        { title: "Rain on Leaves Soundscape", description: "You enjoyed 'Ocean Sounds'. Why not try this for your next session?", link: "/listen/rain-on-leaves" },
+    ]
+};
+
+// Stars Background Component
+const Stars = () => {
+  const ref = React.useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start start", "end start"],
+  });
+  const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
+  const randomMove = () => Math.random() * 4 - 2;
+  const randomOpacity = () => Math.random() * 0.5 + 0.5;
+  const randomSize = () => Math.random() * 2 + 1;
+
+  return (
+    <div ref={ref} className="absolute inset-0 h-full w-full z-0">
+      <motion.div
+        style={{
+          translateY: y,
+        }}
+        className="h-full w-full"
+      >
+        {[...Array(100)].map((_, i) => (
+          <motion.div
+            key={`star-${i}`}
+            className="absolute rounded-full bg-white"
+            animate={{
+              x: `${randomMove()}rem`,
+              y: `${randomMove()}rem`,
+              opacity: [randomOpacity(), randomOpacity(), randomOpacity()],
+              transition: {
+                duration: Math.random() * 10 + 5,
+                repeat: Infinity,
+                repeatType: "mirror",
+              },
+            }}
+            style={{
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+              width: `${randomSize()}px`,
+              height: `${randomSize()}px`,
+            }}
+          />
+        ))}
+      </motion.div>
+    </div>
+  );
+};
+
+// Elegant Shape Component
+function ElegantShape({
+  className,
+  delay = 0,
+  width = 400,
+  height = 100,
+  rotate = 0,
+  gradient = "from-white/[0.08]",
+}: {
+  className?: string;
+  delay?: number;
+  width?: number;
+  height?: number;
+  rotate?: number;
+  gradient?: string;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -150, rotate: rotate - 15 }}
+      animate={{ opacity: 1, y: 0, rotate: rotate }}
+      transition={{
+        duration: 2.4,
+        delay,
+        ease: [0.23, 0.86, 0.39, 0.96],
+        opacity: { duration: 1.2 },
+      }}
+      className={cn("absolute", className)}
+    >
+      <motion.div
+        animate={{ y: [0, 15, 0] }}
+        transition={{
+          duration: 12,
+          repeat: Number.POSITIVE_INFINITY,
+          ease: "easeInOut",
+        }}
+        style={{ width, height }}
+        className="relative"
+      >
+        <div
+          className={cn(
+            "absolute inset-0 rounded-full",
+            "bg-gradient-to-r to-transparent",
+            gradient,
+            "backdrop-blur-[2px] border-2 border-white/[0.15]",
+            "shadow-[0_8px_32px_0_rgba(255,255,255,0.1)]",
+            "after:absolute after:inset-0 after:rounded-full",
+            "after:bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.2),transparent_70%)]"
+          )}
+        />
+      </motion.div>
+    </motion.div>
+  );
+}
+
+// --- This is the main component for your new page ---
+export default function ProfilePage() {
+    const fadeUpVariants = {
+        hidden: { opacity: 0, y: 30 },
+        visible: (i: number) => ({
+          opacity: 1,
+          y: 0,
+          transition: {
+            duration: 0.8,
+            delay: 0.2 + i * 0.1,
+            ease: [0.25, 1, 0.5, 1],
+          },
+        }),
+      };
+
+    return (
+        <div className="relative min-h-screen w-full overflow-hidden bg-[#030303] text-white">
+            <Stars />
+            
+            {/* Background Gradients & Shapes */}
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.05] via-transparent to-accent/[0.05] blur-3xl" />
+            <div className="absolute inset-0 overflow-hidden">
+              <ElegantShape
+                delay={0.3}
+                width={600}
+                height={140}
+                rotate={12}
+                gradient="from-primary/[0.15]"
+                className="left-[-10%] top-[15%]"
+              />
+              <ElegantShape
+                delay={0.5}
+                width={500}
+                height={120}
+                rotate={-15}
+                gradient="from-accent/[0.15]"
+                className="right-[-5%] top-[70%]"
+              />
+            </div>
+
+            <header className="sticky top-0 z-50 border-b border-white/10 bg-black/30 backdrop-blur-xl">
+                 <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+                    <Link href="/" className="flex items-center gap-2 group">
+                        <Heart className="h-8 w-8 text-primary transition-all duration-300 group-hover:scale-110 neon-glow" />
+                        <h1 className="text-2xl font-bold text-gradient">MindCare</h1>
+                    </Link>
+                    {/* Your navigation would go here */}
+                </div>
+            </header>
+            
+            <main className="relative z-10 container mx-auto px-4 py-8 max-w-4xl space-y-8">
+                <motion.div initial="hidden" animate="visible" variants={fadeUpVariants} custom={0}>
+                    <ProfileHeader name={userProfile.name} intention={userProfile.intention} />
+                </motion.div>
+                
+                <motion.div initial="hidden" animate="visible" variants={fadeUpVariants} custom={1}>
+                    <WeeklyReflection report={userProfile.weeklyReport} />
+                </motion.div>
+                
+                <motion.div initial="hidden" animate="visible" variants={fadeUpVariants} custom={2}>
+                    <StreaksAndMilestones streaks={userProfile.streaks} />
+                </motion.div>
+                
+                <motion.div initial="hidden" animate="visible" variants={fadeUpVariants} custom={3}>
+                    <Suggestions recommendations={userProfile.recommendations} />
+                </motion.div>
+                
+                <motion.div initial="hidden" animate="visible" variants={fadeUpVariants} custom={4}>
+                    <QuickAccess />
+                </motion.div>
+            </main>
+
+            <div className="absolute inset-0 bg-gradient-to-t from-[#030303] via-transparent to-[#030303]/80 pointer-events-none" />
+        </div>
+    );
+}
+
+// --- All the UI components for the profile page will go below ---
+
+const ProfileHeader = ({ name, intention }: { name: string; intention: string }) => (
+    <div className="flex items-center gap-6">
+        <div className="w-24 h-24 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center neon-glow-accent">
+            <User className="w-12 h-12 text-white" />
+        </div>
+        <div>
+            <h2 className="text-4xl font-bold text-white">Good evening, {name}.</h2>
+            <p className="text-white/60 text-lg mt-1 italic flex items-center gap-2">
+                "{intention}"
+                <button className="text-white/40 hover:text-white transition-colors"><Edit className="h-4 w-4" /></button>
+            </p>
+        </div>
+    </div>
+);
+
+const WeeklyReflection = ({ report }: { report: typeof userProfile.weeklyReport }) => (
+    <Card className="glass-effect border-white/[0.08] backdrop-blur-lg">
+        <CardHeader>
+            <CardTitle className="text-2xl text-white">Your Weekly Reflection</CardTitle>
+            <p className="text-white/50">{report.dateRange}</p>
+        </CardHeader>
+        <CardContent className="space-y-8">
+            <div>
+                <h3 className="font-semibold text-lg text-white/90 mb-3">Your Mood Journey</h3>
+                <div className="w-full h-48 bg-white/5 rounded-lg border border-white/10 overflow-x-auto flex items-center">
+                    <Image 
+                        src="/chart.png" 
+                        alt="Weekly mood flow chart" 
+                        width={700}
+                        height={170}
+                        className="p-2"
+                    />
+                </div>
+                <p className="text-white/70 mt-4 p-4 bg-white/5 rounded-lg border border-white/10">{report.moodSummary}</p>
+            </div>
+            <div>
+                <h3 className="font-semibold text-lg text-white/90 mb-3">Your Mindful Activities</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <ActivityStat icon={<Brain />} label="Meditations" value={`${report.activities.meditations.sessions} sessions`} />
+                    <ActivityStat icon={<BookOpen />} label="Journal Entries" value={`${report.activities.journalEntries} entries`} />
+                    <ActivityStat icon={<Wind />} label="Breathing" value={`${report.activities.breathingExercises} sessions`} />
+                    <ActivityStat icon={<CheckCircle />} label="Goals Achieved" value={`${report.activities.goalsAchieved.completed} of ${report.activities.goalsAchieved.total}`} />
+                </div>
+            </div>
+            <div>
+                 <h3 className="font-semibold text-lg text-white/90 mb-3">Themes From Your Journal</h3>
+                 <div className="flex flex-wrap gap-2">
+                    {report.journalThemes.map(theme => (
+                        <Badge key={theme} variant="secondary" className="bg-white/10 text-white/80 border-white/20 text-sm">#{theme}</Badge>
+                    ))}
+                 </div>
+            </div>
+        </CardContent>
+    </Card>
+);
+
+const ActivityStat = ({ icon, label, value }: { icon: React.ReactNode, label: string, value: string }) => (
+    <div className="p-4 bg-white/5 rounded-lg border border-white/10">
+        <div className="flex items-center gap-3 text-indigo-300">
+            {React.cloneElement(icon as React.ReactElement, { className: "h-5 w-5" })}
+            <p className="text-sm font-medium text-white/60">{label}</p>
+        </div>
+        <p className="text-xl font-bold text-white mt-2">{value}</p>
+    </div>
+);
+
+const StreaksAndMilestones = ({ streaks }: { streaks: typeof userProfile.streaks }) => (
+    <Card className="glass-effect border-white/[0.08] backdrop-blur-lg">
+         <CardHeader>
+            <CardTitle className="text-2xl text-white">Streaks & Milestones</CardTitle>
+        </CardHeader>
+        <CardContent className="grid md:grid-cols-3 gap-6 text-center">
+            <div className="p-4 bg-gradient-to-br from-orange-500/10 to-yellow-500/10 rounded-lg">
+                <Flame className="mx-auto h-8 w-8 text-orange-400" />
+                <p className="text-3xl font-bold mt-2">{streaks.current}-Day Streak!</p>
+                <p className="text-white/60">Keep the momentum going.</p>
+            </div>
+             <div className="p-4 bg-white/5 rounded-lg">
+                <Trophy className="mx-auto h-8 w-8 text-yellow-300" />
+                <p className="text-3xl font-bold mt-2">{streaks.longest} days</p>
+                <p className="text-white/60">Your Longest Streak</p>
+            </div>
+            <div className="p-4 bg-white/5 rounded-lg col-span-1 md:col-span-3">
+                <Award className="mx-auto h-8 w-8 text-teal-300" />
+                <p className="font-semibold text-white/90 mt-2">{streaks.recentAchievement}</p>
+            </div>
+        </CardContent>
+    </Card>
+);
+
+const Suggestions = ({ recommendations }: { recommendations: typeof userProfile.recommendations }) => (
+    <div>
+        <h2 className="text-2xl font-bold text-white mb-4">A Few Ideas for the Coming Week</h2>
+        .
+        <div className="grid md:grid-cols-2 gap-4">
+            {recommendations.map(rec => (
+                <Link key={rec.title} href={rec.link} className="block p-4 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 transition-colors">
+                    <p className="font-bold text-white">{rec.title}</p>
+                    <p className="text-white/60 text-sm mt-1">{rec.description}</p>
+                </Link>
+            ))}
+        </div>
+    </div>
+);
+
+const QuickAccess = () => (
+    <div className="mt-12">
+        <h2 className="text-2xl font-bold text-white mb-4 text-center">Quick Access</h2>
+        <div className="flex flex-wrap justify-center gap-4">
+            <Button asChild variant="outline" className="glass-effect border-primary/30 text-foreground hover:bg-primary/10 hover:border-primary/50 transition-all duration-300 px-6 py-3 rounded-full">
+                <Link href="/journal">View Full Journal History</Link>
+            </Button>
+            <Button asChild variant="outline" className="glass-effect border-primary/30 text-foreground hover:bg-primary/10 hover:border-primary/50 transition-all duration-300 px-6 py-3 rounded-full">
+                <Link href="/favorites">My Favorite Meditations</Link>
+            </Button>
+            <Button asChild variant="outline" className="glass-effect border-primary/30 text-foreground hover:bg-primary/10 hover:border-primary/50 transition-all duration-300 px-6 py-3 rounded-full">
+                <Link href="/goals">Review My Goals</Link>
+            </Button>
+            <Button asChild variant="outline" className="glass-effect border-primary/30 text-foreground hover:bg-primary/10 hover:border-primary/50 transition-all duration-300 px-6 py-3 rounded-full">
+                <Link href="/settings">Settings & Preferences</Link>
+            </Button>
+        </div>
+    </div>
+);
