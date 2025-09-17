@@ -8,6 +8,7 @@ import {
   useMotionValue,
   useSpring,
   useTransform,
+  easeOut,
 } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import {
@@ -466,6 +467,10 @@ export default function CommunityPage() {
     setCommentText({ ...commentText, [postId]: "" });
   };
 
+  const handleChangeComment = (postId: string, text: string) => {
+    setCommentText({ ...commentText, [postId]: text });
+  };
+
   const toggleComments = (postId: string) => {
     setShowComments({ ...showComments, [postId]: !showComments[postId] });
   };
@@ -479,17 +484,18 @@ export default function CommunityPage() {
     return matchesSearch && matchesCategory;
   });
 
+  // Animation variants
   const fadeUpVariants = {
     hidden: { opacity: 0, y: 30 },
-    visible: (i: number = 0) => ({
+    visible: {
       opacity: 1,
       y: 0,
       transition: {
         duration: 0.8,
-        delay: 0.2 + i * 0.1,
-        ease: [0.25, 1, 0.5, 1],
+        delay: 0.2,
+        ease: easeOut,
       },
-    }),
+    },
   };
 
   return (
@@ -639,6 +645,7 @@ export default function CommunityPage() {
                     onBookmark={handleBookmarkPost}
                     onToggleComments={toggleComments}
                     onAddComment={handleAddComment}
+                    onChangeComment={handleChangeComment}
                     commentText={commentText[post.id] || ""}
                     showComments={showComments[post.id] || false}
                   />
@@ -691,6 +698,7 @@ const PostCard = ({
   onBookmark,
   onToggleComments,
   onAddComment,
+  onChangeComment,
   commentText,
   showComments,
 }: {
@@ -699,6 +707,7 @@ const PostCard = ({
   onBookmark: (id: string) => void;
   onToggleComments: (id: string) => void;
   onAddComment: (id: string) => void;
+  onChangeComment: (id: string, text: string) => void;
   commentText: string;
   showComments: boolean;
 }) => (
@@ -809,7 +818,8 @@ const PostCard = ({
                 placeholder="Write a comment..."
                 value={commentText}
                 onChange={(e) => {
-                  // This needs to be handled by parent component
+                  const updatedCommentText = e.target.value;
+                  onChangeComment(post.id, updatedCommentText);
                 }}
                 className="bg-white/5 border-white/10 text-white placeholder:text-white/50 min-h-[80px] resize-none"
               />
