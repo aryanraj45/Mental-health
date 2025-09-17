@@ -176,7 +176,7 @@ export default function HomePage() {
   const { t, currentLanguage } = useLanguage();
   
   useEffect(() => {
-    console.log("Home page rendered with language:", currentLanguage);
+    console.log("Home page rendered with language :", currentLanguage);
   }, [currentLanguage]);
 
   // Animation variants for Framer Motion (static, compatible)
