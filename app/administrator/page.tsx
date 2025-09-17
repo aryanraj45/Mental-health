@@ -797,10 +797,10 @@ const AdministratorDashboard = () => {
                 <CardHeader className="flex flex-row items-center justify-between">
                   <CardTitle className="text-white">Average Mood Trends</CardTitle>
                   <div className="flex gap-2">
-                    <Button size="sm" variant="outline" className="border-white/30 text-white hover:bg-white/10" onClick={() => handleDownloadChart(moodChartRef, "mood-trends.pdf")}>
-                      <Download className="h-4 w-4 mr-2" />
-                      Download
-                    </Button>
+                    {/* <Button size="sm" variant="outline" className="border-white/30 text-white hover:bg-white/10" onClick={() => handleDownloadChart(moodChartRef, "mood-trends.pdf")}> */}
+                      {/* <Download className="h-4 w-4 mr-2" /> */}
+                      {/* Download */}
+                    {/* </Button> */}
                     <Button size="sm" asChild className="bg-gradient-to-r from-purple-600 to-blue-600 text-white">
                       <Link href="/resources">View Resources</Link>
                     </Button>
@@ -830,10 +830,10 @@ const AdministratorDashboard = () => {
               <Card className="bg-white/5 border-white/10 backdrop-blur-xl" ref={sessionChartRef}>
                 <CardHeader className="flex flex-row items-center justify-between">
                   <CardTitle className="text-white">Session Types</CardTitle>
-                  <Button size="sm" variant="outline" className="border-white/30 text-white hover:bg-white/10" onClick={() => handleDownloadChart(sessionChartRef, "session-types.pdf")}>
-                    <Download className="h-4 w-4 mr-2" />
-                    Download
-                  </Button>
+                  {/* <Button size="sm" variant="outline" className="border-white/30 text-white hover:bg-white/10" onClick={() => handleDownloadChart(sessionChartRef, "session-types.pdf")}>
+                    {/* <Download className="h-4 w-4 mr-2" />
+                    Download */}
+                  {/* </Button */}
                 </CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={300} ref={sessionChartRef}>
@@ -868,10 +868,10 @@ const AdministratorDashboard = () => {
               <Card className="bg-white/5 border-white/10 backdrop-blur-xl lg:col-span-2" ref={issueChartRef}>
                 <CardHeader className="flex flex-row items-center justify-between">
                   <CardTitle className="text-white">Common Issues Distribution</CardTitle>
-                  <Button size="sm" variant="outline" className="border-white/30 text-white hover:bg-white/10" onClick={() => handleDownloadChart(issueChartRef, "issue-distribution.pdf")}>
+                  {/* <Button size="sm" variant="outline" className="border-white/30 text-white hover:bg-white/10" onClick={() => handleDownloadChart(issueChartRef, "issue-distribution.pdf")}>
                     <Download className="h-4 w-4 mr-2" />
                     Download
-                  </Button>
+                  </Button> */}
                 </CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={300} ref={issueChartRef}>
