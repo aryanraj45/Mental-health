@@ -1,10 +1,40 @@
 "use client";
 
-import { useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
+import { Pacifico } from "next/font/google";
+import { motion, useScroll, useTransform, MotionValue } from "framer-motion";
+import { Heart } from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { LanguageSwitcher } from "@/components/language-switcher";
+import { useLanguage } from "@/contexts/language-context";
+import {
+  IconBrightnessDown,
+  IconBrightnessUp,
+  IconCaretRightFilled,
+  IconCaretUpFilled,
+  IconChevronUp,
+  IconMicrophone,
+  IconMoon,
+  IconPlayerSkipForward,
+  IconPlayerTrackNext,
+  IconPlayerTrackPrev,
+  IconTable,
+  IconVolume,
+  IconVolume2,
+  IconVolume3,
+  IconSearch,
+  IconWorld,
+  IconCommand,
+  IconCaretLeftFilled,
+  IconCaretDownFilled,
+} from "@tabler/icons-react";
 
-export default function DashboardRedirector() {
+export function DashboardRedirector() {
   const router = useRouter();
   const { user, isLoggedIn } = useAuth();
 
@@ -377,7 +407,6 @@ export default function HomePage() {
   );
 }
 
-// --- Macbook Components ---
 
 export const MacbookScroll = ({
   src,
