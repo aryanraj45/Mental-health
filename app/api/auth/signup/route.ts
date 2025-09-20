@@ -1,39 +1,45 @@
-import { type NextRequest, NextResponse } from "next/server"
-import type { User } from "@/lib/auth"
-
-// Mock user storage - replace with real database
-const mockUsers: User[] = []
+import { type NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma"; // Make sure prisma client is exported from here
+import bcrypt from "bcryptjs";
 
 export async function POST(request: NextRequest) {
   try {
-    const { firstName, lastName, email, password, role, college, department, academicYear } = await request.json()
+    const { firstName, lastName, email, password, role, college, department, academicYear } =
+      await request.json();
+
 
     if (!firstName || !lastName || !email || !password || !role) {
-      return NextResponse.json({ error: "All required fields must be filled" }, { status: 400 })
+      return NextResponse.json({ error: "All required fields must be filled" }, { status: 400 });
     }
 
-    // Check if user already exists
-    const existingUser = mockUsers.find((u) => u.email === email)
+    const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
-      return NextResponse.json({ error: "User with this email already exists" }, { status: 409 })
+      return NextResponse.json({ error: "User already exists" }, { status: 400 });
     }
 
-    // Create new user
-    const newUser: User = {
-      id: Date.now().toString(),
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+ 
+  const newUser = await prisma.user.create({
+  data: {
+      firstName,
+      lastName,
       email,
-      name: `${firstName} ${lastName}`,
-      role: role as "student" | "admin",
-      ...(role === "student" && { college, department, academicYear }),
-    }
-
-    mockUsers.push(newUser)
+      password:hashedPassword,
+      role:role.toUpperCase(),
+      college: college || null,
+      department: department || null,
+      academicYear: academicYear || null,
+    },
+   });
 
     return NextResponse.json({
-      success: true,
+      ok: true,
       message: "Account created successfully",
-    })
+      userId: newUser.id,
+    });
   } catch (error) {
-    return NextResponse.json({ error: "Registration failed" }, { status: 500 })
+    console.error(error);
+    return NextResponse.json({ error: "Registration failed" }, { status: 500 });
   }
 }
