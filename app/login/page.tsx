@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Heart, User, Shield, Mail, Lock } from "lucide-react";
@@ -9,15 +9,17 @@ import { Pacifico } from "next/font/google";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/auth-context";
-// import { Stars, ElegantShape } from "@/components/animations"; // reuse your existing animations
+import { Header } from "@/components/header";
 
+// --- Font Definition from HomePage ---
 const pacifico = Pacifico({
   subsets: ["latin"],
   weight: ["400"],
   variable: "--font-pacifico",
 });
 
-// --- Stars Component ---
+// --- Helper & Effect Components from HomePage ---
+
 const Stars = () => {
   const randomMove = () => Math.random() * 4 - 2;
   const randomOpacity = () => Math.random() * 0.5 + 0.5;
@@ -33,7 +35,11 @@ const Stars = () => {
             x: `${randomMove()}rem`,
             y: `${randomMove()}rem`,
             opacity: [randomOpacity(), randomOpacity(), randomOpacity()],
-            transition: { duration: Math.random() * 10 + 5, repeat: Infinity, repeatType: "mirror" },
+            transition: {
+              duration: Math.random() * 10 + 5,
+              repeat: Infinity,
+              repeatType: "mirror",
+            },
           }}
           style={{
             top: `${Math.random() * 100}%`,
@@ -47,8 +53,15 @@ const Stars = () => {
   );
 };
 
-// --- ElegantShape Component ---
-function ElegantShape({ className, delay = 0, gradient = "from-white/[0.08]" }: { className?: string; delay?: number; gradient?: string }) {
+function ElegantShape({
+  className,
+  delay = 0,
+  gradient = "from-white/[0.08]",
+}: {
+  className?: string;
+  delay?: number;
+  gradient?: string;
+}) {
   const width = Math.random() * 400 + 200;
   const height = Math.random() * 100 + 50;
   const rotate = Math.random() * 360;
@@ -81,6 +94,7 @@ function ElegantShape({ className, delay = 0, gradient = "from-white/[0.08]" }: 
   );
 }
 
+// --- Combined Login Page Component ---
 export default function LoginPage() {
   const [role, setRole] = useState<"student" | "admin">("student");
   const [email, setEmail] = useState("");
@@ -90,50 +104,83 @@ export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuth();
 
+  useEffect(() => {
+    if (role === "student") {
+      setEmail("student@university.edu");
+      setPassword("password123");
+    } else if (role === "admin") {
+      setEmail("admin@university.edu");
+      setPassword("password123");
+    }
+    setError("");
+    
+    // Clear any previous session to start fresh
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('user');
+    }
+  }, [role]);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError("");
-
+    
     try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await res.json();
-
-      if (data.success) {
-        // Save user in context
-        login(data.user);
-
-        // Optional: store JWT in sessionStorage for API requests
-        if (data.token) sessionStorage.setItem("token", data.token);
-
-        // Redirect to dashboard based on role
-        router.push(data.user.role === "student" ? "/dashboard" : "/administrator");
-      } else {
-        setError(data.error || "Invalid credentials");
+      // Simulate loading for better UX
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      // Create user data based on selected role
+      const userData = role === "student" 
+        ? {
+            id: "student1",
+            name: "Student User",
+            email: "student@university.edu",
+            role: "student" as const,
+          }
+        : {
+            id: "admin1",
+            name: "Admin User",
+            email: "admin@university.edu",
+            role: "admin" as const,
+          };
+      
+      // Use the auth context login function
+      login(userData);
+      
+      // Set the flag to show the mood modal on the dashboard if student
+      if (role === "student") {
+        sessionStorage.setItem('showMoodModal', 'true');
       }
-    } catch (err) {
-      console.error(err);
-      setError("Network error. Please try again.");
-    } finally {
+      
+      // Redirect to the appropriate dashboard
+      router.push(role === "student" ? "/dashboard" : "/administrator");
+      
+    } catch (error) {
+      console.error("Login error:", error);
+      setError("Something went wrong. Please try again.");
       setIsLoading(false);
     }
   };
 
+  // Simple animation variants that work with TypeScript
   const fadeUpVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 },
+    visible: { opacity: 1, y: 0 }
   };
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-[#030303] text-white">
       <Stars />
-      <ElegantShape delay={0.3} gradient="from-indigo-500/[0.15]" className="left-[-10%] top-[15%]" />
-      <ElegantShape delay={0.5} gradient="from-rose-500/[0.15]" className="right-[-5%] top-[70%]" />
+      {/* <Header /> */}
+      <ElegantShape
+        delay={0.3}
+        gradient="from-indigo-500/[0.15]"
+        className="left-[-10%] top-[15%]"
+      />
+      <ElegantShape
+        delay={0.5}
+        gradient="from-rose-500/[0.15]"
+        className="right-[-5%] top-[70%]"
+      />
       <div className="absolute inset-0 bg-gradient-to-t from-[#030303] via-transparent to-[#030303]/80 pointer-events-none" />
 
       <div className="relative z-10 flex min-h-screen items-center justify-center p-4 pt-20">
@@ -143,7 +190,10 @@ export default function LoginPage() {
           className="w-full max-w-md rounded-2xl bg-white/[0.03] backdrop-blur-lg border border-white/[0.08] shadow-2xl shadow-black/30 p-8 md:p-10"
         >
           <div className="text-center">
-            <motion.div variants={fadeUpVariants} className="flex items-center justify-center gap-3 mb-4">
+            <motion.div
+              variants={fadeUpVariants}
+              className="flex items-center justify-center gap-3 mb-4"
+            >
               <Heart className="h-8 w-8 text-white" />
               <h1
                 className={cn(
@@ -154,13 +204,21 @@ export default function LoginPage() {
                 Sukoon
               </h1>
             </motion.div>
-            <motion.p custom={1} variants={fadeUpVariants} className="text-center text-white/50 mb-8">
+            <motion.p
+              custom={1}
+              variants={fadeUpVariants}
+              className="text-center text-white/50 mb-8"
+            >
               Welcome back. A safe space awaits.
             </motion.p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-5">
-            <motion.div custom={2} variants={fadeUpVariants} className="grid grid-cols-2 gap-3">
+            <motion.div
+              custom={2}
+              variants={fadeUpVariants}
+              className="grid grid-cols-2 gap-3"
+            >
               <Button
                 type="button"
                 onClick={() => setRole("student")}
@@ -189,7 +247,11 @@ export default function LoginPage() {
               </Button>
             </motion.div>
 
-            <motion.div custom={3} variants={fadeUpVariants} className="relative">
+            <motion.div
+              custom={3}
+              variants={fadeUpVariants}
+              className="relative"
+            >
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/30 z-10" />
               <input
                 id="email"
@@ -202,7 +264,11 @@ export default function LoginPage() {
               />
             </motion.div>
 
-            <motion.div custom={4} variants={fadeUpVariants} className="relative">
+            <motion.div
+              custom={4}
+              variants={fadeUpVariants}
+              className="relative"
+            >
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/30 z-10" />
               <input
                 id="password"
@@ -216,10 +282,19 @@ export default function LoginPage() {
             </motion.div>
 
             {error && (
-              <motion.div custom={5} variants={fadeUpVariants} className="text-sm text-rose-300 bg-rose-800/20 p-3 rounded-lg border border-rose-500/30">
+              <motion.div
+                custom={5}
+                variants={fadeUpVariants}
+                className="text-sm text-rose-300 bg-rose-800/20 p-3 rounded-lg border border-rose-500/30"
+              >
                 {error}
               </motion.div>
             )}
+
+            <motion.div custom={5} variants={fadeUpVariants} className="text-xs text-center text-white/40 bg-white/5 p-3 rounded-lg border border-white/10">
+                <p className="font-medium mb-1 text-white/60">Demo Credentials</p>
+                <p>Click a role above to autofill.</p>
+            </motion.div>
 
             <motion.div custom={6} variants={fadeUpVariants}>
               <Button
@@ -237,12 +312,26 @@ export default function LoginPage() {
               </Button>
             </motion.div>
 
-            <motion.div custom={7} variants={fadeUpVariants} className="text-center text-sm text-white/40 space-y-2 pt-4">
-              <Link href="/forgot-password" className="font-semibold text-white/60 hover:text-white hover:underline">
+            <motion.div
+              custom={7}
+              variants={fadeUpVariants}
+              className="text-center text-sm text-white/40 space-y-2 pt-4"
+            >
+              <Link
+                href="/forgot-password"
+                className="font-semibold text-white/60 hover:text-white hover:underline"
+              >
                 Forgot Password?
-              </Link><div className="mx-4 text-sm text-white">Did't have a account?<Link href={'/signup'}
-              className="text-sm text-pink-600 ml-2"
-              >signup here</Link></div>
+              </Link>
+              <p>
+                Don't have an account?{" "}
+                {/* <Link
+                  href="/signup"
+                  className="font-semibold text-white hover:underline"
+                >
+                  Sign Up
+                </Link> */}
+              </p>
             </motion.div>
           </form>
         </motion.div>
