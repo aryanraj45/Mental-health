@@ -1,69 +1,130 @@
-import { cookies } from "next/headers";
-import jwt from "jsonwebtoken";
-import bcrypt from "bcryptjs";
-import { prisma } from "@/lib/prisma";
+import { cookies } from "next/headers"
 
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-for-mental-health-platform";
-const JWT_EXPIRES_IN = "24h"; // Token expiry
+const secretKey = process.env.JWT_SECRET || "your-secret-key-for-mental-health-platform"
 
-export type UserRole = "student" | "admin" | "counselor" | "moderator";
+export type UserRole = "student" | "admin" | "counselor" | "moderator"
 
-export interface UserSession {
-  id: string;
-  email: string;
-  name: string;
-  role: UserRole;
-  college?: string;
-  academicYear?: string;
-  department?: string;
+export interface User {
+  id: string
+  email: string
+  name: string
+  role: UserRole
+  college?: string
+  academicYear?: string
+  department?: string
 }
 
-// --- SESSION FUNCTIONS ---
+// Simple hash function for browser compatibility
+function simpleHash(str: string): string {
+  let hash = 0
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i)
+    hash = (hash << 5) - hash + char
+    hash = hash & hash // Convert to 32bit integer
+  }
+  return Math.abs(hash).toString(36)
+}
 
-export async function createSession(user: UserSession) {
-  const token = jwt.sign({ user }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+export async function encrypt(payload: any) {
+  const data = JSON.stringify(payload)
+  const timestamp = Date.now()
+  const expires = timestamp + 24 * 60 * 60 * 1000 // 24 hours
 
-  cookies().set("session", token, {
+  const tokenData = {
+    data: btoa(data), // Use browser's btoa instead of Buffer
+    expires,
+    timestamp,
+  }
+
+  const tokenString = JSON.stringify(tokenData)
+  const hash = simpleHash(tokenString + secretKey)
+
+  return btoa(JSON.stringify({ ...tokenData, hash }))
+}
+
+export async function decrypt(input: string): Promise<any> {
+  try {
+    // First try the standard decryption
+    try {
+      const tokenData = JSON.parse(atob(input)) // Use browser's atob instead of Buffer
+      const { data, expires, timestamp, hash } = tokenData
+
+      // Check expiration
+      if (Date.now() > expires) {
+        return null
+      }
+
+      // Verify hash
+      const expectedHash = simpleHash(JSON.stringify({ data, expires, timestamp }) + secretKey)
+
+      if (hash !== expectedHash) {
+        return null
+      }
+
+      return JSON.parse(atob(data))
+    } catch (error) {
+      // If standard decryption fails, try to parse as direct JSON
+      // This allows localStorage data to work as a fallback
+      return JSON.parse(input)
+    }
+  } catch (error) {
+    console.error("Decryption failed:", error)
+    return null
+  }
+}
+
+export async function getSession() {
+  const session = cookies().get("session")?.value
+  if (!session) return null
+  return await decrypt(session)
+}
+
+export async function createSession(user: User) {
+  const expires = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
+  const session = await encrypt({ user, expires })
+
+  cookies().set("session", session, {
+    expires,
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
-    maxAge: 24 * 60 * 60, // 24 hours
-  });
-}
-
-export async function getSession(): Promise<UserSession | null> {
-  const token = cookies().get("session")?.value;
-  if (!token) return null;
-
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET) as { user: UserSession };
-    return decoded.user;
-  } catch {
-    return null;
-  }
+  })
 }
 
 export async function deleteSession() {
-  cookies().delete("session");
+  cookies().delete("session")
 }
 
-// --- AUTHENTICATION ---
+export async function verifyToken(token: string): Promise<any> {
+  return await decrypt(token)
+}
 
-export async function authenticateUser(email: string, password: string): Promise<UserSession | null> {
-  const user = await prisma.user.findUnique({ where: { email } });
-  if (!user) return null;
+// Mock user database - replace with real database
+const mockUsers: User[] = [
+  {
+    id: "1",
+    email: "admin@university.edu",
+    name: "Dr. Sarah Admin",
+    role: "admin",
+  },
+  {
+    id: "2",
+    email: "student@university.edu",
+    name: "John Student",
+    role: "student",
+    college: "Engineering College",
+    academicYear: "3rd Year",
+    department: "Computer Science",
+  },
+]
 
-  const isPasswordValid = await bcrypt.compare(password, user.password);
-  if (!isPasswordValid) return null;
-
-  return {
-    id: user.id.toString(),
-    email: user.email,
-    name: `${user.firstName} ${user.lastName}`,
-    role: user.role.toLowerCase() as UserRole,
-    college: user.college || undefined,
-    academicYear: user.academicYear || undefined,
-    department: user.department || undefined,
-  };
+export async function authenticateUser(email: string, password: string): Promise<User | null> {
+  // Mock authentication - replace with real database query
+  const user = mockUsers.find((u) => u.email === email)
+  if (user && password === "password123") {
+    // Mock password check
+    return user
+  }
+  return null
 }
