@@ -196,7 +196,7 @@ export default function HomePage() {
           <div className="container mx-auto flex justify-between items-center">
             <Link href="/" className="flex items-center gap-3 group">
               <Image
-                src="/logoo.png"
+                src="/logo2.png"
                 alt="Sukoon Logo"
                 width={150}
                 height={200}
@@ -386,7 +386,7 @@ export default function HomePage() {
           >
             <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 tracking-tight">
               <span className="bg-clip-text text-transparent bg-gradient-to-b from-white to-white/80">
-                {t('our-mission-at')}{" "}
+               
               </span>
               <span
                 className={cn(
@@ -398,7 +398,7 @@ export default function HomePage() {
               </span>
             </h2>
             <p className="text-base sm:text-lg md:text-xl text-white/60 leading-relaxed font-light tracking-wide max-w-2xl mx-auto">
-              {t('mission-statement')}
+              
             </p>
           </motion.div>
         </div>
@@ -529,12 +529,11 @@ export const Lid = ({
         <div className="absolute inset-0 rounded-lg bg-[#272729]" />
         <video
           className="absolute inset-0 h-full w-full rounded-lg object-cover"
-          autoPlay
-          muted
+          controls
           loop
           playsInline
         >
-          <source src={src} type="video/mp4" />
+          <source src="/video/Sukoon-100mb.mp4" type="video/mp4" />
           Your browser does not support the video tag.
         </video>
       </motion.div>
