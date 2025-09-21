@@ -2,7 +2,6 @@ import { type NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs"; 
 import { createSession } from "@/lib/auth";
-import { authenticateUser } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
   try {
@@ -28,14 +27,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create session
-    const sessionUser = await authenticateUser(email, password);
-
-    if (!sessionUser) {
-      throw new Error("Invalid credentials");
-    }
-
-    await createSession(sessionUser); // ✅ correct type
-
+    await createSession(user);
 
     return NextResponse.json({
       success: true,
