@@ -17,4 +17,9 @@ The Mental Health project is a comprehensive application aimed at supporting men
 - Other Tools: [Specify e.g., Git, Docker]
 
 ## Installation and Setup
-1. Clone the repository:
+1. Clone the repository:git clone https://github.com/YOUR-USERNAME/mental-health.git
+2. 2. Navigate into the project directory:
+      cd mental-health
+
+
+
