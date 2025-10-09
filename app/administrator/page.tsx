@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
+  CardDescription
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -405,7 +405,7 @@ const AdministratorDashboard = () => {
     if (confirm("Are you sure you want to cancel this session?")) {
       alert(`Cancelling session ${sessionId}`);
     }
-  };
+  };//ihfuhfugfhgjfn
 
   const handleSendMessage = (studentId: string) => {
     alert(`Sending message to student ${studentId}`);
