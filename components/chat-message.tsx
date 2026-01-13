@@ -1,6 +1,6 @@
 import { Bot, User } from "lucide-react"
 
-interface ChatMessageProps {
+interface ChatMessageProps {  
   content: string
   sender: "user" | "ai"
   timestamp: Date
