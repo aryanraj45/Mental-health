@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Phone, X, AlertTriangle } from "lucide-react"
 import Link from "next/link"
-
+//hrllo
 export function EmergencyWidget() {
   const [isOpen, setIsOpen] = useState(false)
 
