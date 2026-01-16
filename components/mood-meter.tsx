@@ -12,7 +12,7 @@ interface MoodAssessmentModalProps {
   onClose: () => void;
   userName: string;
 }
-
+  
 type MoodOption = { label: string; emoji: string; value: number };
 type CapacityOption = { label: string; icon: React.ElementType; value: number };
 type ContextOption = { label: string };
