@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 type Language = "en-US" | "hi-IN" | "ks-IN" | "es-ES" | "fr-FR";
 
 const promptsByLanguage: Record<Language, { label: string; query: string }[]> = {
-  "en-US": [
+  "en-US": [  
     { label: "My Weekly Report", query: "Show my weekly wellness report" },
     { label: "Grounding Exercise", query: "Start a grounding exercise" },
     { label: "Gratitude Journal", query: "I want to try a gratitude journal" },
