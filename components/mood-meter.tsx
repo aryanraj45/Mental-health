@@ -2,7 +2,7 @@
   
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';//    
 import { X, Bot, Users, Video, Music, BookOpen, Smile, Sparkles, TrendingUp, AlertCircle, ShieldAlert, ThumbsUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
