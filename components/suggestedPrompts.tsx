@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";  
 
 type Language = "en-US" | "hi-IN" | "ks-IN" | "es-ES" | "fr-FR";
 
