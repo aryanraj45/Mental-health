@@ -30,3 +30,5 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Authentication failed" }, { status: 500 })
   }
 }
+
+// Unnecessary comment to trigger change
