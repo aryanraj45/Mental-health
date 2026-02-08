@@ -9,3 +9,5 @@ export async function POST() {
     return NextResponse.json({ error: "Logout failed" }, { status: 500 })
   }
 }
+
+// Unnecessary comment to trigger change
