@@ -3,7 +3,7 @@
 ## Project Overview     
 The Mental Health project is a comprehensive application aimed at supporting mental well-being through various tools and resources. It focuses on tracking moods, providing relaxation exercises, educational content, and community support to help users manage their mental health effectively.
 
-## Features
+## Features got it
 - Mood tracking and journaling to reflect daily feelings.
 - Guided meditation and relaxation exercises.
 - Informative articles and resources about mental health.
