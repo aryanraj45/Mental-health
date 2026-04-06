@@ -4,7 +4,7 @@ interface ChatMessageProps {
   content: string
   sender: "user" | "ai"
   timestamp: Date
-  isEmergency?: boolean
+  isEmergency?: boolean   
 }
 
 export function ChatMessage({ content, sender, timestamp, isEmergency }: ChatMessageProps) {
